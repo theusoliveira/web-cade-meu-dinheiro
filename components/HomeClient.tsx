@@ -8,6 +8,7 @@ import { GoalsClient } from "./GoalsClient";
 import { EntriesClient } from "./EntriesClient";
 import { CardControlClient } from "./CardControlClient";
 import { useBusy } from "./BusyProvider";
+import { UserMenu } from "./UserMenu";
 
 import { todayAsDateInputValue, type EntryKind, type FinanceEntry } from "../lib/finance";
 import { supabase } from "../lib/supabaseClient";
@@ -276,6 +277,7 @@ export function HomeClient() {
           <div className="flex items-center gap-2">
             <SiteNav active={activeTab} onChange={setActiveTab} />
             <ThemeToggle />
+            <UserMenu displayName={displayName} />
           </div>
         </div>
       </header>
