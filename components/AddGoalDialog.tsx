@@ -49,12 +49,15 @@ export function AddGoalDialog({ open, onClose, initial, onSubmit }: Props) {
   const [targetText, setTargetText] = React.useState("");
 
   const [error, setError] = React.useState<string | null>(null);
+  const [submitting, setSubmitting] = React.useState(false);
+
   const isEdit = !!initial;
 
   React.useEffect(() => {
     if (!open) return;
 
     setError(null);
+    setSubmitting(false);
 
     if (initial) {
       setDescription(initial.description ?? "");
@@ -77,8 +80,20 @@ export function AddGoalDialog({ open, onClose, initial, onSubmit }: Props) {
     }
   }, [open, initial]);
 
+  // ESC fecha, mas não durante submit
+  React.useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !submitting) onClose();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [open, onClose, submitting]);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (submitting) return;
+
     setError(null);
 
     if (!description.trim()) return setError("Digite uma descrição.");
@@ -95,15 +110,28 @@ export function AddGoalDialog({ open, onClose, initial, onSubmit }: Props) {
       createdAt: initial?.createdAt ?? Date.now(),
     };
 
-    await onSubmit(goal);
-    onClose();
+    try {
+      setSubmitting(true);
+      await Promise.resolve(onSubmit(goal));
+      setSubmitting(false);
+      onClose();
+    } catch (err) {
+      console.error(err);
+      setSubmitting(false);
+      setError("Não foi possível salvar agora. Tente novamente.");
+    }
   }
 
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center p-4">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+    <div className="fixed inset-0 z-50 grid place-items-center p-4" role="dialog" aria-modal="true">
+      <div
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        onClick={() => {
+          if (!submitting) onClose();
+        }}
+      />
       <div className="relative w-full max-w-lg rounded-2xl border border-zinc-200 bg-white p-5 shadow-xl dark:border-zinc-800 dark:bg-zinc-950">
         <div className="flex items-start justify-between gap-3">
           <div>
@@ -113,79 +141,83 @@ export function AddGoalDialog({ open, onClose, initial, onSubmit }: Props) {
             </p>
           </div>
 
-          <Button variant="ghost" onClick={onClose} className="h-9 px-3">
+          <Button variant="ghost" onClick={onClose} className="h-9 px-3" disabled={submitting}>
             Fechar
           </Button>
         </div>
 
         <form onSubmit={handleSubmit} className="mt-4 grid gap-3">
-          <div className="grid gap-1">
-            <label className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
-              Descrição
-            </label>
-            <input
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Ex.: Reserva de emergência"
-              className="h-10 rounded-lg border border-zinc-200 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-zinc-400/50 dark:border-zinc-800 dark:bg-zinc-950"
-            />
-          </div>
+          <fieldset disabled={submitting} className="grid gap-3">
+            <div className="grid gap-1">
+              <label className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
+                Descrição
+              </label>
+              <input
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Ex.: Reserva de emergência"
+                className="h-10 rounded-lg border border-zinc-200 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-zinc-400/50 dark:border-zinc-800 dark:bg-zinc-950"
+              />
+            </div>
 
-          <div className="grid gap-1">
-            <label className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
-              Valor atual
-            </label>
-            <input
-              type="text"
-              inputMode="numeric"
-              value={currentText}
-              onChange={(e) => {
-                const cents = parseDigitsToCents(e.target.value);
-                setCurrentCents(cents);
-                setCurrentText(cents === 0 ? "" : formatFromCents(cents));
-              }}
-              placeholder="R$ 0,00"
-              className="h-10 rounded-lg border border-zinc-200 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-zinc-400/50 dark:border-zinc-800 dark:bg-zinc-950"
-            />
-          </div>
+            <div className="grid gap-1">
+              <label className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
+                Valor atual
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={currentText}
+                onChange={(e) => {
+                  const cents = parseDigitsToCents(e.target.value);
+                  setCurrentCents(cents);
+                  setCurrentText(cents === 0 ? "" : formatFromCents(cents));
+                }}
+                placeholder="R$ 0,00"
+                className="h-10 rounded-lg border border-zinc-200 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-zinc-400/50 dark:border-zinc-800 dark:bg-zinc-950"
+              />
+            </div>
 
-          <div className="grid gap-1">
-            <label className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
-              Objetivo
-            </label>
-            <input
-              type="text"
-              inputMode="numeric"
-              value={targetText}
-              onChange={(e) => {
-                const cents = parseDigitsToCents(e.target.value);
-                setTargetCents(cents);
-                setTargetText(cents === 0 ? "" : formatFromCents(cents));
-              }}
-              placeholder="R$ 0,00"
-              className="h-10 rounded-lg border border-zinc-200 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-zinc-400/50 dark:border-zinc-800 dark:bg-zinc-950"
-            />
-          </div>
+            <div className="grid gap-1">
+              <label className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
+                Objetivo
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={targetText}
+                onChange={(e) => {
+                  const cents = parseDigitsToCents(e.target.value);
+                  setTargetCents(cents);
+                  setTargetText(cents === 0 ? "" : formatFromCents(cents));
+                }}
+                placeholder="R$ 0,00"
+                className="h-10 rounded-lg border border-zinc-200 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-zinc-400/50 dark:border-zinc-800 dark:bg-zinc-950"
+              />
+            </div>
 
-          <div className="grid gap-1">
-            <label className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
-              Previsão (mês/ano)
-            </label>
-            <input
-              type="month"
-              value={forecast}
-              onChange={(e) => setForecast(e.target.value)}
-              className="h-10 rounded-lg border border-zinc-200 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-zinc-400/50 dark:border-zinc-800 dark:bg-zinc-950"
-            />
-          </div>
+            <div className="grid gap-1">
+              <label className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
+                Previsão (mês/ano)
+              </label>
+              <input
+                type="month"
+                value={forecast}
+                onChange={(e) => setForecast(e.target.value)}
+                className="h-10 rounded-lg border border-zinc-200 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-zinc-400/50 dark:border-zinc-800 dark:bg-zinc-950"
+              />
+            </div>
+          </fieldset>
 
           {error ? <p className="text-sm text-rose-600">{error}</p> : null}
 
           <div className="mt-2 flex items-center justify-end gap-2">
-            <Button type="button" variant="secondary" onClick={onClose}>
+            <Button type="button" variant="secondary" onClick={onClose} disabled={submitting}>
               Cancelar
             </Button>
-            <Button type="submit">{isEdit ? "Salvar" : "Cadastrar"}</Button>
+            <Button type="submit" disabled={submitting}>
+              {submitting ? "Salvando…" : isEdit ? "Salvar" : "Cadastrar"}
+            </Button>
           </div>
         </form>
       </div>

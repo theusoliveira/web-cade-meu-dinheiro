@@ -7,6 +7,7 @@ import { SiteNav } from "./SiteNav";
 import { GoalsClient } from "./GoalsClient";
 import { EntriesClient } from "./EntriesClient";
 import { CardControlClient } from "./CardControlClient";
+import { useBusy } from "./BusyProvider";
 
 import { todayAsDateInputValue, type EntryKind, type FinanceEntry } from "../lib/finance";
 import { supabase } from "../lib/supabaseClient";
@@ -48,36 +49,42 @@ export function HomeClient() {
 
   const [displayName, setDisplayName] = React.useState<string>("");
 
+  const busy = useBusy();
+
   React.useEffect(() => {
     let alive = true;
 
     async function loadProfile() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      await busy.run(async () => {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
 
-      const userId = user?.id;
-      if (!userId) return;
+        const userId = user?.id;
+        if (!userId) return;
 
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("display_name, full_name")
-        .eq("id", userId)
-        .single();
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("display_name, full_name")
+          .eq("id", userId)
+          .single();
 
-      if (error) {
-        console.error(error);
-        return;
-      }
+        if (error) {
+          console.error(error);
+          return;
+        }
 
-      if (!alive) return;
-      setDisplayName((data?.display_name ?? data?.full_name ?? "").toString());
+        if (!alive) return;
+        setDisplayName((data?.display_name ?? data?.full_name ?? "").toString());
+      });
     }
 
     loadProfile();
     return () => {
       alive = false;
     };
+    // busy.run is stable (useCallback). Keeping deps empty intentionally.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   React.useEffect(() => {
@@ -89,34 +96,38 @@ export function HomeClient() {
     const start = `${ym}-01`;
     const next = nextMonthStart(ym);
 
-    const { data, error } = await supabase
-      .from("entries")
-      .select("id, kind, date, category, description, value, created_at")
-      .gte("date", start)
-      .lt("date", next)
-      .order("date", { ascending: false })
-      .order("created_at", { ascending: false });
+    await busy.run(async () => {
+      const { data, error } = await supabase
+        .from("entries")
+        .select("id, kind, date, category, description, value, created_at")
+        .gte("date", start)
+        .lt("date", next)
+        .order("date", { ascending: false })
+        .order("created_at", { ascending: false });
 
-    if (error) {
-      console.error(error);
-      return;
-    }
-    setEntries(mapDbRows(data));
+      if (error) {
+        console.error(error);
+        return;
+      }
+      setEntries(mapDbRows(data));
+    });
   }
 
   // >>> Controle de gastos agora é “único” (sem mês)
   async function fetchCardAll() {
-    const { data, error } = await supabase
-      .from("card_entries")
-      .select("id, kind, date, category, description, value, created_at")
-      .order("date", { ascending: false })
-      .order("created_at", { ascending: false });
+    await busy.run(async () => {
+      const { data, error } = await supabase
+        .from("card_entries")
+        .select("id, kind, date, category, description, value, created_at")
+        .order("date", { ascending: false })
+        .order("created_at", { ascending: false });
 
-    if (error) {
-      console.error(error);
-      return;
-    }
-    setCardEntries(mapDbRows(data));
+      if (error) {
+        console.error(error);
+        return;
+      }
+      setCardEntries(mapDbRows(data));
+    });
   }
 
   React.useEffect(() => {
@@ -144,29 +155,31 @@ export function HomeClient() {
   }
 
   async function upsertEntry(entry: FinanceEntry) {
-    const payload = {
-      id: entry.id,
-      kind: entry.kind,
-      date: entry.date,
-      category: entry.category,
-      description: entry.description,
-      value: entry.value,
-    };
+    await busy.run(async () => {
+      const payload = {
+        id: entry.id,
+        kind: entry.kind,
+        date: entry.date,
+        category: entry.category,
+        description: entry.description,
+        value: entry.value,
+      };
 
-    const exists = entries.some((p) => p.id === entry.id);
+      const exists = entries.some((p) => p.id === entry.id);
 
-    const q = exists
-      ? supabase.from("entries").update(payload).eq("id", entry.id)
-      : supabase.from("entries").insert(payload);
+      const q = exists
+        ? supabase.from("entries").update(payload).eq("id", entry.id)
+        : supabase.from("entries").insert(payload);
 
-    const { error } = await q;
-    if (error) {
-      console.error(error);
-      alert("Erro ao salvar. Veja o console.");
-      return;
-    }
+      const { error } = await q;
+      if (error) {
+        console.error(error);
+        alert("Erro ao salvar. Veja o console.");
+        return;
+      }
 
-    await fetchEntriesMonth(month);
+      await fetchEntriesMonth(month);
+    });
   }
 
   async function upsertCardEntry(entry: FinanceEntry) {
@@ -175,64 +188,72 @@ export function HomeClient() {
       return;
     }
 
-    const payload = {
-      id: entry.id,
-      kind: entry.kind,
-      date: entry.date,
-      category: entry.category,
-      description: entry.description,
-      value: entry.value,
-    };
+    await busy.run(async () => {
+      const payload = {
+        id: entry.id,
+        kind: entry.kind,
+        date: entry.date,
+        category: entry.category,
+        description: entry.description,
+        value: entry.value,
+      };
 
-    const exists = cardEntries.some((p) => p.id === entry.id);
+      const exists = cardEntries.some((p) => p.id === entry.id);
 
-    const q = exists
-      ? supabase.from("card_entries").update(payload).eq("id", entry.id)
-      : supabase.from("card_entries").insert(payload);
+      const q = exists
+        ? supabase.from("card_entries").update(payload).eq("id", entry.id)
+        : supabase.from("card_entries").insert(payload);
 
-    const { error } = await q;
-    if (error) {
-      console.error(error);
-      alert("Erro ao salvar (cartão). Veja o console.");
-      return;
-    }
+      const { error } = await q;
+      if (error) {
+        console.error(error);
+        alert("Erro ao salvar (cartão). Veja o console.");
+        return;
+      }
 
-    await fetchCardAll();
+      await fetchCardAll();
+    });
   }
 
   async function deleteEntry(entry: FinanceEntry) {
-    const { error } = await supabase.from("entries").delete().eq("id", entry.id);
-    if (error) {
-      console.error(error);
-      alert("Erro ao excluir. Veja o console.");
-      return;
-    }
-    await fetchEntriesMonth(month);
+    await busy.run(async () => {
+      const { error } = await supabase.from("entries").delete().eq("id", entry.id);
+      if (error) {
+        console.error(error);
+        alert("Erro ao excluir. Veja o console.");
+        return;
+      }
+      await fetchEntriesMonth(month);
+    });
   }
 
   async function deleteCardEntry(entry: FinanceEntry) {
-    const { error } = await supabase.from("card_entries").delete().eq("id", entry.id);
-    if (error) {
-      console.error(error);
-      alert("Erro ao excluir (cartão). Veja o console.");
-      return;
-    }
-    await fetchCardAll();
+    await busy.run(async () => {
+      const { error } = await supabase.from("card_entries").delete().eq("id", entry.id);
+      if (error) {
+        console.error(error);
+        alert("Erro ao excluir (cartão). Veja o console.");
+        return;
+      }
+      await fetchCardAll();
+    });
   }
 
   // >>> Excluir TODOS os lançamentos do Controle de gastos
   async function deleteAllCardEntries() {
-    // Supabase/PostgREST normalmente exige um filtro em DELETE.
-    // Este filtro pega “tudo” (datas sempre serão >= 0001-01-01).
-    const { error } = await supabase.from("card_entries").delete().gte("date", "0001-01-01");
+    await busy.run(async () => {
+      // Supabase/PostgREST normalmente exige um filtro em DELETE.
+      // Este filtro pega “tudo” (datas sempre serão >= 0001-01-01).
+      const { error } = await supabase.from("card_entries").delete().gte("date", "0001-01-01");
 
-    if (error) {
-      console.error(error);
-      alert("Erro ao excluir todos (cartão). Veja o console.");
-      return;
-    }
+      if (error) {
+        console.error(error);
+        alert("Erro ao excluir todos (cartão). Veja o console.");
+        return;
+      }
 
-    setCardEntries([]);
+      setCardEntries([]);
+    });
   }
 
   const visibleEntries = activeTab === "controle" ? cardEntries : entries;
