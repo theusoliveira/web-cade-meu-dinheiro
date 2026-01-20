@@ -52,8 +52,11 @@ export function HomeClient() {
     let alive = true;
 
     async function loadProfile() {
-      const { data: userData } = await supabase.auth.getUser();
-      const userId = userData.user?.id;
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      const userId = user?.id;
       if (!userId) return;
 
       const { data, error } = await supabase
@@ -101,15 +104,11 @@ export function HomeClient() {
     setEntries(mapDbRows(data));
   }
 
-  async function fetchCardMonth(ym: string) {
-    const start = `${ym}-01`;
-    const next = nextMonthStart(ym);
-
+  // >>> Controle de gastos agora é “único” (sem mês)
+  async function fetchCardAll() {
     const { data, error } = await supabase
       .from("card_entries")
       .select("id, kind, date, category, description, value, created_at")
-      .gte("date", start)
-      .lt("date", next)
       .order("date", { ascending: false })
       .order("created_at", { ascending: false });
 
@@ -121,10 +120,16 @@ export function HomeClient() {
   }
 
   React.useEffect(() => {
-    if (activeTab === "lancamentos") fetchEntriesMonth(month);
-    if (activeTab === "controle") fetchCardMonth(month);
+    if (activeTab !== "lancamentos") return;
+    fetchEntriesMonth(month);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [month, activeTab]);
+
+  React.useEffect(() => {
+    if (activeTab !== "controle") return;
+    fetchCardAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
 
   function openDialog(nextKind: EntryKind) {
     setKind(nextKind);
@@ -192,7 +197,7 @@ export function HomeClient() {
       return;
     }
 
-    await fetchCardMonth(month);
+    await fetchCardAll();
   }
 
   async function deleteEntry(entry: FinanceEntry) {
@@ -212,7 +217,22 @@ export function HomeClient() {
       alert("Erro ao excluir (cartão). Veja o console.");
       return;
     }
-    await fetchCardMonth(month);
+    await fetchCardAll();
+  }
+
+  // >>> Excluir TODOS os lançamentos do Controle de gastos
+  async function deleteAllCardEntries() {
+    // Supabase/PostgREST normalmente exige um filtro em DELETE.
+    // Este filtro pega “tudo” (datas sempre serão >= 0001-01-01).
+    const { error } = await supabase.from("card_entries").delete().gte("date", "0001-01-01");
+
+    if (error) {
+      console.error(error);
+      alert("Erro ao excluir todos (cartão). Veja o console.");
+      return;
+    }
+
+    setCardEntries([]);
   }
 
   const visibleEntries = activeTab === "controle" ? cardEntries : entries;
@@ -228,9 +248,7 @@ export function HomeClient() {
             </div>
             <div>
               <p className="text-sm font-semibold leading-tight">Cadê meu dinheiro?</p>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                Bem vindo(a){displayName ? `, ${displayName}` : ""}!
-              </p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">{displayName}</p>
             </div>
           </div>
 
@@ -260,8 +278,6 @@ export function HomeClient() {
 
         {activeTab === "controle" ? (
           <CardControlClient
-            month={month}
-            setMonth={setMonth}
             entries={visibleEntries}
             openDialog={(k) => openDialog(k)}
             onEdit={openEdit}
@@ -271,6 +287,7 @@ export function HomeClient() {
               );
               if (ok) deleteCardEntry(entry);
             }}
+            onDeleteAll={deleteAllCardEntries}
           />
         ) : null}
 
