@@ -12,6 +12,17 @@ type Props = {
   entries: FinanceEntry[];
   onEdit: (entry: FinanceEntry) => void;
   onDelete: (entry: FinanceEntry) => void;
+
+  /**
+   * Quando você já está renderizando tabelas separadas por tipo (Receitas/Despesas/Investimentos),
+   * pode ocultar a coluna/badge de "Tipo" para economizar espaço.
+   */
+  hideKind?: boolean;
+
+  /**
+   * Texto opcional para quando não existirem registros nessa lista.
+   */
+  emptyMessage?: string;
 };
 
 function KindBadge({ kind }: { kind: FinanceEntry["kind"] }) {
@@ -28,12 +39,19 @@ function KindBadge({ kind }: { kind: FinanceEntry["kind"] }) {
   return <span className={`${base} ${styles[kind]}`}>{kindLabel(kind)}</span>;
 }
 
-export function HistoryTable({ entries, onEdit, onDelete }: Props) {
+export function HistoryTable({
+  entries,
+  onEdit,
+  onDelete,
+  hideKind = false,
+  emptyMessage,
+}: Props) {
   if (entries.length === 0) {
     return (
       <div className="rounded-2xl border border-zinc-200 bg-white p-8 text-center dark:border-zinc-800 dark:bg-zinc-950">
         <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          Nenhum lançamento ainda. Use os botões acima para adicionar receita, despesa ou investimento.
+          {emptyMessage ??
+            "Nenhum lançamento ainda. Use os botões acima para adicionar receita, despesa ou investimento."}
         </p>
       </div>
     );
@@ -52,7 +70,7 @@ export function HistoryTable({ entries, onEdit, onDelete }: Props) {
                 </p>
 
                 <div className="mt-1 flex flex-wrap items-center gap-2">
-                  <KindBadge kind={e.kind} />
+                  {hideKind ? null : <KindBadge kind={e.kind} />}
                   <span className="text-xs text-zinc-600 dark:text-zinc-300 break-words">
                     {e.category}
                   </span>
@@ -71,7 +89,12 @@ export function HistoryTable({ entries, onEdit, onDelete }: Props) {
             ) : null}
 
             <div className="mt-3 flex items-center justify-end gap-2">
-              <Button type="button" variant="secondary" className="h-9 px-3" onClick={() => onEdit(e)}>
+              <Button
+                type="button"
+                variant="secondary"
+                className="h-9 px-3"
+                onClick={() => onEdit(e)}
+              >
                 Editar
               </Button>
               <Button
@@ -94,7 +117,7 @@ export function HistoryTable({ entries, onEdit, onDelete }: Props) {
           <thead className="bg-zinc-50 text-xs text-zinc-600 dark:bg-zinc-900/50 dark:text-zinc-300">
             <tr>
               <th className="px-4 py-3 font-medium">Data</th>
-              <th className="px-4 py-3 font-medium">Tipo</th>
+              {hideKind ? null : <th className="px-4 py-3 font-medium">Tipo</th>}
               <th className="px-4 py-3 font-medium">Categoria</th>
               <th className="px-4 py-3 font-medium">Descrição</th>
               <th className="px-4 py-3 text-right font-medium">Valor</th>
@@ -103,21 +126,37 @@ export function HistoryTable({ entries, onEdit, onDelete }: Props) {
           </thead>
           <tbody className="divide-y divide-zinc-100 dark:divide-zinc-900">
             {entries.map((e) => (
-              <tr key={e.id} className="hover:bg-zinc-50/70 dark:hover:bg-zinc-900/40">
+              <tr
+                key={e.id}
+                className="hover:bg-zinc-50/70 dark:hover:bg-zinc-900/40"
+              >
                 <td className="whitespace-nowrap px-4 py-3 text-zinc-700 dark:text-zinc-200">
                   {formatDateBR(e.date)}
                 </td>
-                <td className="px-4 py-3">
-                  <KindBadge kind={e.kind} />
+
+                {hideKind ? null : (
+                  <td className="px-4 py-3">
+                    <KindBadge kind={e.kind} />
+                  </td>
+                )}
+
+                <td className="px-4 py-3 text-zinc-700 dark:text-zinc-200">
+                  {e.category}
                 </td>
-                <td className="px-4 py-3 text-zinc-700 dark:text-zinc-200">{e.category}</td>
-                <td className="px-4 py-3 text-zinc-700 dark:text-zinc-200">{e.description}</td>
+                <td className="px-4 py-3 text-zinc-700 dark:text-zinc-200">
+                  {e.description}
+                </td>
                 <td className="whitespace-nowrap px-4 py-3 text-right font-medium text-zinc-900 dark:text-zinc-50">
                   {kindPrefix(e.kind)} {formatCurrencyBRL(e.value)}
                 </td>
                 <td className="whitespace-nowrap px-4 py-3 text-right">
                   <div className="inline-flex items-center gap-1">
-                    <Button type="button" variant="ghost" size="sm" onClick={() => onEdit(e)}>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onEdit(e)}
+                    >
                       Editar
                     </Button>
                     <Button
