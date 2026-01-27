@@ -17,22 +17,30 @@ type Props = {
   open: boolean;
   kind: EntryKind;
   onClose: () => void;
-  /** If provided, dialog works in edit mode. */
   initial?: FinanceEntry | null;
-  // Pode ser async (HomeClient já é async), então aguardamos.
+  allowFixed?: boolean;
   onSubmit: (entry: FinanceEntry) => void | Promise<void>;
 };
 
-export function AddEntryDialog({ open, kind, onClose, initial, onSubmit }: Props) {
+export function AddEntryDialog({
+  open,
+  kind,
+  onClose,
+  initial,
+  allowFixed = false,
+  onSubmit,
+}: Props) {
   const [date, setDate] = React.useState(() => todayAsDateInputValue());
-  const [category, setCategory] = React.useState<Category>(() => categoriesFor(kind)[0] as Category);
+  const [category, setCategory] = React.useState<Category>(
+    () => categoriesFor(kind)[0] as Category
+  );
   const [description, setDescription] = React.useState("");
   const [valueCents, setValueCents] = React.useState(0);
   const [valueText, setValueText] = React.useState("");
+  const [isFixedTemplate, setIsFixedTemplate] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [submitting, setSubmitting] = React.useState(false);
 
-  // Reset fields when opening
   React.useEffect(() => {
     if (!open) return;
     if (initial) {
@@ -42,18 +50,27 @@ export function AddEntryDialog({ open, kind, onClose, initial, onSubmit }: Props
       const cents = Math.round(initial.value * 100);
       setValueCents(cents);
       setValueText(formatCurrencyBRL(cents / 100));
+      setIsFixedTemplate(Boolean(initial.isFixedTemplate));
     } else {
       setDate(todayAsDateInputValue());
       setCategory(categoriesFor(kind)[0] as Category);
       setDescription("");
       setValueCents(0);
       setValueText("");
+      setIsFixedTemplate(false);
     }
     setError(null);
     setSubmitting(false);
   }, [open, kind, initial]);
 
-  // Close on ESC (se não estiver salvando)
+  // Se marcar como fixo, o valor fica sempre 0 (mas a data fica editável)
+  React.useEffect(() => {
+    if (!open) return;
+    if (!isFixedTemplate) return;
+    setValueCents(0);
+    setValueText(formatCurrencyBRL(0));
+  }, [open, isFixedTemplate]);
+
   React.useEffect(() => {
     if (!open) return;
     const onKeyDown = (e: KeyboardEvent) => {
@@ -75,18 +92,15 @@ export function AddEntryDialog({ open, kind, onClose, initial, onSubmit }: Props
     if (!date) return setError("Selecione uma data.");
     if (!category) return setError("Selecione uma categoria.");
     if (!desc) return setError("Digite uma descrição.");
-    if (valueCents <= 0) return setError("Digite um valor válido.");
+    if (!isFixedTemplate && valueCents <= 0)
+      return setError("Digite um valor válido.");
 
-    const entry: FinanceEntry = initial
+    const editingVirtualFixed = Boolean(
+      initial?.isVirtualFixed && initial?.fixedEntryId
+    );
+
+    const entry: FinanceEntry = editingVirtualFixed
       ? {
-          ...initial,
-          // Keep id/createdAt, update other fields.
-          date,
-          category,
-          description: desc,
-          value: num,
-        }
-      : {
           id: newId(),
           kind,
           date,
@@ -94,11 +108,31 @@ export function AddEntryDialog({ open, kind, onClose, initial, onSubmit }: Props
           description: desc,
           value: num,
           createdAt: Date.now(),
+          fixedEntryId: initial!.fixedEntryId,
+        }
+      : initial
+      ? {
+          ...initial,
+          date,
+          category,
+          description: desc,
+          value: isFixedTemplate ? 0 : num,
+          isFixedTemplate,
+        }
+      : {
+          id: newId(),
+          kind,
+          date,
+          category,
+          description: desc,
+          value: isFixedTemplate ? 0 : num,
+          createdAt: Date.now(),
+          isFixedTemplate,
         };
 
     try {
       setSubmitting(true);
-      await Promise.resolve(onSubmit(entry)); // aguarda o supabase no HomeClient
+      await Promise.resolve(onSubmit(entry));
       setSubmitting(false);
       onClose();
     } catch (err) {
@@ -115,7 +149,9 @@ export function AddEntryDialog({ open, kind, onClose, initial, onSubmit }: Props
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       role="dialog"
       aria-modal="true"
-      aria-label={`${initial ? "Editar" : "Adicionar"} ${kindLabel(kind).toLowerCase()}`}
+      aria-label={`${initial ? "Editar" : "Adicionar"} ${kindLabel(
+        kind
+      ).toLowerCase()}`}
     >
       <button
         type="button"
@@ -130,10 +166,13 @@ export function AddEntryDialog({ open, kind, onClose, initial, onSubmit }: Props
         <div className="flex items-start justify-between gap-4 border-b border-zinc-200 p-5 dark:border-zinc-800">
           <div>
             <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-              {initial ? "Editar" : "Adicionar"} {kindLabel(kind).toLowerCase()}
+              {initial ? "Editar" : "Adicionar"}{" "}
+              {kindLabel(kind).toLowerCase()}
             </h2>
             <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-              {initial ? "Atualize os dados do lançamento." : "Informe os dados do lançamento."}
+              {initial
+                ? "Atualize os dados do lançamento."
+                : "Informe os dados do lançamento."}
             </p>
           </div>
           <Button
@@ -149,8 +188,30 @@ export function AddEntryDialog({ open, kind, onClose, initial, onSubmit }: Props
 
         <form onSubmit={submit} className="p-5">
           <fieldset disabled={submitting} className="grid gap-4">
+            {allowFixed && !initial ? (
+              <label className="flex items-start gap-3 rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-sm dark:border-zinc-800 dark:bg-zinc-900/40">
+                <input
+                  type="checkbox"
+                  checked={isFixedTemplate}
+                  onChange={(e) => setIsFixedTemplate(e.target.checked)}
+                  className="mt-1 h-4 w-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-400/50 dark:border-zinc-700 dark:bg-zinc-950"
+                />
+                <span className="grid gap-0.5">
+                  <span className="font-medium text-zinc-900 dark:text-zinc-100">
+                    Lançamento fixo
+                  </span>
+                  <span className="text-xs text-zinc-600 dark:text-zinc-300">
+                    Ele vai aparecer automaticamente em todos os meses com valor
+                    R$ 0,00 (no dia escolhido).
+                  </span>
+                </span>
+              </label>
+            ) : null}
+
             <label className="grid gap-2">
-              <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200">Data</span>
+              <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
+                Data
+              </span>
               <input
                 type="date"
                 value={date}
@@ -170,7 +231,10 @@ export function AddEntryDialog({ open, kind, onClose, initial, onSubmit }: Props
               >
                 {(() => {
                   const base = [...categoriesFor(kind)];
-                  const merged = category && !base.includes(category) ? [category, ...base] : base;
+                  const merged =
+                    category && !base.includes(category)
+                      ? [category, ...base]
+                      : base;
                   return merged;
                 })().map((c) => (
                   <option key={c} value={c}>
@@ -193,7 +257,9 @@ export function AddEntryDialog({ open, kind, onClose, initial, onSubmit }: Props
             </label>
 
             <label className="grid gap-2">
-              <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200">Valor</span>
+              <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
+                Valor
+              </span>
               <input
                 type="text"
                 inputMode="numeric"
@@ -205,6 +271,7 @@ export function AddEntryDialog({ open, kind, onClose, initial, onSubmit }: Props
                   setValueCents(cents);
                   setValueText(cents === 0 ? "" : formatCurrencyBRL(cents / 100));
                 }}
+                disabled={isFixedTemplate}
                 placeholder="R$ 0,00"
                 className="h-10 rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:ring-2 focus:ring-zinc-400/50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50"
               />
@@ -218,7 +285,12 @@ export function AddEntryDialog({ open, kind, onClose, initial, onSubmit }: Props
           ) : null}
 
           <div className="mt-5 flex items-center justify-end gap-2">
-            <Button type="button" variant="secondary" onClick={onClose} disabled={submitting}>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={onClose}
+              disabled={submitting}
+            >
               Cancelar
             </Button>
             <Button type="submit" disabled={submitting}>

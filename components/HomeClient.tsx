@@ -17,6 +17,15 @@ import {
 } from "../lib/finance";
 import { supabase } from "../lib/supabaseClient";
 
+type FixedEntry = {
+  id: string;
+  kind: EntryKind;
+  category: string;
+  description: string;
+  dayOfMonth: number; // NEW
+  createdAt: number;
+};
+
 function nextMonthStart(ym: string): string {
   const [y, m] = ym.split("-").map(Number);
   let yy = y;
@@ -28,6 +37,11 @@ function nextMonthStart(ym: string): string {
   return `${yy}-${String(mm).padStart(2, "0")}-01`;
 }
 
+function sortEntriesDesc(a: FinanceEntry, b: FinanceEntry): number {
+  if (a.date !== b.date) return a.date < b.date ? 1 : -1;
+  return (b.createdAt ?? 0) - (a.createdAt ?? 0);
+}
+
 function mapDbRows(data: any[] | null | undefined): FinanceEntry[] {
   return (data ?? []).map((r) => ({
     id: r.id,
@@ -37,7 +51,24 @@ function mapDbRows(data: any[] | null | undefined): FinanceEntry[] {
     description: (r.description ?? "") as string,
     value: Number(r.value),
     createdAt: new Date(r.created_at as string).getTime(),
+    fixedEntryId: (r.fixed_entry_id ?? null) as string | null,
   }));
+}
+
+function mapFixedRows(data: any[] | null | undefined): FixedEntry[] {
+  return (data ?? []).map((r) => ({
+    id: r.id as string,
+    kind: r.kind as EntryKind,
+    category: (r.category ?? "") as string,
+    description: (r.description ?? "") as string,
+    dayOfMonth: Number(r.day_of_month ?? 1), // NEW
+    createdAt: new Date(r.created_at as string).getTime(),
+  }));
+}
+
+function lastDayOfMonthFromYM(ym: string): number {
+  const [y, m] = ym.split("-").map(Number); // m = 1..12
+  return new Date(y, m, 0).getDate();
 }
 
 export function HomeClient() {
@@ -49,14 +80,12 @@ export function HomeClient() {
     "lancamentos" | "controle" | "metas"
   >("lancamentos");
 
-  // Colapso da sidebar em telas grandes (md+)
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
-
-  // Drawer do mobile
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   const [entries, setEntries] = React.useState<FinanceEntry[]>([]);
   const [cardEntries, setCardEntries] = React.useState<FinanceEntry[]>([]);
+  const [fixedEntries, setFixedEntries] = React.useState<FixedEntry[]>([]);
 
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [kind, setKind] = React.useState<EntryKind>("income");
@@ -66,14 +95,11 @@ export function HomeClient() {
 
   const busy = useBusy();
 
-  // Persistência do colapso (client-only)
   React.useEffect(() => {
     try {
       const v = window.localStorage.getItem("sidebar_collapsed");
       if (v === "1") setSidebarCollapsed(true);
-    } catch {
-      // ignore
-    }
+    } catch {}
   }, []);
 
   const toggleSidebarCollapsed = React.useCallback(() => {
@@ -81,9 +107,7 @@ export function HomeClient() {
       const next = !prev;
       try {
         window.localStorage.setItem("sidebar_collapsed", next ? "1" : "0");
-      } catch {
-        // ignore
-      }
+      } catch {}
       return next;
     });
   }, []);
@@ -120,7 +144,6 @@ export function HomeClient() {
     return () => {
       alive = false;
     };
-    // busy.run is stable (useCallback). Keeping deps empty intentionally.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -137,7 +160,7 @@ export function HomeClient() {
     await busy.run(async () => {
       const { data, error } = await supabase
         .from("entries")
-        .select("id, kind, date, category, description, value, created_at")
+        .select("id, kind, date, category, description, value, created_at, fixed_entry_id")
         .gte("date", start)
         .lt("date", next)
         .order("date", { ascending: false })
@@ -151,7 +174,21 @@ export function HomeClient() {
     });
   }
 
-  // Controle de gastos é “único” (sem mês)
+  async function fetchFixedEntries() {
+    await busy.run(async () => {
+      const { data, error } = await supabase
+        .from("fixed_entries")
+        .select("id, kind, category, description, day_of_month, created_at") // NEW
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+      setFixedEntries(mapFixedRows(data));
+    });
+  }
+
   async function fetchCardAll() {
     await busy.run(async () => {
       const { data, error } = await supabase
@@ -175,6 +212,12 @@ export function HomeClient() {
   }, [month, activeTab]);
 
   React.useEffect(() => {
+    if (activeTab !== "lancamentos") return;
+    fetchFixedEntries();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
+
+  React.useEffect(() => {
     if (activeTab !== "controle") return;
     fetchCardAll();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -194,6 +237,29 @@ export function HomeClient() {
 
   async function upsertEntry(entry: FinanceEntry) {
     await busy.run(async () => {
+      if (entry.isFixedTemplate) {
+        const day = Number(entry.date.split("-")[2] ?? "1") || 1;
+
+        const payload = {
+          id: entry.id,
+          kind: entry.kind,
+          category: entry.category,
+          description: entry.description,
+          day_of_month: day, // NEW
+        };
+
+        const { error } = await supabase.from("fixed_entries").insert(payload);
+        if (error) {
+          console.error(error);
+          alert("Erro ao salvar lançamento fixo. Veja o console.");
+          return;
+        }
+
+        await fetchFixedEntries();
+        await fetchEntriesMonth(month);
+        return;
+      }
+
       const payload = {
         id: entry.id,
         kind: entry.kind,
@@ -201,6 +267,7 @@ export function HomeClient() {
         category: entry.category,
         description: entry.description,
         value: entry.value,
+        fixed_entry_id: entry.fixedEntryId ?? null,
       };
 
       const exists = entries.some((p) => p.id === entry.id);
@@ -255,6 +322,25 @@ export function HomeClient() {
 
   async function deleteEntry(entry: FinanceEntry) {
     await busy.run(async () => {
+      // Se for uma linha virtual (fixo), deletar o template
+      if (entry.isVirtualFixed && entry.fixedEntryId) {
+        const { error } = await supabase
+          .from("fixed_entries")
+          .delete()
+          .eq("id", entry.fixedEntryId);
+
+        if (error) {
+          console.error(error);
+          alert("Erro ao excluir lançamento fixo. Veja o console.");
+          return;
+        }
+
+        await fetchFixedEntries();
+        await fetchEntriesMonth(month);
+        return;
+      }
+
+      // Caso contrário, é um lançamento normal (ocorrência do mês)
       const { error } = await supabase.from("entries").delete().eq("id", entry.id);
       if (error) {
         console.error(error);
@@ -281,11 +367,8 @@ export function HomeClient() {
     });
   }
 
-  // Excluir TODOS os lançamentos do Controle de gastos
   async function deleteAllCardEntries() {
     await busy.run(async () => {
-      // Supabase/PostgREST normalmente exige um filtro em DELETE.
-      // Este filtro pega “tudo” (datas sempre serão >= 0001-01-01).
       const { error } = await supabase
         .from("card_entries")
         .delete()
@@ -301,7 +384,42 @@ export function HomeClient() {
     });
   }
 
-  const visibleEntries = activeTab === "controle" ? cardEntries : entries;
+  const entriesWithFixed = React.useMemo(() => {
+    if (activeTab !== "lancamentos") return entries;
+
+    const ym = month;
+    const lastDay = lastDayOfMonthFromYM(ym);
+
+    const byFixedId = new Map<string, FinanceEntry>();
+    for (const e of entries) {
+      const fid = e.fixedEntryId ?? null;
+      if (fid) byFixedId.set(fid, e);
+    }
+
+    const virtuals: FinanceEntry[] = [];
+    for (const f of fixedEntries) {
+      if (byFixedId.has(f.id)) continue;
+
+      const day = Math.max(1, Math.min(f.dayOfMonth, lastDay));
+      const date = `${ym}-${String(day).padStart(2, "0")}`;
+
+      virtuals.push({
+        id: `virtual-${f.id}`,
+        kind: f.kind,
+        date,
+        category: f.category as any,
+        description: f.description,
+        value: 0,
+        createdAt: f.createdAt,
+        fixedEntryId: f.id,
+        isVirtualFixed: true,
+      });
+    }
+
+    return [...entries, ...virtuals].sort(sortEntriesDesc);
+  }, [activeTab, entries, fixedEntries, month]);
+
+  const visibleEntries = activeTab === "controle" ? cardEntries : entriesWithFixed;
   const onSubmit = activeTab === "controle" ? upsertCardEntry : upsertEntry;
 
   const tabTitle =
@@ -333,13 +451,7 @@ export function HomeClient() {
                   aria-label="Abrir menu"
                   onClick={() => setMobileMenuOpen(true)}
                 >
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    aria-hidden="true"
-                  >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <path
                       d="M4 6h16M4 12h16M4 18h16"
                       stroke="currentColor"
@@ -350,9 +462,7 @@ export function HomeClient() {
                 </button>
 
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold leading-tight">
-                    {tabTitle}
-                  </p>
+                  <p className="truncate text-sm font-semibold leading-tight">{tabTitle}</p>
                   <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
                     Bem-vindo(a), {displayName}
                   </p>
@@ -376,8 +486,11 @@ export function HomeClient() {
                   openDialog={openDialog}
                   onEdit={openEdit}
                   onDelete={(entry) => {
+                    const isFixedVirtual = Boolean(entry.isVirtualFixed && entry.fixedEntryId);
                     const ok = window.confirm(
-                      `Excluir este lançamento?\n\n${entry.description} — ${entry.value}`
+                      isFixedVirtual
+                        ? `Excluir este lançamento fixo?\n\n${entry.description}`
+                        : `Excluir este lançamento?\n\n${entry.description} — ${entry.value}`
                     );
                     if (ok) deleteEntry(entry);
                   }}
@@ -404,6 +517,7 @@ export function HomeClient() {
               <AddEntryDialog
                 open={dialogOpen}
                 kind={kind}
+                allowFixed={activeTab === "lancamentos"}
                 onClose={() => {
                   setDialogOpen(false);
                   setEditing(null);

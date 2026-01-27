@@ -12,16 +12,7 @@ type Props = {
   entries: FinanceEntry[];
   onEdit: (entry: FinanceEntry) => void;
   onDelete: (entry: FinanceEntry) => void;
-
-  /**
-   * Quando você já está renderizando tabelas separadas por tipo (Receitas/Despesas/Investimentos),
-   * pode ocultar a coluna/badge de "Tipo" para economizar espaço.
-   */
   hideKind?: boolean;
-
-  /**
-   * Texto opcional para quando não existirem registros nessa lista.
-   */
   emptyMessage?: string;
 };
 
@@ -97,6 +88,7 @@ export function HistoryTable({
               >
                 Editar
               </Button>
+
               <Button
                 type="button"
                 variant="ghost"

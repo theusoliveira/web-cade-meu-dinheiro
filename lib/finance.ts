@@ -16,11 +16,50 @@ export type FinanceEntry = {
   /** Always stored as a positive number. UI can render + / - based on kind. */
   value: number;
   createdAt: number;
+
+  /**
+   * Se este lançamento foi criado a partir de um template de lançamento fixo,
+   * este campo referencia o `fixed_entries.id`.
+   */
+  fixedEntryId?: string | null;
+
+  /**
+   * Linha "virtual" gerada a partir de um lançamento fixo (não existe na tabela `entries`).
+   * Serve apenas para UI (aparece com valor 0) e, ao editar, vira uma ocorrência real.
+   */
+  isVirtualFixed?: boolean;
+
+  /**
+   * Usado pelo modal para indicar que o usuário está cadastrando um template de lançamento fixo.
+   * (Não é um lançamento real do mês.)
+   */
+  isFixedTemplate?: boolean;
 };
 
-export const INCOME_CATEGORIES: IncomeCategory[] = ["Salário", "Renda extra", "Empréstimo", "Saldo", "Outros"];
-export const EXPENSE_CATEGORIES: ExpenseCategory[] = ["Carro", "Lazer", "Mercado", "Saúde", "Casa", "Presente", "Educação", "Cartão de crédito", "Roupa", "Outros"];
-export const INVESTMENT_CATEGORIES: InvestmentCategory[] = ["Reserva", "Aposentadoria", "Casa própria"];
+export const INCOME_CATEGORIES: IncomeCategory[] = [
+  "Salário",
+  "Renda extra",
+  "Empréstimo",
+  "Saldo",
+  "Outros",
+];
+export const EXPENSE_CATEGORIES: ExpenseCategory[] = [
+  "Carro",
+  "Lazer",
+  "Mercado",
+  "Saúde",
+  "Casa",
+  "Presente",
+  "Educação",
+  "Cartão de crédito",
+  "Roupa",
+  "Outros",
+];
+export const INVESTMENT_CATEGORIES: InvestmentCategory[] = [
+  "Reserva",
+  "Aposentadoria",
+  "Casa própria",
+];
 
 export const CATEGORIES_BY_KIND: Record<EntryKind, readonly Category[]> = {
   income: INCOME_CATEGORIES,
@@ -78,7 +117,6 @@ export function newId(): string {
     return v.toString(16);
   });
 }
-
 
 export function parseBRLCents(raw: string): number {
   // mantém só números: "R$ 1.234,56" -> "123456"
