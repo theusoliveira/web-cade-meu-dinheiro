@@ -37,9 +37,9 @@ function nextMonthStart(ym: string): string {
   return `${yy}-${String(mm).padStart(2, "0")}-01`;
 }
 
-function sortEntriesDesc(a: FinanceEntry, b: FinanceEntry): number {
-  if (a.date !== b.date) return a.date < b.date ? 1 : -1;
-  return (b.createdAt ?? 0) - (a.createdAt ?? 0);
+function sortEntriesAsc(a: FinanceEntry, b: FinanceEntry): number {
+  if (a.date !== b.date) return a.date < b.date ? -1 : 1;
+  return (a.createdAt ?? 0) - (b.createdAt ?? 0);
 }
 
 function mapDbRows(data: any[] | null | undefined): FinanceEntry[] {
@@ -416,7 +416,7 @@ export function HomeClient() {
       });
     }
 
-    return [...entries, ...virtuals].sort(sortEntriesDesc);
+    return [...entries, ...virtuals].sort(sortEntriesAsc);
   }, [activeTab, entries, fixedEntries, month]);
 
   const visibleEntries = activeTab === "controle" ? cardEntries : entriesWithFixed;
