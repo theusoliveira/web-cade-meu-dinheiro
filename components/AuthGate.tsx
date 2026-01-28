@@ -173,7 +173,7 @@ export function AuthGate() {
   if (checking) {
     // você pode manter essa tela; o overlay global também vai aparecer por causa do busy.run no getSession()
     return (
-      <div className="min-h-screen grid place-items-center bg-zinc-50 text-zinc-900 dark:bg-black dark:text-zinc-50">
+      <div className="min-h-[100dvh] grid place-items-center bg-zinc-50 text-zinc-900 dark:bg-black dark:text-zinc-50">
         <p className="text-sm text-zinc-600 dark:text-zinc-400">Carregando…</p>
       </div>
     );
@@ -181,7 +181,7 @@ export function AuthGate() {
 
   if (!signedIn) {
     return (
-      <div className="min-h-screen grid place-items-center bg-zinc-50 text-zinc-900 dark:bg-black dark:text-zinc-50 px-4">
+      <div className="min-h-[100dvh] grid place-items-center bg-zinc-50 text-zinc-900 dark:bg-black dark:text-zinc-50 px-4">
         <div className="w-full max-w-sm rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950">
           <h1 className="text-lg font-semibold">
             {mode === "login" ? "Entrar" : "Criar conta"}

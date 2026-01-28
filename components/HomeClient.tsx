@@ -430,8 +430,8 @@ export function HomeClient() {
       : "Controle de gastos";
 
   return (
-    <div className="min-h-screen bg-zinc-50 text-zinc-900 dark:bg-black dark:text-zinc-50">
-      <div className="flex min-h-screen">
+    <div className="min-h-[100dvh] bg-zinc-50 text-zinc-900 dark:bg-black dark:text-zinc-50">
+      <div className="flex min-h-[100dvh]">
         <AppSidebar
           active={activeTab}
           onChange={setActiveTab}
