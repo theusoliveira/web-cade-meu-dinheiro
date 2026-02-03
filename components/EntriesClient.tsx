@@ -26,6 +26,10 @@ function groupByCategory(entries: FinanceEntry[], kind: EntryKind): DonutSlice[]
   return [...map.entries()].map(([name, value]) => ({ name, value }));
 }
 
+function pluralRegistros(n: number) {
+  return `${n} registro${n === 1 ? "" : "s"}`;
+}
+
 type Props = {
   month: string;
   setMonth: (m: string) => void;
@@ -49,6 +53,19 @@ export function EntriesClient({
   const expenseByCategory = React.useMemo(() => groupByCategory(entries, "expense"), [entries]);
   const investmentByCategory = React.useMemo(
     () => groupByCategory(entries, "investment"),
+    [entries]
+  );
+
+  const incomeEntries = React.useMemo(
+    () => entries.filter((e) => e.kind === "income"),
+    [entries]
+  );
+  const expenseEntries = React.useMemo(
+    () => entries.filter((e) => e.kind === "expense"),
+    [entries]
+  );
+  const investmentEntries = React.useMemo(
+    () => entries.filter((e) => e.kind === "investment"),
     [entries]
   );
 
@@ -110,7 +127,9 @@ export function EntriesClient({
           </div>
           <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900/40">
             <p className="text-xs text-zinc-500 dark:text-zinc-400">Investimentos</p>
-            <p className="mt-1 text-lg font-semibold">{formatCurrencyBRL(totals.investment)}</p>
+            <p className="mt-1 text-lg font-semibold">
+              {formatCurrencyBRL(totals.investment)}
+            </p>
           </div>
           <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900/40">
             <p className="text-xs text-zinc-500 dark:text-zinc-400">Saldo</p>
@@ -126,12 +145,15 @@ export function EntriesClient({
               Visão do mês
             </h2>
             <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-              {monthLabel(month)} · {entries.length} registro{entries.length === 1 ? "" : "s"}
+              {monthLabel(month)} · {pluralRegistros(entries.length)}
             </p>
           </div>
 
           <div className="flex items-center gap-2">
-            <label htmlFor="month" className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
+            <label
+              htmlFor="month"
+              className="text-xs font-medium text-zinc-700 dark:text-zinc-300"
+            >
               Mês
             </label>
             <input
@@ -166,14 +188,43 @@ export function EntriesClient({
         </div>
 
         <div className="mt-6">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">Histórico</h2>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">
-              {entries.length} registro{entries.length === 1 ? "" : "s"}
-            </p>
-          </div>
+          <div className="grid gap-4">
+            <div>
+              <div className="mb-2 flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                  Receitas
+                </h3>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                  {pluralRegistros(incomeEntries.length)}
+                </p>
+              </div>
+              <HistoryTable entries={incomeEntries} onEdit={onEdit} onDelete={onDelete} />
+            </div>
 
-          <HistoryTable entries={entries} onEdit={onEdit} onDelete={onDelete} />
+            <div>
+              <div className="mb-2 flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                  Despesas
+                </h3>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                  {pluralRegistros(expenseEntries.length)}
+                </p>
+              </div>
+              <HistoryTable entries={expenseEntries} onEdit={onEdit} onDelete={onDelete} />
+            </div>
+
+            <div>
+              <div className="mb-2 flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                  Investimentos
+                </h3>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                  {pluralRegistros(investmentEntries.length)}
+                </p>
+              </div>
+              <HistoryTable entries={investmentEntries} onEdit={onEdit} onDelete={onDelete} />
+            </div>
+          </div>
         </div>
       </section>
     </>

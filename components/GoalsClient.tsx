@@ -6,6 +6,7 @@ import { AddGoalDialog, type Goal } from "./AddGoalDialog";
 import { GoalsTable } from "./GoalsTable";
 import { formatCurrencyBRL } from "../lib/finance";
 import { supabase } from "../lib/supabaseClient";
+import { useBusy } from "./BusyProvider";
 
 function forecastToDate(ym: string): string {
   // YYYY-MM -> YYYY-MM-01
@@ -22,32 +23,37 @@ export function GoalsClient() {
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [editing, setEditing] = React.useState<Goal | null>(null);
 
+  const busy = useBusy();
+
   async function fetchGoals() {
-    const { data, error } = await supabase
-      .from("goals")
-      .select("id, description, current_value, target_value, forecast, created_at")
-      .order("forecast", { ascending: true })
-      .order("created_at", { ascending: false });
+    await busy.run(async () => {
+      const { data, error } = await supabase
+        .from("goals")
+        .select("id, description, current_value, target_value, forecast, created_at")
+        .order("forecast", { ascending: true })
+        .order("created_at", { ascending: false });
 
-    if (error) {
-      console.error(error);
-      return;
-    }
+      if (error) {
+        console.error(error);
+        return;
+      }
 
-    const mapped: Goal[] = (data ?? []).map((r: any) => ({
-      id: r.id,
-      description: r.description ?? "",
-      currentValue: Number(r.current_value ?? 0),
-      targetValue: Number(r.target_value ?? 0),
-      forecast: dateToForecast(r.forecast as string),
-      createdAt: new Date(r.created_at as string).getTime(),
-    }));
+      const mapped: Goal[] = (data ?? []).map((r: any) => ({
+        id: r.id,
+        description: r.description ?? "",
+        currentValue: Number(r.current_value ?? 0),
+        targetValue: Number(r.target_value ?? 0),
+        forecast: dateToForecast(r.forecast as string),
+        createdAt: new Date(r.created_at as string).getTime(),
+      }));
 
-    setGoals(mapped);
+      setGoals(mapped);
+    });
   }
 
   React.useEffect(() => {
     fetchGoals();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function openNew() {
@@ -61,38 +67,42 @@ export function GoalsClient() {
   }
 
   async function upsertGoal(goal: Goal) {
-    const exists = goals.some((g) => g.id === goal.id);
+    await busy.run(async () => {
+      const exists = goals.some((g) => g.id === goal.id);
 
-    const payload = {
-      id: goal.id,
-      description: goal.description,
-      current_value: goal.currentValue,
-      target_value: goal.targetValue,
-      forecast: forecastToDate(goal.forecast),
-    };
+      const payload = {
+        id: goal.id,
+        description: goal.description,
+        current_value: goal.currentValue,
+        target_value: goal.targetValue,
+        forecast: forecastToDate(goal.forecast),
+      };
 
-    const q = exists
-      ? supabase.from("goals").update(payload).eq("id", goal.id)
-      : supabase.from("goals").insert(payload);
+      const q = exists
+        ? supabase.from("goals").update(payload).eq("id", goal.id)
+        : supabase.from("goals").insert(payload);
 
-    const { error } = await q;
-    if (error) {
-      console.error(error);
-      alert("Erro ao salvar meta. Veja o console.");
-      return;
-    }
+      const { error } = await q;
+      if (error) {
+        console.error(error);
+        alert("Erro ao salvar meta. Veja o console.");
+        return;
+      }
 
-    await fetchGoals();
+      await fetchGoals();
+    });
   }
 
   async function deleteGoal(id: string) {
-    const { error } = await supabase.from("goals").delete().eq("id", id);
-    if (error) {
-      console.error(error);
-      alert("Erro ao excluir meta. Veja o console.");
-      return;
-    }
-    await fetchGoals();
+    await busy.run(async () => {
+      const { error } = await supabase.from("goals").delete().eq("id", id);
+      if (error) {
+        console.error(error);
+        alert("Erro ao excluir meta. Veja o console.");
+        return;
+      }
+      await fetchGoals();
+    });
   }
 
   const totals = React.useMemo(() => {

@@ -4,6 +4,7 @@ import * as React from "react";
 import { supabase } from "../lib/supabaseClient";
 import { Button } from "./Button";
 import { HomeClient } from "./HomeClient";
+import { useBusy } from "./BusyProvider";
 
 function onlyDigits(v: string) {
   return v.replace(/\D/g, "");
@@ -36,18 +37,35 @@ export function AuthGate() {
   const [error, setError] = React.useState<string | null>(null);
   const [message, setMessage] = React.useState<string | null>(null);
 
+  const busy = useBusy();
+
   React.useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setSignedIn(!!data.session);
-      setChecking(false);
-    });
+    let alive = true;
+
+    // Mostra loading global enquanto checa sessão inicial
+    busy
+      .run(async () => {
+        const { data } = await supabase.auth.getSession();
+        if (!alive) return;
+        setSignedIn(!!data.session);
+        setChecking(false);
+      })
+      .catch(() => {
+        // se der erro, a gente só libera a tela
+        if (!alive) return;
+        setChecking(false);
+      });
 
     const { data } = supabase.auth.onAuthStateChange((_event, session) => {
       setSignedIn(!!session);
       setChecking(false);
     });
 
-    return () => data.subscription.unsubscribe();
+    return () => {
+      alive = false;
+      data.subscription.unsubscribe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function goToLogin(withMessage?: string) {
@@ -68,12 +86,14 @@ export function AuthGate() {
     if (!email.trim()) return setError("Informe seu e-mail.");
     if (!password) return setError("Informe sua senha.");
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password,
-    });
+    await busy.run(async () => {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
 
-    if (error) setError(error.message);
+      if (error) setError(error.message);
+    });
   }
 
   async function signUp(e: React.FormEvent) {
@@ -91,62 +111,69 @@ export function AuthGate() {
       return setError("A senha precisa ter pelo menos 6 caracteres.");
     if (password !== confirmPassword) return setError("As senhas não conferem.");
 
-    // 1) Checar se CPF já existe
-    const { data: cpfUsed, error: cpfErr } = await supabase.rpc("cpf_exists", {
-      cpf_in: cpfDigits,
-    });
+    await busy.run(async () => {
+      // 1) Checar se CPF já existe
+      const { data: cpfUsed, error: cpfErr } = await supabase.rpc("cpf_exists", {
+        cpf_in: cpfDigits,
+      });
 
-    if (cpfErr) {
-      console.error(cpfErr);
-      return setError("Não foi possível validar o CPF agora. Tente novamente.");
-    }
-    if (cpfUsed) {
-      return setError("Este CPF já está cadastrado. Faça login ou use outro CPF.");
-    }
-
-    // 2) Criar usuário no Supabase Auth
-    const { data, error } = await supabase.auth.signUp({
-      email: email.trim(),
-      password,
-      options: {
-        data: {
-          full_name: fullName.trim(),
-          display_name: displayName.trim(),
-          cpf: cpfDigits,
-        },
-        emailRedirectTo: typeof window !== "undefined" ? window.location.origin : undefined,
-      },
-    });
-
-    if (error) {
-      const msg = (error.message || "").toLowerCase();
-
-      // Se por corrida/conflito o CPF duplicar (unique constraint), você pode receber erro do DB
-      if (msg.includes("duplicate") || msg.includes("unique") || msg.includes("cpf")) {
-        return setError("Este CPF já está cadastrado. Faça login ou use outro CPF.");
+      if (cpfErr) {
+        console.error(cpfErr);
+        setError("Não foi possível validar o CPF agora. Tente novamente.");
+        return;
+      }
+      if (cpfUsed) {
+        setError("Este CPF já está cadastrado. Faça login ou use outro CPF.");
+        return;
       }
 
-      // Se provider email/signup estiver desabilitado, costuma cair aqui também
-      return setError(error.message);
-    }
+      // 2) Criar usuário no Supabase Auth
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+        options: {
+          data: {
+            full_name: fullName.trim(),
+            display_name: displayName.trim(),
+            cpf: cpfDigits,
+          },
+          emailRedirectTo: typeof window !== "undefined" ? window.location.origin : undefined,
+        },
+      });
 
-    // Se confirm email estiver ligado, session vem null
-    if (!data.session) {
-      // Conta criada, mas precisa confirmar email (se estiver habilitado)
-      setMessage("Conta criada! Se você ativou confirmação de e-mail, verifique sua caixa de entrada.");
-      // Volta pro login ao confirmar a mensagem
-      goToLogin("Conta criada! Agora faça login.");
-      return;
-    }
+      if (error) {
+        const msg = (error.message || "").toLowerCase();
 
-    // Se criou e já logou, fazemos signOut e voltamos pro login (como você pediu)
-    await supabase.auth.signOut();
-    goToLogin("Conta criada com sucesso! Agora faça login.");
+        // Se por corrida/conflito o CPF duplicar (unique constraint), você pode receber erro do DB
+        if (msg.includes("duplicate") || msg.includes("unique") || msg.includes("cpf")) {
+          setError("Este CPF já está cadastrado. Faça login ou use outro CPF.");
+          return;
+        }
+
+        // Se provider email/signup estiver desabilitado, costuma cair aqui também
+        setError(error.message);
+        return;
+      }
+
+      // Se confirm email estiver ligado, session vem null
+      if (!data.session) {
+        setMessage(
+          "Conta criada! Se você ativou confirmação de e-mail, verifique sua caixa de entrada."
+        );
+        goToLogin("Conta criada! Agora faça login.");
+        return;
+      }
+
+      // Se criou e já logou, fazemos signOut e voltamos pro login (como você pediu)
+      await supabase.auth.signOut();
+      goToLogin("Conta criada com sucesso! Agora faça login.");
+    });
   }
 
   if (checking) {
+    // você pode manter essa tela; o overlay global também vai aparecer por causa do busy.run no getSession()
     return (
-      <div className="min-h-screen grid place-items-center bg-zinc-50 text-zinc-900 dark:bg-black dark:text-zinc-50">
+      <div className="min-h-[100dvh] grid place-items-center bg-zinc-50 text-zinc-900 dark:bg-black dark:text-zinc-50">
         <p className="text-sm text-zinc-600 dark:text-zinc-400">Carregando…</p>
       </div>
     );
@@ -154,7 +181,7 @@ export function AuthGate() {
 
   if (!signedIn) {
     return (
-      <div className="min-h-screen grid place-items-center bg-zinc-50 text-zinc-900 dark:bg-black dark:text-zinc-50 px-4">
+      <div className="min-h-[100dvh] grid place-items-center bg-zinc-50 text-zinc-900 dark:bg-black dark:text-zinc-50 px-4">
         <div className="w-full max-w-sm rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950">
           <h1 className="text-lg font-semibold">
             {mode === "login" ? "Entrar" : "Criar conta"}
@@ -262,12 +289,7 @@ export function AuthGate() {
                 Criar conta
               </Button>
 
-              <Button
-                type="button"
-                variant="ghost"
-                className="w-full"
-                onClick={() => goToLogin()}
-              >
+              <Button type="button" variant="ghost" className="w-full" onClick={() => goToLogin()}>
                 Já tenho conta
               </Button>
             </form>
