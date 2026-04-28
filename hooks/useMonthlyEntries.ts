@@ -12,9 +12,14 @@ import {
   fetchMonthlyEntries,
   fetchOpeningBalance,
   upsertMonthlyEntry,
+  type MonthlyEntriesScope,
 } from "../lib/supabase/queries/entries";
 
-export function useMonthlyEntries(month: string, enabled: boolean) {
+export function useMonthlyEntries(
+  month: string,
+  enabled: boolean,
+  scope: MonthlyEntriesScope = "personal",
+) {
   const [entries, setEntries] = React.useState<FinanceEntry[]>([]);
   const [fixedEntries, setFixedEntries] = React.useState<FixedEntry[]>([]);
   const [openingBalance, setOpeningBalance] = React.useState(0);
@@ -26,9 +31,9 @@ export function useMonthlyEntries(month: string, enabled: boolean) {
     await run(async () => {
       try {
         const [nextEntries, nextFixedEntries, nextOpeningBalance] = await Promise.all([
-          fetchMonthlyEntries(month),
-          fetchFixedEntries(),
-          fetchOpeningBalance(month),
+          fetchMonthlyEntries(month, scope),
+          fetchFixedEntries(scope),
+          fetchOpeningBalance(month, scope),
         ]);
 
         setEntries(nextEntries);
@@ -38,7 +43,7 @@ export function useMonthlyEntries(month: string, enabled: boolean) {
         console.error(error);
       }
     });
-  }, [enabled, month, run]);
+  }, [enabled, month, run, scope]);
 
   React.useEffect(() => {
     reloadMonth();
@@ -46,29 +51,29 @@ export function useMonthlyEntries(month: string, enabled: boolean) {
 
   const refreshEntriesOnly = React.useCallback(async () => {
     const [nextEntries, nextOpeningBalance] = await Promise.all([
-      fetchMonthlyEntries(month),
-      fetchOpeningBalance(month),
+      fetchMonthlyEntries(month, scope),
+      fetchOpeningBalance(month, scope),
     ]);
     setEntries(nextEntries);
     setOpeningBalance(nextOpeningBalance);
-  }, [month]);
+  }, [month, scope]);
 
   const upsertEntry = React.useCallback(
     async (entry: FinanceEntry) => {
       await run(async () => {
         try {
           if (entry.isFixedTemplate) {
-            await createFixedEntryTemplate(entry);
+            await createFixedEntryTemplate(entry, scope);
             const [nextFixedEntries, nextEntries] = await Promise.all([
-              fetchFixedEntries(),
-              fetchMonthlyEntries(month),
+              fetchFixedEntries(scope),
+              fetchMonthlyEntries(month, scope),
             ]);
             setFixedEntries(nextFixedEntries);
             setEntries(nextEntries);
             return;
           }
 
-          await upsertMonthlyEntry(entry);
+          await upsertMonthlyEntry(entry, scope);
           await refreshEntriesOnly();
         } catch (error) {
           console.error(error);
@@ -76,7 +81,7 @@ export function useMonthlyEntries(month: string, enabled: boolean) {
         }
       });
     },
-    [month, refreshEntriesOnly, run],
+    [month, refreshEntriesOnly, run, scope],
   );
 
   const deleteEntry = React.useCallback(
@@ -84,17 +89,17 @@ export function useMonthlyEntries(month: string, enabled: boolean) {
       await run(async () => {
         try {
           if (entry.isVirtualFixed && entry.fixedEntryId) {
-            await deleteFixedEntry(entry.fixedEntryId);
+            await deleteFixedEntry(entry.fixedEntryId, scope);
             const [nextFixedEntries, nextEntries] = await Promise.all([
-              fetchFixedEntries(),
-              fetchMonthlyEntries(month),
+              fetchFixedEntries(scope),
+              fetchMonthlyEntries(month, scope),
             ]);
             setFixedEntries(nextFixedEntries);
             setEntries(nextEntries);
             return;
           }
 
-          await deleteMonthlyEntry(entry.id);
+          await deleteMonthlyEntry(entry.id, scope);
           await refreshEntriesOnly();
         } catch (error) {
           console.error(error);
@@ -102,7 +107,7 @@ export function useMonthlyEntries(month: string, enabled: boolean) {
         }
       });
     },
-    [month, refreshEntriesOnly, run],
+    [month, refreshEntriesOnly, run, scope],
   );
 
   const visibleEntries = React.useMemo(

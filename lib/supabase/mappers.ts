@@ -2,11 +2,13 @@ import type { EntryKind, FinanceEntry, FixedEntry } from "../finance";
 import type { Database } from "./types";
 
 type EntryRow = Database["public"]["Tables"]["entries"]["Row"];
+type PjEntryRow = Database["public"]["Tables"]["pj_entries"]["Row"];
 type CardEntryRow = Database["public"]["Tables"]["card_entries"]["Row"];
 type FixedEntryRow = Database["public"]["Tables"]["fixed_entries"]["Row"];
+type PjFixedEntryRow = Database["public"]["Tables"]["pj_fixed_entries"]["Row"];
 
 export function mapEntryRows(
-  data: EntryRow[] | CardEntryRow[] | null | undefined,
+  data: EntryRow[] | PjEntryRow[] | CardEntryRow[] | null | undefined,
 ): FinanceEntry[] {
   return (data ?? []).map((row) => ({
     id: row.id,
@@ -21,7 +23,7 @@ export function mapEntryRows(
 }
 
 export function mapFixedEntryRows(
-  data: FixedEntryRow[] | null | undefined,
+  data: FixedEntryRow[] | PjFixedEntryRow[] | null | undefined,
 ): FixedEntry[] {
   return (data ?? []).map((row) => ({
     id: row.id,

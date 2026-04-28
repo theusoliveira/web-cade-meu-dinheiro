@@ -113,6 +113,7 @@ function SidebarBody({
     icon: "list" | "target" | "card";
   }> = [
     { key: "lancamentos", label: "Lançamentos", icon: "list" },
+    { key: "lancamentos_pj", label: "Lançamentos PJ", icon: "list" },
     { key: "metas", label: "Metas", icon: "target" },
     { key: "controle", label: "Controle de gastos", icon: "card" },
   ];

@@ -29,7 +29,7 @@ const AddEntryDialog = dynamic(
   () => import("./AddEntryDialog").then((mod) => mod.AddEntryDialog),
 );
 
-type ActiveTab = "lancamentos" | "controle" | "metas";
+type ActiveTab = "lancamentos" | "lancamentos_pj" | "controle" | "metas";
 
 function SectionFallback({ label }: { label: string }) {
   return (
@@ -51,7 +51,12 @@ export function HomeClient() {
   const [editing, setEditing] = React.useState<FinanceEntry | null>(null);
 
   const { displayName } = useProfile();
-  const monthlyEntries = useMonthlyEntries(month, activeTab === "lancamentos");
+  const personalMonthlyEntries = useMonthlyEntries(month, activeTab === "lancamentos", "personal");
+  const businessMonthlyEntries = useMonthlyEntries(
+    month,
+    activeTab === "lancamentos_pj",
+    "business",
+  );
   const cardEntries = useCardEntries(activeTab === "controle");
 
   React.useEffect(() => {
@@ -90,18 +95,26 @@ export function HomeClient() {
     setDialogOpen(true);
   }
 
+  const isBusinessEntriesTab = activeTab === "lancamentos_pj";
+  const isMonthlyEntriesTab = activeTab === "lancamentos" || isBusinessEntriesTab;
+  const activeMonthlyEntries = isBusinessEntriesTab
+    ? businessMonthlyEntries
+    : personalMonthlyEntries;
+
   const visibleEntries =
-    activeTab === "controle" ? cardEntries.entries : monthlyEntries.visibleEntries;
+    activeTab === "controle" ? cardEntries.entries : activeMonthlyEntries.visibleEntries;
 
   const onSubmit =
-    activeTab === "controle" ? cardEntries.upsertEntry : monthlyEntries.upsertEntry;
+    activeTab === "controle" ? cardEntries.upsertEntry : activeMonthlyEntries.upsertEntry;
 
   const tabTitle =
     activeTab === "lancamentos"
       ? "Lançamentos"
-      : activeTab === "metas"
-        ? "Metas"
-        : "Controle de gastos";
+      : activeTab === "lancamentos_pj"
+        ? "Lançamentos PJ"
+        : activeTab === "metas"
+          ? "Metas"
+          : "Controle de gastos";
 
   return (
     <div className="min-h-[100dvh] bg-zinc-50 text-zinc-900 dark:bg-black dark:text-zinc-50">
@@ -152,7 +165,7 @@ export function HomeClient() {
 
           <main className="w-full flex-1 px-4 py-6 pb-[calc(env(safe-area-inset-bottom)+24px)] sm:px-6 lg:px-8">
             <div className="mx-auto w-full max-w-7xl">
-              {activeTab === "lancamentos" ? (
+              {isMonthlyEntriesTab ? (
                 <EntriesClient
                   month={month}
                   setMonth={setMonth}
@@ -166,8 +179,23 @@ export function HomeClient() {
                         ? `Excluir este lançamento fixo?\n\n${entry.description}`
                         : `Excluir este lançamento?\n\n${entry.description} — ${entry.value}`,
                     );
-                    if (ok) monthlyEntries.deleteEntry(entry);
+                    if (ok) activeMonthlyEntries.deleteEntry(entry);
                   }}
+                  title={isBusinessEntriesTab ? "Lançamentos PJ" : "Lançamentos"}
+                  description={
+                    isBusinessEntriesTab
+                      ? "Registre receitas, despesas e investimentos da conta PJ."
+                      : "Registre receitas, despesas e investimentos do mês."
+                  }
+                  incomeChartTitle={
+                    isBusinessEntriesTab ? "Receitas da conta PJ" : "De onde vem meu dinheiro"
+                  }
+                  expenseChartTitle={
+                    isBusinessEntriesTab ? "Despesas da conta PJ" : "Onde estou gastando mais"
+                  }
+                  investmentChartTitle={
+                    isBusinessEntriesTab ? "Investimentos da conta PJ" : "Onde estou investindo"
+                  }
                 />
               ) : null}
 
@@ -192,7 +220,7 @@ export function HomeClient() {
                 <AddEntryDialog
                   open={dialogOpen}
                   kind={kind}
-                  allowFixed={activeTab === "lancamentos"}
+                  allowFixed={isMonthlyEntriesTab}
                   onClose={() => {
                     setDialogOpen(false);
                     setEditing(null);
