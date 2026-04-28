@@ -37,33 +37,49 @@ type GoalsInsert = {
   forecast: string;
 };
 
+type EntryRow = {
+  id: string;
+  kind: EntryKind;
+  date: string;
+  category: string;
+  description: string | null;
+  value: number | string;
+  fixed_entry_id: string | null;
+  created_at: string;
+};
+
+type FixedEntryRow = {
+  id: string;
+  kind: EntryKind;
+  category: string | null;
+  description: string | null;
+  day_of_month: number | string | null;
+  created_at: string;
+};
+
 export type Database = {
   public: {
     Tables: {
       entries: {
-        Row: {
-          id: string;
-          kind: EntryKind;
-          date: string;
-          category: string;
-          description: string | null;
-          value: number | string;
-          fixed_entry_id: string | null;
-          created_at: string;
-        };
+        Row: EntryRow;
         Insert: EntriesInsert;
         Update: Partial<EntriesInsert>;
         Relationships: [];
       };
       fixed_entries: {
-        Row: {
-          id: string;
-          kind: EntryKind;
-          category: string | null;
-          description: string | null;
-          day_of_month: number | string | null;
-          created_at: string;
-        };
+        Row: FixedEntryRow;
+        Insert: FixedEntriesInsert;
+        Update: Partial<FixedEntriesInsert>;
+        Relationships: [];
+      };
+      pj_entries: {
+        Row: EntryRow;
+        Insert: EntriesInsert;
+        Update: Partial<EntriesInsert>;
+        Relationships: [];
+      };
+      pj_fixed_entries: {
+        Row: FixedEntryRow;
         Insert: FixedEntriesInsert;
         Update: Partial<FixedEntriesInsert>;
         Relationships: [];
@@ -113,6 +129,10 @@ export type Database = {
         Returns: boolean;
       };
       get_opening_balance: {
+        Args: { month_start: string };
+        Returns: number | string | null;
+      };
+      get_pj_opening_balance: {
         Args: { month_start: string };
         Returns: number | string | null;
       };

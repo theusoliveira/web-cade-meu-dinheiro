@@ -45,6 +45,11 @@ type Props = {
   openDialog: (kind: EntryKind) => void;
   onEdit: (entry: FinanceEntry) => void;
   onDelete: (entry: FinanceEntry) => void;
+  title?: string;
+  description?: string;
+  incomeChartTitle?: string;
+  expenseChartTitle?: string;
+  investmentChartTitle?: string;
 };
 
 export function EntriesClient({
@@ -54,7 +59,32 @@ export function EntriesClient({
   openDialog,
   onEdit,
   onDelete,
+  title = "Lançamentos",
+  description = "Registre receitas, despesas e investimentos do mês.",
+  incomeChartTitle = "De onde vem meu dinheiro",
+  expenseChartTitle = "Onde estou gastando mais",
+  investmentChartTitle = "Onde estou investindo",
 }: Props) {
+  const isBusinessEntries = title.toLowerCase().includes("pj");
+
+  const incomeLabel = isBusinessEntries ? "Entradas" : "Receitas";
+  const expenseLabel = isBusinessEntries ? "Saídas" : "Despesas";
+
+  const incomeButtonLabel = isBusinessEntries ? "+ Entrada" : "+ Receita";
+  const expenseButtonLabel = isBusinessEntries ? "- Saída" : "- Despesa";
+
+  const effectiveDescription = isBusinessEntries
+    ? "Registre entradas, saídas e investimentos da conta PJ."
+    : description;
+
+  const effectiveIncomeChartTitle = isBusinessEntries
+    ? "Entradas da conta PJ"
+    : incomeChartTitle;
+
+  const effectiveExpenseChartTitle = isBusinessEntries
+    ? "Saídas da conta PJ"
+    : expenseChartTitle;
+
   const incomeByCategory = React.useMemo(() => groupByCategory(entries, "income"), [entries]);
   const expenseByCategory = React.useMemo(() => groupByCategory(entries, "expense"), [entries]);
   const investmentByCategory = React.useMemo(
@@ -94,9 +124,9 @@ export function EntriesClient({
       <section className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-xl font-semibold">Lançamentos</h1>
+            <h1 className="text-xl font-semibold">{title}</h1>
             <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-              Registre receitas, despesas e investimentos do mês.
+              {effectiveDescription}
             </p>
           </div>
 
@@ -107,7 +137,7 @@ export function EntriesClient({
               onClick={() => openDialog("income")}
               className="w-full gap-2 bg-emerald-100 text-emerald-800 hover:bg-emerald-200 sm:w-auto dark:bg-emerald-900/30 dark:text-emerald-100 dark:hover:bg-emerald-900/45"
             >
-              + Receita
+              {incomeButtonLabel}
             </Button>
             <Button
               type="button"
@@ -115,7 +145,7 @@ export function EntriesClient({
               onClick={() => openDialog("expense")}
               className="w-full gap-2 bg-rose-100 text-rose-800 hover:bg-rose-200 sm:w-auto dark:bg-rose-900/30 dark:text-rose-100 dark:hover:bg-rose-900/45"
             >
-              - Despesa
+              {expenseButtonLabel}
             </Button>
             <Button
               type="button"
@@ -130,11 +160,11 @@ export function EntriesClient({
 
         <div className="mt-5 grid gap-3 sm:grid-cols-4">
           <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900/40">
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">Receitas</p>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">{incomeLabel}</p>
             <p className="mt-1 text-lg font-semibold">{formatCurrencyBRL(totals.income)}</p>
           </div>
           <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900/40">
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">Despesas</p>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">{expenseLabel}</p>
             <p className="mt-1 text-lg font-semibold">{formatCurrencyBRL(totals.expense)}</p>
           </div>
           <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900/40">
@@ -175,19 +205,19 @@ export function EntriesClient({
 
         <div className="grid gap-3 md:grid-cols-3">
           <DonutChartCard
-            title="De onde vem meu dinheiro"
+            title={effectiveIncomeChartTitle}
             data={incomeByCategory}
             colors={["#10b981", "#14b8a6", "#22c55e", "#06b6d4"]}
-            centerLabel="Receitas"
+            centerLabel={incomeLabel}
           />
           <DonutChartCard
-            title="Onde estou gastando mais"
+            title={effectiveExpenseChartTitle}
             data={expenseByCategory}
             colors={["#f43f5e", "#f59e0b", "#8b5cf6", "#ef4444"]}
-            centerLabel="Despesas"
+            centerLabel={expenseLabel}
           />
           <DonutChartCard
-            title="Onde estou investindo"
+            title={investmentChartTitle}
             data={investmentByCategory}
             colors={["#f59e0b", "#38bdf8", "#fb7185", "#a3e635"]}
             centerLabel="Investimentos"
@@ -197,7 +227,9 @@ export function EntriesClient({
         <div className="mt-6 grid gap-4">
           <div>
             <div className="mb-2 flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Receitas</h3>
+              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                {incomeLabel}
+              </h3>
               <p className="text-xs text-zinc-500 dark:text-zinc-400">
                 {pluralRegistros(incomeEntries.length)}
               </p>
@@ -207,7 +239,9 @@ export function EntriesClient({
 
           <div>
             <div className="mb-2 flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Despesas</h3>
+              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                {expenseLabel}
+              </h3>
               <p className="text-xs text-zinc-500 dark:text-zinc-400">
                 {pluralRegistros(expenseEntries.length)}
               </p>

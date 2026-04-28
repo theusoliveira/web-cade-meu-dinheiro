@@ -26,11 +26,13 @@ Também é aceito o nome mais novo da chave pública do Supabase:
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=...
 ```
 
-## Otimização do saldo automático
+## Migrations do Supabase
 
-A aba **Lançamentos** carrega automaticamente o saldo acumulado dos meses anteriores.
+A pasta `supabase/migrations/` deve ficar versionada no GitHub. Ela documenta as mudanças necessárias no banco.
 
-Para o melhor desempenho, execute no Supabase o script:
+Execute os scripts pelo **SQL Editor** do Supabase, colando o conteúdo de cada arquivo, ou pela Supabase CLI se o projeto estiver configurado.
+
+### Saldo automático dos lançamentos pessoais
 
 ```txt
 supabase/migrations/202604280001_opening_balance.sql
@@ -38,7 +40,15 @@ supabase/migrations/202604280001_opening_balance.sql
 
 Esse script cria índices e a função RPC `get_opening_balance(month_start date)`.
 
-Se a função ainda não existir, o app continua funcionando com fallback no frontend, mas o cálculo pode ficar mais pesado com muitos lançamentos históricos.
+### Aba Lançamentos PJ
+
+```txt
+supabase/migrations/202604280002_pj_entries.sql
+```
+
+Esse script cria as tabelas independentes `pj_entries` e `pj_fixed_entries`, os índices e a função RPC `get_pj_opening_balance(month_start date)`.
+
+A aba **Lançamentos PJ** começa vazia e não replica os dados já cadastrados em **Lançamentos**.
 
 ## Scripts úteis
 
