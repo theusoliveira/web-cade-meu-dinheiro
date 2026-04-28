@@ -1,27 +1,35 @@
 "use client";
 
 import * as React from "react";
+import dynamic from "next/dynamic";
 import { Button } from "./Button";
 import { HistoryTable } from "./HistoryTable";
-import { DonutChartCard, type DonutSlice } from "./DonutChartCard";
+import type { DonutSlice } from "./DonutChartCard";
 import {
   formatCurrencyBRL,
+  monthLabel,
   type EntryKind,
   type FinanceEntry,
 } from "../lib/finance";
 
-function monthLabel(ym: string): string {
-  if (!ym) return "Todos os meses";
-  const [y, m] = ym.split("-").map((v) => Number(v));
-  const dt = new Date(y, (m ?? 1) - 1, 1);
-  return new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(dt);
+function ChartFallback() {
+  return (
+    <div className="rounded-2xl border border-zinc-200 bg-white p-6 text-center text-sm text-zinc-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400">
+      Carregando gráfico...
+    </div>
+  );
 }
+
+const DonutChartCard = dynamic(
+  () => import("./DonutChartCard").then((mod) => mod.DonutChartCard),
+  { loading: () => <ChartFallback /> },
+);
 
 function groupByCategory(entries: FinanceEntry[], kind: EntryKind): DonutSlice[] {
   const map = new Map<string, number>();
-  for (const e of entries) {
-    if (e.kind !== kind) continue;
-    map.set(e.category, (map.get(e.category) ?? 0) + e.value);
+  for (const entry of entries) {
+    if (entry.kind !== kind) continue;
+    map.set(entry.category, (map.get(entry.category) ?? 0) + entry.value);
   }
   return [...map.entries()].map(([name, value]) => ({ name, value }));
 }
@@ -33,9 +41,7 @@ function pluralRegistros(n: number) {
 type Props = {
   month: string;
   setMonth: (m: string) => void;
-
   entries: FinanceEntry[];
-
   openDialog: (kind: EntryKind) => void;
   onEdit: (entry: FinanceEntry) => void;
   onDelete: (entry: FinanceEntry) => void;
@@ -53,31 +59,33 @@ export function EntriesClient({
   const expenseByCategory = React.useMemo(() => groupByCategory(entries, "expense"), [entries]);
   const investmentByCategory = React.useMemo(
     () => groupByCategory(entries, "investment"),
-    [entries]
+    [entries],
   );
 
   const incomeEntries = React.useMemo(
-    () => entries.filter((e) => e.kind === "income"),
-    [entries]
+    () => entries.filter((entry) => entry.kind === "income"),
+    [entries],
   );
   const expenseEntries = React.useMemo(
-    () => entries.filter((e) => e.kind === "expense"),
-    [entries]
+    () => entries.filter((entry) => entry.kind === "expense"),
+    [entries],
   );
   const investmentEntries = React.useMemo(
-    () => entries.filter((e) => e.kind === "investment"),
-    [entries]
+    () => entries.filter((entry) => entry.kind === "investment"),
+    [entries],
   );
 
   const totals = React.useMemo(() => {
     let income = 0;
     let expense = 0;
     let investment = 0;
-    for (const e of entries) {
-      if (e.kind === "income") income += e.value;
-      else if (e.kind === "expense") expense += e.value;
-      else investment += e.value;
+
+    for (const entry of entries) {
+      if (entry.kind === "income") income += entry.value;
+      else if (entry.kind === "expense") expense += entry.value;
+      else investment += entry.value;
     }
+
     return { income, expense, investment, balance: income - expense - investment };
   }, [entries]);
 
@@ -88,30 +96,34 @@ export function EntriesClient({
           <div>
             <h1 className="text-xl font-semibold">Lançamentos</h1>
             <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-              Adicione uma receita, despesa ou investimento e acompanhe o histórico.
+              Registre receitas, despesas e investimentos do mês.
             </p>
           </div>
 
-          <div className="flex flex-col gap-2 sm:flex-row sm:flex-nowrap sm:items-center sm:justify-end">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
             <Button
+              type="button"
+              variant="secondary"
               onClick={() => openDialog("income")}
-              className="gap-2 w-full sm:w-auto bg-emerald-100 text-emerald-900 hover:bg-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-100 dark:hover:bg-emerald-900/45"
+              className="w-full gap-2 bg-emerald-100 text-emerald-800 hover:bg-emerald-200 sm:w-auto dark:bg-emerald-900/30 dark:text-emerald-100 dark:hover:bg-emerald-900/45"
             >
-              + Adicionar receita
+              + Receita
             </Button>
-
             <Button
+              type="button"
+              variant="secondary"
               onClick={() => openDialog("expense")}
-              className="gap-2 w-full sm:w-auto bg-rose-100 text-rose-900 hover:bg-rose-200 dark:bg-rose-900/30 dark:text-rose-100 dark:hover:bg-rose-900/45"
+              className="w-full gap-2 bg-rose-100 text-rose-800 hover:bg-rose-200 sm:w-auto dark:bg-rose-900/30 dark:text-rose-100 dark:hover:bg-rose-900/45"
             >
-              - Adicionar despesa
+              - Despesa
             </Button>
-
             <Button
+              type="button"
+              variant="secondary"
               onClick={() => openDialog("investment")}
-              className="gap-2 w-full sm:w-auto bg-amber-100 text-amber-900 hover:bg-amber-200 dark:bg-amber-900/30 dark:text-amber-100 dark:hover:bg-amber-900/45"
+              className="w-full gap-2 bg-sky-100 text-sky-800 hover:bg-sky-200 sm:w-auto dark:bg-sky-900/30 dark:text-sky-100 dark:hover:bg-sky-900/45"
             >
-              ▸ Adicionar investimento
+              + Investimento
             </Button>
           </div>
         </div>
@@ -127,9 +139,7 @@ export function EntriesClient({
           </div>
           <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900/40">
             <p className="text-xs text-zinc-500 dark:text-zinc-400">Investimentos</p>
-            <p className="mt-1 text-lg font-semibold">
-              {formatCurrencyBRL(totals.investment)}
-            </p>
+            <p className="mt-1 text-lg font-semibold">{formatCurrencyBRL(totals.investment)}</p>
           </div>
           <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900/40">
             <p className="text-xs text-zinc-500 dark:text-zinc-400">Saldo</p>
@@ -150,17 +160,14 @@ export function EntriesClient({
           </div>
 
           <div className="flex items-center gap-2">
-            <label
-              htmlFor="month"
-              className="text-xs font-medium text-zinc-700 dark:text-zinc-300"
-            >
+            <label htmlFor="month" className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
               Mês
             </label>
             <input
               id="month"
               type="month"
               value={month}
-              onChange={(e) => setMonth(e.target.value)}
+              onChange={(event) => setMonth(event.target.value)}
               className="h-9 rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 outline-none focus:ring-2 focus:ring-zinc-400/50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50"
             />
           </div>
@@ -187,43 +194,37 @@ export function EntriesClient({
           />
         </div>
 
-        <div className="mt-6">
-          <div className="grid gap-4">
-            <div>
-              <div className="mb-2 flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-                  Receitas
-                </h3>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                  {pluralRegistros(incomeEntries.length)}
-                </p>
-              </div>
-              <HistoryTable entries={incomeEntries} onEdit={onEdit} onDelete={onDelete} />
+        <div className="mt-6 grid gap-4">
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Receitas</h3>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                {pluralRegistros(incomeEntries.length)}
+              </p>
             </div>
+            <HistoryTable entries={incomeEntries} onEdit={onEdit} onDelete={onDelete} />
+          </div>
 
-            <div>
-              <div className="mb-2 flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-                  Despesas
-                </h3>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                  {pluralRegistros(expenseEntries.length)}
-                </p>
-              </div>
-              <HistoryTable entries={expenseEntries} onEdit={onEdit} onDelete={onDelete} />
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Despesas</h3>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                {pluralRegistros(expenseEntries.length)}
+              </p>
             </div>
+            <HistoryTable entries={expenseEntries} onEdit={onEdit} onDelete={onDelete} />
+          </div>
 
-            <div>
-              <div className="mb-2 flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-                  Investimentos
-                </h3>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                  {pluralRegistros(investmentEntries.length)}
-                </p>
-              </div>
-              <HistoryTable entries={investmentEntries} onEdit={onEdit} onDelete={onDelete} />
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                Investimentos
+              </h3>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                {pluralRegistros(investmentEntries.length)}
+              </p>
             </div>
+            <HistoryTable entries={investmentEntries} onEdit={onEdit} onDelete={onDelete} />
           </div>
         </div>
       </section>

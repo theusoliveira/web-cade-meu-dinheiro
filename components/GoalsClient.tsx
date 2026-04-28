@@ -5,56 +5,32 @@ import { Button } from "./Button";
 import { AddGoalDialog, type Goal } from "./AddGoalDialog";
 import { GoalsTable } from "./GoalsTable";
 import { formatCurrencyBRL } from "../lib/finance";
-import { supabase } from "../lib/supabaseClient";
 import { useBusy } from "./BusyProvider";
-
-function forecastToDate(ym: string): string {
-  // YYYY-MM -> YYYY-MM-01
-  return `${ym}-01`;
-}
-
-function dateToForecast(dateStr: string): string {
-  // YYYY-MM-DD -> YYYY-MM
-  return (dateStr ?? "").slice(0, 7);
-}
+import {
+  deleteGoal as deleteGoalQuery,
+  fetchGoals,
+  upsertGoal as upsertGoalQuery,
+} from "../lib/supabase/queries/goals";
 
 export function GoalsClient() {
   const [goals, setGoals] = React.useState<Goal[]>([]);
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [editing, setEditing] = React.useState<Goal | null>(null);
+  const { run } = useBusy();
 
-  const busy = useBusy();
-
-  async function fetchGoals() {
-    await busy.run(async () => {
-      const { data, error } = await supabase
-        .from("goals")
-        .select("id, description, current_value, target_value, forecast, created_at")
-        .order("forecast", { ascending: true })
-        .order("created_at", { ascending: false });
-
-      if (error) {
+  const reloadGoals = React.useCallback(async () => {
+    await run(async () => {
+      try {
+        setGoals(await fetchGoals());
+      } catch (error) {
         console.error(error);
-        return;
       }
-
-      const mapped: Goal[] = (data ?? []).map((r: any) => ({
-        id: r.id,
-        description: r.description ?? "",
-        currentValue: Number(r.current_value ?? 0),
-        targetValue: Number(r.target_value ?? 0),
-        forecast: dateToForecast(r.forecast as string),
-        createdAt: new Date(r.created_at as string).getTime(),
-      }));
-
-      setGoals(mapped);
     });
-  }
+  }, [run]);
 
   React.useEffect(() => {
-    fetchGoals();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    reloadGoals();
+  }, [reloadGoals]);
 
   function openNew() {
     setEditing(null);
@@ -67,50 +43,35 @@ export function GoalsClient() {
   }
 
   async function upsertGoal(goal: Goal) {
-    await busy.run(async () => {
-      const exists = goals.some((g) => g.id === goal.id);
-
-      const payload = {
-        id: goal.id,
-        description: goal.description,
-        current_value: goal.currentValue,
-        target_value: goal.targetValue,
-        forecast: forecastToDate(goal.forecast),
-      };
-
-      const q = exists
-        ? supabase.from("goals").update(payload).eq("id", goal.id)
-        : supabase.from("goals").insert(payload);
-
-      const { error } = await q;
-      if (error) {
+    await run(async () => {
+      try {
+        await upsertGoalQuery(goal);
+        setGoals(await fetchGoals());
+      } catch (error) {
         console.error(error);
         alert("Erro ao salvar meta. Veja o console.");
-        return;
       }
-
-      await fetchGoals();
     });
   }
 
   async function deleteGoal(id: string) {
-    await busy.run(async () => {
-      const { error } = await supabase.from("goals").delete().eq("id", id);
-      if (error) {
+    await run(async () => {
+      try {
+        await deleteGoalQuery(id);
+        setGoals(await fetchGoals());
+      } catch (error) {
         console.error(error);
         alert("Erro ao excluir meta. Veja o console.");
-        return;
       }
-      await fetchGoals();
     });
   }
 
   const totals = React.useMemo(() => {
     let current = 0;
     let target = 0;
-    for (const g of goals) {
-      current += g.currentValue;
-      target += g.targetValue;
+    for (const goal of goals) {
+      current += goal.currentValue;
+      target += goal.targetValue;
     }
     return { current, target };
   }, [goals]);
@@ -159,8 +120,8 @@ export function GoalsClient() {
           onDelete={(goal) => {
             const ok = window.confirm(
               `Excluir esta meta?\n\n${goal.description}\nAtual: ${formatCurrencyBRL(
-                goal.currentValue
-              )}\nObjetivo: ${formatCurrencyBRL(goal.targetValue)}`
+                goal.currentValue,
+              )}\nObjetivo: ${formatCurrencyBRL(goal.targetValue)}`,
             );
             if (ok) deleteGoal(goal.id);
           }}

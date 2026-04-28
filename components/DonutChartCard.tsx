@@ -9,7 +9,7 @@ export type DonutSlice = {
   value: number;
 };
 
-type Props = {
+export type DonutChartCardProps = {
   title: string;
   data: DonutSlice[]; // já agrupado por categoria
   colors: string[];
@@ -21,7 +21,7 @@ function percent(value: number, total: number): string {
   return `${Math.round((value / total) * 100)}%`;
 }
 
-export function DonutChartCard({ title, data, colors, centerLabel }: Props) {
+export function DonutChartCard({ title, data, colors, centerLabel }: DonutChartCardProps) {
   const total = React.useMemo(() => data.reduce((acc, d) => acc + d.value, 0), [data]);
   const hasData = total > 0;
 

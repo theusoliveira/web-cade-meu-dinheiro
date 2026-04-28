@@ -1,36 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Cadê meu dinheiro?
 
-## Getting Started
+App de controle financeiro pessoal em Next.js + Supabase.
 
-First, run the development server:
+## Rodando localmente
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abra `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Variáveis de ambiente
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Crie `.env.local` com:
 
-## Learn More
+```env
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+```
 
-To learn more about Next.js, take a look at the following resources:
+Também é aceito o nome mais novo da chave pública do Supabase:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```env
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=...
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Otimização do saldo automático
 
-## Deploy on Vercel
+A aba **Lançamentos** carrega automaticamente o saldo acumulado dos meses anteriores.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Para o melhor desempenho, execute no Supabase o script:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```txt
+supabase/migrations/202604280001_opening_balance.sql
+```
+
+Esse script cria índices e a função RPC `get_opening_balance(month_start date)`.
+
+Se a função ainda não existir, o app continua funcionando com fallback no frontend, mas o cálculo pode ficar mais pesado com muitos lançamentos históricos.
+
+## Scripts úteis
+
+```bash
+npm run lint
+npm run build
+```
+
+## Organização do código
+
+- `components/` - UI e telas.
+- `hooks/` - estado e carregamento de dados por contexto.
+- `lib/finance/` - regras financeiras, datas, formatação e saldo.
+- `lib/supabase/queries/` - acesso ao Supabase centralizado.
+- `supabase/migrations/` - scripts SQL para aplicar no projeto Supabase.
