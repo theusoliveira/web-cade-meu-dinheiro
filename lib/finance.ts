@@ -34,6 +34,12 @@ export type FinanceEntry = {
    * (Não é um lançamento real do mês.)
    */
   isFixedTemplate?: boolean;
+
+  /**
+   * Linha virtual gerada automaticamente para carregar o saldo acumulado
+   * dos meses anteriores para o mês selecionado. Não existe na tabela `entries`.
+   */
+  isAutoCarryover?: boolean;
 };
 
 export const INCOME_CATEGORIES: IncomeCategory[] = [

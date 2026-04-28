@@ -71,9 +71,74 @@ function lastDayOfMonthFromYM(ym: string): number {
   return new Date(y, m, 0).getDate();
 }
 
+function signedEntryValue(entry: FinanceEntry): number {
+  return entry.kind === "income" ? entry.value : -entry.value;
+}
+
+function isSaldoEntry(entry: FinanceEntry): boolean {
+  return entry.category.trim().toLocaleLowerCase("pt-BR") === "saldo";
+}
+
+function calculateOpeningBalance(entriesBeforeMonth: FinanceEntry[]): number {
+  const byMonth = new Map<string, FinanceEntry[]>();
+
+  for (const entry of entriesBeforeMonth) {
+    const ym = entry.date.slice(0, 7);
+    const monthEntries = byMonth.get(ym) ?? [];
+    monthEntries.push(entry);
+    byMonth.set(ym, monthEntries);
+  }
+
+  let balance = 0;
+
+  for (const ym of [...byMonth.keys()].sort()) {
+    const monthEntries = byMonth.get(ym) ?? [];
+    const manualSaldoEntries = monthEntries.filter(isSaldoEntry);
+
+    // Compatibilidade com o fluxo antigo: se o usuário já tinha informado
+    // uma linha "Saldo" manualmente em algum mês, tratamos essa linha como
+    // saldo inicial daquele mês, e não como uma receita extra acumulativa.
+    if (manualSaldoEntries.length > 0) {
+      balance = manualSaldoEntries.reduce(
+        (sum, entry) => sum + signedEntryValue(entry),
+        0,
+      );
+    }
+
+    for (const entry of monthEntries) {
+      if (isSaldoEntry(entry)) continue;
+      balance += signedEntryValue(entry);
+    }
+  }
+
+  return balance;
+}
+
+function createAutoCarryoverEntry(
+  ym: string,
+  openingBalance: number,
+): FinanceEntry | null {
+  if (Math.abs(openingBalance) < 0.005) return null;
+
+  const isPositive = openingBalance >= 0;
+
+  return {
+    id: `auto-carryover-${ym}`,
+    kind: isPositive ? "income" : "expense",
+    date: `${ym}-01`,
+    category: "Saldo",
+    description: isPositive
+      ? "Saldo do mês anterior"
+      : "Saldo negativo do mês anterior",
+    value: Math.abs(openingBalance),
+    createdAt: -1,
+    isAutoCarryover: true,
+  };
+}
+
 export function HomeClient() {
   const [month, setMonth] = React.useState(() =>
-    todayAsDateInputValue().slice(0, 7)
+    todayAsDateInputValue().slice(0, 7),
   );
 
   const [activeTab, setActiveTab] = React.useState<
@@ -84,6 +149,9 @@ export function HomeClient() {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   const [entries, setEntries] = React.useState<FinanceEntry[]>([]);
+  const [entriesBeforeMonth, setEntriesBeforeMonth] = React.useState<
+    FinanceEntry[]
+  >([]);
   const [cardEntries, setCardEntries] = React.useState<FinanceEntry[]>([]);
   const [fixedEntries, setFixedEntries] = React.useState<FixedEntry[]>([]);
 
@@ -136,7 +204,9 @@ export function HomeClient() {
         }
 
         if (!alive) return;
-        setDisplayName((data?.display_name ?? data?.full_name ?? "").toString());
+        setDisplayName(
+          (data?.display_name ?? data?.full_name ?? "").toString(),
+        );
       });
     }
 
@@ -160,7 +230,9 @@ export function HomeClient() {
     await busy.run(async () => {
       const { data, error } = await supabase
         .from("entries")
-        .select("id, kind, date, category, description, value, created_at, fixed_entry_id")
+        .select(
+          "id, kind, date, category, description, value, created_at, fixed_entry_id",
+        )
         .gte("date", start)
         .lt("date", next)
         .order("date", { ascending: false })
@@ -171,6 +243,27 @@ export function HomeClient() {
         return;
       }
       setEntries(mapDbRows(data));
+    });
+  }
+
+  async function fetchEntriesBeforeMonth(ym: string) {
+    const start = `${ym}-01`;
+
+    await busy.run(async () => {
+      const { data, error } = await supabase
+        .from("entries")
+        .select(
+          "id, kind, date, category, description, value, created_at, fixed_entry_id",
+        )
+        .lt("date", start)
+        .order("date", { ascending: true })
+        .order("created_at", { ascending: true });
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+      setEntriesBeforeMonth(mapDbRows(data));
     });
   }
 
@@ -208,6 +301,7 @@ export function HomeClient() {
   React.useEffect(() => {
     if (activeTab !== "lancamentos") return;
     fetchEntriesMonth(month);
+    fetchEntriesBeforeMonth(month);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [month, activeTab]);
 
@@ -341,7 +435,10 @@ export function HomeClient() {
       }
 
       // Caso contrário, é um lançamento normal (ocorrência do mês)
-      const { error } = await supabase.from("entries").delete().eq("id", entry.id);
+      const { error } = await supabase
+        .from("entries")
+        .delete()
+        .eq("id", entry.id);
       if (error) {
         console.error(error);
         alert("Erro ao excluir. Veja o console.");
@@ -389,6 +486,11 @@ export function HomeClient() {
 
     const ym = month;
     const lastDay = lastDayOfMonthFromYM(ym);
+    const openingBalance = calculateOpeningBalance(entriesBeforeMonth);
+    const hasManualSaldoInCurrentMonth = entries.some(isSaldoEntry);
+    const autoCarryover = hasManualSaldoInCurrentMonth
+      ? null
+      : createAutoCarryoverEntry(ym, openingBalance);
 
     const byFixedId = new Map<string, FinanceEntry>();
     for (const e of entries) {
@@ -396,7 +498,7 @@ export function HomeClient() {
       if (fid) byFixedId.set(fid, e);
     }
 
-    const virtuals: FinanceEntry[] = [];
+    const virtuals: FinanceEntry[] = autoCarryover ? [autoCarryover] : [];
     for (const f of fixedEntries) {
       if (byFixedId.has(f.id)) continue;
 
@@ -417,17 +519,18 @@ export function HomeClient() {
     }
 
     return [...entries, ...virtuals].sort(sortEntriesAsc);
-  }, [activeTab, entries, fixedEntries, month]);
+  }, [activeTab, entries, entriesBeforeMonth, fixedEntries, month]);
 
-  const visibleEntries = activeTab === "controle" ? cardEntries : entriesWithFixed;
+  const visibleEntries =
+    activeTab === "controle" ? cardEntries : entriesWithFixed;
   const onSubmit = activeTab === "controle" ? upsertCardEntry : upsertEntry;
 
   const tabTitle =
     activeTab === "lancamentos"
       ? "Lançamentos"
       : activeTab === "metas"
-      ? "Metas"
-      : "Controle de gastos";
+        ? "Metas"
+        : "Controle de gastos";
 
   return (
     <div className="min-h-[100dvh] bg-zinc-50 text-zinc-900 dark:bg-black dark:text-zinc-50">
@@ -451,7 +554,13 @@ export function HomeClient() {
                   aria-label="Abrir menu"
                   onClick={() => setMobileMenuOpen(true)}
                 >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    aria-hidden="true"
+                  >
                     <path
                       d="M4 6h16M4 12h16M4 18h16"
                       stroke="currentColor"
@@ -462,7 +571,9 @@ export function HomeClient() {
                 </button>
 
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold leading-tight">{tabTitle}</p>
+                  <p className="truncate text-sm font-semibold leading-tight">
+                    {tabTitle}
+                  </p>
                   <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
                     Bem-vindo(a), {displayName}
                   </p>
@@ -486,11 +597,13 @@ export function HomeClient() {
                   openDialog={openDialog}
                   onEdit={openEdit}
                   onDelete={(entry) => {
-                    const isFixedVirtual = Boolean(entry.isVirtualFixed && entry.fixedEntryId);
+                    const isFixedVirtual = Boolean(
+                      entry.isVirtualFixed && entry.fixedEntryId,
+                    );
                     const ok = window.confirm(
                       isFixedVirtual
                         ? `Excluir este lançamento fixo?\n\n${entry.description}`
-                        : `Excluir este lançamento?\n\n${entry.description} — ${entry.value}`
+                        : `Excluir este lançamento?\n\n${entry.description} — ${entry.value}`,
                     );
                     if (ok) deleteEntry(entry);
                   }}
@@ -504,7 +617,7 @@ export function HomeClient() {
                   onEdit={openEdit}
                   onDelete={(entry) => {
                     const ok = window.confirm(
-                      `Excluir este lançamento do cartão?\n\n${entry.description} — ${entry.value}`
+                      `Excluir este lançamento do cartão?\n\n${entry.description} — ${entry.value}`,
                     );
                     if (ok) deleteCardEntry(entry);
                   }}
