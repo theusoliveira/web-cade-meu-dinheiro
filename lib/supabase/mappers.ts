@@ -7,6 +7,9 @@ type CardEntryRow = Database["public"]["Tables"]["card_entries"]["Row"];
 type FixedEntryRow = Database["public"]["Tables"]["fixed_entries"]["Row"];
 type PjFixedEntryRow = Database["public"]["Tables"]["pj_fixed_entries"]["Row"];
 
+/** Linhas que possuem fixed_entry_id (entries e pj_entries, mas não card_entries). */
+type RowWithFixedId = EntryRow | PjEntryRow;
+
 export function mapEntryRows(
   data: EntryRow[] | PjEntryRow[] | CardEntryRow[] | null | undefined,
 ): FinanceEntry[] {
@@ -18,7 +21,10 @@ export function mapEntryRows(
     description: row.description ?? "",
     value: Number(row.value ?? 0),
     createdAt: new Date(row.created_at).getTime(),
-    fixedEntryId: "fixed_entry_id" in row ? row.fixed_entry_id ?? null : null,
+    // O operador `in` não estreita o tipo em unions complexas; o cast resolve isso.
+    fixedEntryId: "fixed_entry_id" in row
+      ? (row as RowWithFixedId).fixed_entry_id ?? null
+      : null,
   }));
 }
 
