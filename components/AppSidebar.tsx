@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import type { NavKey } from "./SiteNav";
+
+export type NavKey = "lancamentos" | "lancamentos_pj" | "metas" | "controle";
 
 type Props = {
   active: NavKey;

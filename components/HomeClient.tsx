@@ -9,6 +9,7 @@ import { todayAsDateInputValue, type EntryKind, type FinanceEntry } from "../lib
 import { useCardEntries } from "../hooks/useCardEntries";
 import { useMonthlyEntries } from "../hooks/useMonthlyEntries";
 import { useProfile } from "../hooks/useProfile";
+import type { NavKey } from "./AppSidebar";
 
 const EntriesClient = dynamic(
   () => import("./EntriesClient").then((mod) => mod.EntriesClient),
@@ -29,7 +30,12 @@ const AddEntryDialog = dynamic(
   () => import("./AddEntryDialog").then((mod) => mod.AddEntryDialog),
 );
 
-type ActiveTab = "lancamentos" | "lancamentos_pj" | "controle" | "metas";
+const TAB_TITLES: Record<NavKey, string> = {
+  lancamentos: "Lançamentos",
+  lancamentos_pj: "Lançamentos PJ",
+  metas: "Metas",
+  controle: "Controle de gastos",
+};
 
 function SectionFallback({ label }: { label: string }) {
   return (
@@ -41,41 +47,44 @@ function SectionFallback({ label }: { label: string }) {
 
 export function HomeClient() {
   const [month, setMonth] = React.useState(() => todayAsDateInputValue().slice(0, 7));
-  const [activeTab, setActiveTab] = React.useState<ActiveTab>("lancamentos");
-
+  const [activeTab, setActiveTab] = React.useState<NavKey>("lancamentos");
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
-
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [kind, setKind] = React.useState<EntryKind>("income");
   const [editing, setEditing] = React.useState<FinanceEntry | null>(null);
 
   const { displayName } = useProfile();
+
+  const isBusinessTab = activeTab === "lancamentos_pj";
+  const isMonthlyTab = activeTab === "lancamentos" || isBusinessTab;
+
   const personalMonthlyEntries = useMonthlyEntries(month, activeTab === "lancamentos", "personal");
-  const businessMonthlyEntries = useMonthlyEntries(
-    month,
-    activeTab === "lancamentos_pj",
-    "business",
-  );
+  const businessMonthlyEntries = useMonthlyEntries(month, isBusinessTab, "business");
   const cardEntries = useCardEntries(activeTab === "controle");
 
+  const activeMonthlyEntries = isBusinessTab ? businessMonthlyEntries : personalMonthlyEntries;
+  const visibleEntries =
+    activeTab === "controle" ? cardEntries.entries : activeMonthlyEntries.visibleEntries;
+  const onSubmit =
+    activeTab === "controle" ? cardEntries.upsertEntry : activeMonthlyEntries.upsertEntry;
+
+  // Restaura o estado de colapso da sidebar do localStorage
   React.useEffect(() => {
     try {
-      const value = window.localStorage.getItem("sidebar_collapsed");
-      if (value === "1") setSidebarCollapsed(true);
+      if (window.localStorage.getItem("sidebar_collapsed") === "1") setSidebarCollapsed(true);
     } catch {}
   }, []);
 
   const toggleSidebarCollapsed = React.useCallback(() => {
     setSidebarCollapsed((prev) => {
       const next = !prev;
-      try {
-        window.localStorage.setItem("sidebar_collapsed", next ? "1" : "0");
-      } catch {}
+      try { window.localStorage.setItem("sidebar_collapsed", next ? "1" : "0"); } catch {}
       return next;
     });
   }, []);
 
+  // Fecha dialog e menu mobile ao trocar de aba
   React.useEffect(() => {
     setDialogOpen(false);
     setEditing(null);
@@ -94,27 +103,6 @@ export function HomeClient() {
     setEditing(entry);
     setDialogOpen(true);
   }
-
-  const isBusinessEntriesTab = activeTab === "lancamentos_pj";
-  const isMonthlyEntriesTab = activeTab === "lancamentos" || isBusinessEntriesTab;
-  const activeMonthlyEntries = isBusinessEntriesTab
-    ? businessMonthlyEntries
-    : personalMonthlyEntries;
-
-  const visibleEntries =
-    activeTab === "controle" ? cardEntries.entries : activeMonthlyEntries.visibleEntries;
-
-  const onSubmit =
-    activeTab === "controle" ? cardEntries.upsertEntry : activeMonthlyEntries.upsertEntry;
-
-  const tabTitle =
-    activeTab === "lancamentos"
-      ? "Lançamentos"
-      : activeTab === "lancamentos_pj"
-        ? "Lançamentos PJ"
-        : activeTab === "metas"
-          ? "Metas"
-          : "Controle de gastos";
 
   return (
     <div className="min-h-[100dvh] bg-zinc-50 text-zinc-900 dark:bg-black dark:text-zinc-50">
@@ -149,7 +137,9 @@ export function HomeClient() {
                 </button>
 
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold leading-tight">{tabTitle}</p>
+                  <p className="truncate text-sm font-semibold leading-tight">
+                    {TAB_TITLES[activeTab]}
+                  </p>
                   <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
                     Bem-vindo(a), {displayName}
                   </p>
@@ -165,13 +155,14 @@ export function HomeClient() {
 
           <main className="w-full flex-1 px-4 py-6 pb-[calc(env(safe-area-inset-bottom)+24px)] sm:px-6 lg:px-8">
             <div className="mx-auto w-full max-w-7xl">
-              {isMonthlyEntriesTab ? (
+              {isMonthlyTab ? (
                 <EntriesClient
                   month={month}
                   setMonth={setMonth}
                   entries={visibleEntries}
                   openDialog={openDialog}
                   onEdit={openEdit}
+                  isPJ={isBusinessTab}
                   onDelete={(entry) => {
                     const isFixedVirtual = Boolean(entry.isVirtualFixed && entry.fixedEntryId);
                     const ok = window.confirm(
@@ -181,20 +172,11 @@ export function HomeClient() {
                     );
                     if (ok) activeMonthlyEntries.deleteEntry(entry);
                   }}
-                  title={isBusinessEntriesTab ? "Lançamentos PJ" : "Lançamentos"}
+                  title={isBusinessTab ? "Lançamentos PJ" : "Lançamentos"}
                   description={
-                    isBusinessEntriesTab
+                    isBusinessTab
                       ? "Registre receitas, despesas e investimentos da conta PJ."
                       : "Registre receitas, despesas e investimentos do mês."
-                  }
-                  incomeChartTitle={
-                    isBusinessEntriesTab ? "Receitas da conta PJ" : "De onde vem meu dinheiro"
-                  }
-                  expenseChartTitle={
-                    isBusinessEntriesTab ? "Despesas da conta PJ" : "Onde estou gastando mais"
-                  }
-                  investmentChartTitle={
-                    isBusinessEntriesTab ? "Investimentos da conta PJ" : "Onde estou investindo"
                   }
                 />
               ) : null}
@@ -220,7 +202,7 @@ export function HomeClient() {
                 <AddEntryDialog
                   open={dialogOpen}
                   kind={kind}
-                  allowFixed={isMonthlyEntriesTab}
+                  allowFixed={isMonthlyTab}
                   onClose={() => {
                     setDialogOpen(false);
                     setEditing(null);

@@ -11,7 +11,7 @@ export type DonutSlice = {
 
 export type DonutChartCardProps = {
   title: string;
-  data: DonutSlice[]; // já agrupado por categoria
+  data: DonutSlice[];
   colors: string[];
   centerLabel?: string;
 };
@@ -23,6 +23,13 @@ function percent(value: number, total: number): string {
 
 export function DonutChartCard({ title, data, colors, centerLabel }: DonutChartCardProps) {
   const total = React.useMemo(() => data.reduce((acc, d) => acc + d.value, 0), [data]);
+
+  // Ordena uma cópia para não alterar o array original em cada render
+  const sortedData = React.useMemo(
+    () => [...data].sort((a, b) => b.value - a.value),
+    [data],
+  );
+
   const hasData = total > 0;
 
   return (
@@ -69,29 +76,26 @@ export function DonutChartCard({ title, data, colors, centerLabel }: DonutChartC
             </div>
 
             <div className="grid gap-2">
-              {data
-                .slice()
-                .sort((a, b) => b.value - a.value)
-                .map((d, idx) => (
-                  <div key={d.name} className="flex items-center justify-between gap-3 text-sm">
-                    <div className="flex min-w-0 items-center gap-2">
-                      <span
-                        className="h-2.5 w-2.5 shrink-0 rounded-full"
-                        style={{ background: colors[idx % colors.length] }}
-                        aria-hidden="true"
-                      />
-                      <span className="truncate text-zinc-700 dark:text-zinc-200">{d.name}</span>
-                    </div>
-                    <div className="flex shrink-0 items-center gap-2">
-                      <span className="text-xs text-zinc-500 dark:text-zinc-400">
-                        {percent(d.value, total)}
-                      </span>
-                      <span className="font-medium text-zinc-900 dark:text-zinc-50">
-                        {formatCurrencyBRL(d.value)}
-                      </span>
-                    </div>
+              {sortedData.map((d, idx) => (
+                <div key={d.name} className="flex items-center justify-between gap-3 text-sm">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <span
+                      className="h-2.5 w-2.5 shrink-0 rounded-full"
+                      style={{ background: colors[idx % colors.length] }}
+                      aria-hidden="true"
+                    />
+                    <span className="truncate text-zinc-700 dark:text-zinc-200">{d.name}</span>
                   </div>
-                ))}
+                  <div className="flex shrink-0 items-center gap-2">
+                    <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                      {percent(d.value, total)}
+                    </span>
+                    <span className="font-medium text-zinc-900 dark:text-zinc-50">
+                      {formatCurrencyBRL(d.value)}
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         ) : (
