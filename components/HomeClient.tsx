@@ -4,6 +4,8 @@ import * as React from "react";
 import dynamic from "next/dynamic";
 import { ThemeToggle } from "./ThemeToggle";
 import { AppSidebar } from "./AppSidebar";
+import { BottomNav } from "./BottomNav";
+import { MobileActionSheet } from "./MobileActionSheet";
 import { UserMenu } from "./UserMenu";
 import { todayAsDateInputValue, type EntryKind, type FinanceEntry } from "../lib/finance";
 import { useCardEntries } from "../hooks/useCardEntries";
@@ -49,15 +51,18 @@ export function HomeClient() {
   const [month, setMonth] = React.useState(() => todayAsDateInputValue().slice(0, 7));
   const [activeTab, setActiveTab] = React.useState<NavKey>("lancamentos");
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [kind, setKind] = React.useState<EntryKind>("income");
   const [editing, setEditing] = React.useState<FinanceEntry | null>(null);
+
+  // Contador que aciona o dialog de metas dentro de GoalsClient
+  const [goalAddTrigger, setGoalAddTrigger] = React.useState(0);
 
   const { displayName } = useProfile();
 
   const isBusinessTab = activeTab === "lancamentos_pj";
   const isMonthlyTab = activeTab === "lancamentos" || isBusinessTab;
+  const showFAB = activeTab !== "metas" ? isMonthlyTab || activeTab === "controle" : true;
 
   const personalMonthlyEntries = useMonthlyEntries(month, activeTab === "lancamentos", "personal");
   const businessMonthlyEntries = useMonthlyEntries(month, isBusinessTab, "business");
@@ -69,7 +74,6 @@ export function HomeClient() {
   const onSubmit =
     activeTab === "controle" ? cardEntries.upsertEntry : activeMonthlyEntries.upsertEntry;
 
-  // Restaura o estado de colapso da sidebar do localStorage
   React.useEffect(() => {
     try {
       if (window.localStorage.getItem("sidebar_collapsed") === "1") setSidebarCollapsed(true);
@@ -84,11 +88,10 @@ export function HomeClient() {
     });
   }, []);
 
-  // Fecha dialog e menu mobile ao trocar de aba
+  // Fecha o dialog ao trocar de aba
   React.useEffect(() => {
     setDialogOpen(false);
     setEditing(null);
-    setMobileMenuOpen(false);
   }, [activeTab]);
 
   function openDialog(nextKind: EntryKind) {
@@ -107,43 +110,27 @@ export function HomeClient() {
   return (
     <div className="min-h-[100dvh] bg-zinc-50 text-zinc-900 dark:bg-black dark:text-zinc-50">
       <div className="flex min-h-[100dvh]">
+        {/* Sidebar — visível apenas no desktop */}
         <AppSidebar
           active={activeTab}
           onChange={setActiveTab}
           collapsed={sidebarCollapsed}
           onToggleCollapse={toggleSidebarCollapsed}
-          mobileOpen={mobileMenuOpen}
-          onMobileClose={() => setMobileMenuOpen(false)}
+          // Props de mobile drawer não são mais necessárias mas mantemos a API
+          mobileOpen={false}
+          onMobileClose={() => {}}
         />
 
         <div className="flex min-w-0 flex-1 flex-col">
           <header className="sticky top-0 z-40 border-b border-zinc-200/60 bg-white/75 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:border-zinc-800/60 dark:bg-zinc-950/75 dark:supports-[backdrop-filter]:bg-zinc-950/60">
             <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 pb-4 pt-[calc(env(safe-area-inset-top)+16px)] sm:px-6 lg:px-8">
-              <div className="flex min-w-0 items-center gap-3">
-                <button
-                  type="button"
-                  className="grid h-10 w-10 place-items-center rounded-xl border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 md:hidden dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-900/40"
-                  aria-label="Abrir menu"
-                  onClick={() => setMobileMenuOpen(true)}
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path
-                      d="M4 6h16M4 12h16M4 18h16"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                </button>
-
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold leading-tight">
-                    {TAB_TITLES[activeTab]}
-                  </p>
-                  <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
-                    Bem-vindo(a), {displayName}
-                  </p>
-                </div>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold leading-tight">
+                  {TAB_TITLES[activeTab]}
+                </p>
+                <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
+                  Bem-vindo(a), {displayName}
+                </p>
               </div>
 
               <div className="flex items-center gap-2">
@@ -153,7 +140,15 @@ export function HomeClient() {
             </div>
           </header>
 
-          <main className="w-full flex-1 px-4 py-6 pb-[calc(env(safe-area-inset-bottom)+24px)] sm:px-6 lg:px-8">
+          {/*
+            Padding bottom no mobile:
+            - h-16 (64px) da BottomNav
+            + safe-area-inset-bottom
+            + espaço extra para o FAB não cobrir conteúdo
+          */}
+          <main className="w-full flex-1 px-4 py-6 sm:px-6 lg:px-8
+            pb-[calc(env(safe-area-inset-bottom)+160px)]
+            md:pb-[calc(env(safe-area-inset-bottom)+24px)]">
             <div className="mx-auto w-full max-w-7xl">
               {isMonthlyTab ? (
                 <EntriesClient
@@ -196,7 +191,9 @@ export function HomeClient() {
                 />
               ) : null}
 
-              {activeTab === "metas" ? <GoalsClient /> : null}
+              {activeTab === "metas" ? (
+                <GoalsClient addTrigger={goalAddTrigger} />
+              ) : null}
 
               {dialogOpen ? (
                 <AddEntryDialog
@@ -215,6 +212,18 @@ export function HomeClient() {
           </main>
         </div>
       </div>
+
+      {/* Navegação inferior — mobile only */}
+      <BottomNav active={activeTab} onChange={setActiveTab} />
+
+      {/* FAB + Action Sheet — mobile only */}
+      {showFAB ? (
+        <MobileActionSheet
+          activeTab={activeTab}
+          onSelectEntry={openDialog}
+          onAddGoal={() => setGoalAddTrigger((v) => v + 1)}
+        />
+      ) : null}
     </div>
   );
 }

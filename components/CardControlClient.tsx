@@ -59,7 +59,7 @@ export function CardControlClient({
           </p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="hidden gap-2 sm:flex">
           <Button
             type="button"
             variant="secondary"
