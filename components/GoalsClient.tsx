@@ -12,11 +12,17 @@ import {
   upsertGoal as upsertGoalQuery,
 } from "../lib/supabase/queries/goals";
 
-export function GoalsClient() {
+export function GoalsClient({ addTrigger }: { addTrigger?: number }) {
   const [goals, setGoals] = React.useState<Goal[]>([]);
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [editing, setEditing] = React.useState<Goal | null>(null);
   const { run } = useBusy();
+
+  // Quando o HomeClient (via FAB mobile) pede para abrir o dialog
+  React.useEffect(() => {
+    if (!addTrigger) return;
+    openNew();
+  }, [addTrigger]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const reloadGoals = React.useCallback(async () => {
     await run(async () => {
@@ -87,7 +93,7 @@ export function GoalsClient() {
             </p>
           </div>
 
-          <Button onClick={openNew} className="w-full sm:w-auto">
+          <Button onClick={openNew} className="hidden w-full sm:block sm:w-auto">
             + Adicionar meta
           </Button>
         </div>

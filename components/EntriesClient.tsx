@@ -111,7 +111,7 @@ export function EntriesClient({
             </p>
           </div>
 
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
+          <div className="hidden flex-col gap-2 sm:flex sm:flex-row sm:items-center sm:justify-end">
             <Button
               type="button"
               variant="secondary"
