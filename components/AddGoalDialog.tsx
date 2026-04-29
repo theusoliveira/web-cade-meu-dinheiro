@@ -115,7 +115,7 @@ export function AddGoalDialog({ open, onClose, initial, onSubmit }: Props) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center p-4" role="dialog" aria-modal="true">
+    <div className="fixed inset-0 z-[60] grid place-items-center p-4" role="dialog" aria-modal="true">
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
         onClick={() => { if (!submitting) onClose(); }}
