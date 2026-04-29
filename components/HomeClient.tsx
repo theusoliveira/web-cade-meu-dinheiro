@@ -92,6 +92,7 @@ export function HomeClient() {
   React.useEffect(() => {
     setDialogOpen(false);
     setEditing(null);
+    setGoalAddTrigger(0);
   }, [activeTab]);
 
   function openDialog(nextKind: EntryKind) {

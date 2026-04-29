@@ -18,11 +18,13 @@ export function GoalsClient({ addTrigger }: { addTrigger?: number }) {
   const [editing, setEditing] = React.useState<Goal | null>(null);
   const { run } = useBusy();
 
-  // Quando o HomeClient (via FAB mobile) pede para abrir o dialog
+  const handledTriggerRef = React.useRef(0);
+
   React.useEffect(() => {
-    if (!addTrigger) return;
+    if (!addTrigger || addTrigger === handledTriggerRef.current) return;
+    handledTriggerRef.current = addTrigger;
     openNew();
-  }, [addTrigger]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [addTrigger]);
 
   const reloadGoals = React.useCallback(async () => {
     await run(async () => {
