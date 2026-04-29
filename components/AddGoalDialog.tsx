@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Button } from "./Button";
-import { formatCurrencyBRL } from "../lib/finance";
+import { formatCurrencyBRL, newId } from "../lib/finance";
 
 export type Goal = {
   id: string;
@@ -20,15 +20,6 @@ type Props = {
   onSubmit: (goal: Goal) => void | Promise<void>;
 };
 
-function newId(): string {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
-  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0;
-    const v = c === "x" ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
-}
-
 function formatFromCents(cents: number): string {
   return formatCurrencyBRL(cents / 100);
 }
@@ -40,7 +31,7 @@ function parseDigitsToCents(raw: string): number {
 
 export function AddGoalDialog({ open, onClose, initial, onSubmit }: Props) {
   const [description, setDescription] = React.useState("");
-  const [forecast, setForecast] = React.useState(""); // YYYY-MM
+  const [forecast, setForecast] = React.useState("");
 
   const [currentCents, setCurrentCents] = React.useState(0);
   const [currentText, setCurrentText] = React.useState("");
@@ -80,7 +71,6 @@ export function AddGoalDialog({ open, onClose, initial, onSubmit }: Props) {
     }
   }, [open, initial]);
 
-  // ESC fecha, mas não durante submit
   React.useEffect(() => {
     if (!open) return;
     const onKeyDown = (e: KeyboardEvent) => {
@@ -128,9 +118,7 @@ export function AddGoalDialog({ open, onClose, initial, onSubmit }: Props) {
     <div className="fixed inset-0 z-50 grid place-items-center p-4" role="dialog" aria-modal="true">
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-        onClick={() => {
-          if (!submitting) onClose();
-        }}
+        onClick={() => { if (!submitting) onClose(); }}
       />
       <div className="relative w-full max-w-lg rounded-2xl border border-zinc-200 bg-white p-5 shadow-xl dark:border-zinc-800 dark:bg-zinc-950">
         <div className="flex items-start justify-between gap-3">
@@ -140,7 +128,6 @@ export function AddGoalDialog({ open, onClose, initial, onSubmit }: Props) {
               Defina descrição, valores e a previsão.
             </p>
           </div>
-
           <Button variant="ghost" onClick={onClose} className="h-9 px-3" disabled={submitting}>
             Fechar
           </Button>
@@ -148,65 +135,73 @@ export function AddGoalDialog({ open, onClose, initial, onSubmit }: Props) {
 
         <form onSubmit={handleSubmit} className="mt-4 grid gap-3">
           <fieldset disabled={submitting} className="grid gap-3">
-            <div className="grid gap-1">
-              <label className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
-                Descrição
-              </label>
-              <input
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Ex.: Reserva de emergência"
-                className="h-10 rounded-lg border border-zinc-200 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-zinc-400/50 dark:border-zinc-800 dark:bg-zinc-950"
-              />
-            </div>
-
-            <div className="grid gap-1">
-              <label className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
-                Valor atual
-              </label>
-              <input
-                type="text"
-                inputMode="numeric"
-                value={currentText}
-                onChange={(e) => {
-                  const cents = parseDigitsToCents(e.target.value);
-                  setCurrentCents(cents);
-                  setCurrentText(cents === 0 ? "" : formatFromCents(cents));
-                }}
-                placeholder="R$ 0,00"
-                className="h-10 rounded-lg border border-zinc-200 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-zinc-400/50 dark:border-zinc-800 dark:bg-zinc-950"
-              />
-            </div>
-
-            <div className="grid gap-1">
-              <label className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
-                Objetivo
-              </label>
-              <input
-                type="text"
-                inputMode="numeric"
-                value={targetText}
-                onChange={(e) => {
-                  const cents = parseDigitsToCents(e.target.value);
-                  setTargetCents(cents);
-                  setTargetText(cents === 0 ? "" : formatFromCents(cents));
-                }}
-                placeholder="R$ 0,00"
-                className="h-10 rounded-lg border border-zinc-200 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-zinc-400/50 dark:border-zinc-800 dark:bg-zinc-950"
-              />
-            </div>
-
-            <div className="grid gap-1">
-              <label className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
-                Previsão (mês/ano)
-              </label>
-              <input
-                type="month"
-                value={forecast}
-                onChange={(e) => setForecast(e.target.value)}
-                className="h-10 rounded-lg border border-zinc-200 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-zinc-400/50 dark:border-zinc-800 dark:bg-zinc-950"
-              />
-            </div>
+            {(
+              [
+                {
+                  label: "Descrição",
+                  input: (
+                    <input
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      placeholder="Ex.: Reserva de emergência"
+                      className="h-10 rounded-lg border border-zinc-200 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-zinc-400/50 dark:border-zinc-800 dark:bg-zinc-950"
+                    />
+                  ),
+                },
+                {
+                  label: "Valor atual",
+                  input: (
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={currentText}
+                      onChange={(e) => {
+                        const cents = parseDigitsToCents(e.target.value);
+                        setCurrentCents(cents);
+                        setCurrentText(cents === 0 ? "" : formatFromCents(cents));
+                      }}
+                      placeholder="R$ 0,00"
+                      className="h-10 rounded-lg border border-zinc-200 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-zinc-400/50 dark:border-zinc-800 dark:bg-zinc-950"
+                    />
+                  ),
+                },
+                {
+                  label: "Objetivo",
+                  input: (
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={targetText}
+                      onChange={(e) => {
+                        const cents = parseDigitsToCents(e.target.value);
+                        setTargetCents(cents);
+                        setTargetText(cents === 0 ? "" : formatFromCents(cents));
+                      }}
+                      placeholder="R$ 0,00"
+                      className="h-10 rounded-lg border border-zinc-200 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-zinc-400/50 dark:border-zinc-800 dark:bg-zinc-950"
+                    />
+                  ),
+                },
+                {
+                  label: "Previsão (mês/ano)",
+                  input: (
+                    <input
+                      type="month"
+                      value={forecast}
+                      onChange={(e) => setForecast(e.target.value)}
+                      className="h-10 rounded-lg border border-zinc-200 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-zinc-400/50 dark:border-zinc-800 dark:bg-zinc-950"
+                    />
+                  ),
+                },
+              ] as const
+            ).map(({ label, input }) => (
+              <div key={label} className="grid gap-1">
+                <label className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
+                  {label}
+                </label>
+                {input}
+              </div>
+            ))}
           </fieldset>
 
           {error ? <p className="text-sm text-rose-600">{error}</p> : null}

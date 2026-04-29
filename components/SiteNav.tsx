@@ -3,12 +3,19 @@
 import * as React from "react";
 import { Button } from "./Button";
 
-export type NavKey = "lancamentos" | "metas" | "controle";
+export type NavKey = "lancamentos" | "lancamentos_pj" | "metas" | "controle";
 
 type Props = {
   active: NavKey;
   onChange: (next: NavKey) => void;
 };
+
+const NAV_ITEMS: Array<{ key: NavKey; label: string }> = [
+  { key: "lancamentos", label: "Lançamentos" },
+  { key: "lancamentos_pj", label: "Lançamentos PJ" },
+  { key: "metas", label: "Metas" },
+  { key: "controle", label: "Controle de gastos" },
+];
 
 export function SiteNav({ active, onChange }: Props) {
   const [open, setOpen] = React.useState(false);
@@ -29,15 +36,11 @@ export function SiteNav({ active, onChange }: Props) {
     <div className="relative">
       {/* Desktop */}
       <nav className="hidden items-center gap-2 sm:flex">
-        <button className={itemClass("lancamentos")} onClick={() => go("lancamentos")}>
-          Lançamentos
-        </button>
-        <button className={itemClass("metas")} onClick={() => go("metas")}>
-          Metas
-        </button>
-        <button className={itemClass("controle")} onClick={() => go("controle")}>
-          Controle de gastos
-        </button>
+        {NAV_ITEMS.map((item) => (
+          <button key={item.key} className={itemClass(item.key)} onClick={() => go(item.key)}>
+            {item.label}
+          </button>
+        ))}
       </nav>
 
       {/* Mobile hamburger */}
@@ -59,25 +62,16 @@ export function SiteNav({ active, onChange }: Props) {
         </Button>
 
         {open ? (
-          <div className="absolute right-0 mt-2 w-48 rounded-2xl border border-zinc-200 bg-white p-2 shadow-lg dark:border-zinc-800 dark:bg-zinc-950">
-            <button
-              className={`w-full text-left ${itemClass("lancamentos")}`}
-              onClick={() => go("lancamentos")}
-            >
-              Lançamentos
-            </button>
-            <button
-              className={`mt-1 w-full text-left ${itemClass("metas")}`}
-              onClick={() => go("metas")}
-            >
-              Metas
-            </button>
-            <button
-              className={`mt-1 w-full text-left ${itemClass("controle")}`}
-              onClick={() => go("controle")}
-            >
-              Controle de gastos
-            </button>
+          <div className="absolute right-0 mt-2 w-56 rounded-2xl border border-zinc-200 bg-white p-2 shadow-lg dark:border-zinc-800 dark:bg-zinc-950">
+            {NAV_ITEMS.map((item, index) => (
+              <button
+                key={item.key}
+                className={`w-full text-left ${index > 0 ? "mt-1 " : ""}${itemClass(item.key)}`}
+                onClick={() => go(item.key)}
+              >
+                {item.label}
+              </button>
+            ))}
           </div>
         ) : null}
       </div>

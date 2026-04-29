@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import type { NavKey } from "./SiteNav";
+
+export type NavKey = "lancamentos" | "lancamentos_pj" | "metas" | "controle";
 
 type Props = {
   active: NavKey;
@@ -11,9 +12,9 @@ type Props = {
   collapsed: boolean;
   onToggleCollapse: () => void;
 
-  /** Controla o drawer no mobile */
-  mobileOpen: boolean;
-  onMobileClose: () => void;
+  /** @deprecated Mobile agora usa BottomNav. Mantido apenas para compatibilidade. */
+  mobileOpen?: boolean;
+  onMobileClose?: () => void;
 };
 
 function Icon({
@@ -113,6 +114,7 @@ function SidebarBody({
     icon: "list" | "target" | "card";
   }> = [
     { key: "lancamentos", label: "Lançamentos", icon: "list" },
+    { key: "lancamentos_pj", label: "Lançamentos PJ", icon: "list" },
     { key: "metas", label: "Metas", icon: "target" },
     { key: "controle", label: "Controle de gastos", icon: "card" },
   ];
@@ -181,65 +183,12 @@ function SidebarBody({
 export function AppSidebar({
   active,
   onChange,
-  mobileOpen,
-  onMobileClose,
   collapsed,
   onToggleCollapse,
 }: Props) {
-  React.useEffect(() => {
-    if (!mobileOpen) return;
-    function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") onMobileClose();
-    }
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [mobileOpen, onMobileClose]);
-
   const desktopWidth = collapsed ? "md:w-20" : "md:w-64";
 
-  // Botão flutuante no viewport (não é cortado por overflow de nenhum container)
-  const desktopToggle = (
-    <button
-      type="button"
-      onClick={onToggleCollapse}
-      className={
-        "hidden md:grid fixed z-[60] -translate-x-1/2 " +
-        (collapsed ? "left-20 " : "left-64 ") +
-        "top-[calc(env(safe-area-inset-top)+24px)] " +
-        "h-9 w-9 place-items-center rounded-full " +
-        "border border-[#93c5fd] bg-[#dbeafe] text-[#0b2a5b] shadow-md " +
-        "hover:bg-[#bfdbfe] focus:outline-none focus:ring-2 focus:ring-[#93c5fd]/60 " +
-        "dark:border-[#60a5fa]/60 dark:bg-[#0b2a5b] dark:text-white dark:hover:bg-[#0a2550]"
-      }
-      aria-label={collapsed ? "Expandir menu" : "Minimizar menu"}
-      title={collapsed ? "Expandir" : "Minimizar"}
-    >
-      {collapsed ? (
-        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
-          <path
-            d="M10 6l6 6-6 6"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      ) : (
-        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
-          <path
-            d="M14 6l-6 6 6 6"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      )}
-    </button>
-  );
-
-  // Desktop sidebar (fixa)
-  const desktop = (
+  return (
     <>
       {/* Espaçador para o conteúdo não ficar embaixo da sidebar fixa */}
       <div className={`hidden md:block ${desktopWidth}`} aria-hidden="true" />
@@ -256,54 +205,33 @@ export function AppSidebar({
         </div>
       </aside>
 
-      {desktopToggle}
-    </>
-  );
-
-  // Mobile drawer
-  const mobile = mobileOpen ? (
-    <div className="fixed inset-0 z-50 md:hidden">
+      {/* Botão de colapso flutuante — só desktop */}
       <button
         type="button"
-        aria-label="Fechar menu"
-        className="absolute inset-0 bg-black/40"
-        onClick={onMobileClose}
-      />
-
-      <div className="absolute left-0 top-0 h-full w-[18rem] max-w-[80vw] bg-[#0b2a5b] text-white shadow-2xl dark:bg-[#071b3b]">
-        <div className="h-full overflow-y-auto pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)]">
-          <SidebarBody
-            active={active}
-            onChange={onChange}
-            onAfterNavigate={onMobileClose}
-            collapsed={false}
-            topRight={
-              <button
-                type="button"
-                onClick={onMobileClose}
-                className="grid h-10 w-10 place-items-center rounded-xl text-white/80 hover:bg-white/10 hover:text-white"
-                aria-label="Fechar"
-              >
-                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
-                  <path
-                    d="M6 6l12 12M18 6L6 18"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </button>
-            }
-          />
-        </div>
-      </div>
-    </div>
-  ) : null;
-
-  return (
-    <>
-      {desktop}
-      {mobile}
+        onClick={onToggleCollapse}
+        className={
+          "hidden md:grid fixed z-[60] -translate-x-1/2 " +
+          (collapsed ? "left-20 " : "left-64 ") +
+          "top-[calc(env(safe-area-inset-top)+24px)] " +
+          "h-9 w-9 place-items-center rounded-full " +
+          "border border-[#93c5fd] bg-[#dbeafe] text-[#0b2a5b] shadow-md " +
+          "hover:bg-[#bfdbfe] focus:outline-none focus:ring-2 focus:ring-[#93c5fd]/60 " +
+          "dark:border-[#60a5fa]/60 dark:bg-[#0b2a5b] dark:text-white dark:hover:bg-[#0a2550]"
+        }
+        aria-label={collapsed ? "Expandir menu" : "Minimizar menu"}
+        title={collapsed ? "Expandir" : "Minimizar"}
+      >
+        {collapsed ? (
+          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
+            <path d="M10 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        ) : (
+          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
+            <path d="M14 6l-6 6 6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        )}
+      </button>
     </>
   );
 }
+

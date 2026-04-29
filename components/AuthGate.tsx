@@ -37,21 +37,18 @@ export function AuthGate() {
   const [error, setError] = React.useState<string | null>(null);
   const [message, setMessage] = React.useState<string | null>(null);
 
-  const busy = useBusy();
+  const { run } = useBusy();
 
   React.useEffect(() => {
     let alive = true;
 
-    // Mostra loading global enquanto checa sessão inicial
-    busy
-      .run(async () => {
+    run(async () => {
         const { data } = await supabase.auth.getSession();
         if (!alive) return;
         setSignedIn(!!data.session);
         setChecking(false);
       })
       .catch(() => {
-        // se der erro, a gente só libera a tela
         if (!alive) return;
         setChecking(false);
       });
@@ -86,7 +83,7 @@ export function AuthGate() {
     if (!email.trim()) return setError("Informe seu e-mail.");
     if (!password) return setError("Informe sua senha.");
 
-    await busy.run(async () => {
+    await run(async () => {
       const { error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
@@ -111,7 +108,7 @@ export function AuthGate() {
       return setError("A senha precisa ter pelo menos 6 caracteres.");
     if (password !== confirmPassword) return setError("As senhas não conferem.");
 
-    await busy.run(async () => {
+    await run(async () => {
       // 1) Checar se CPF já existe
       const { data: cpfUsed, error: cpfErr } = await supabase.rpc("cpf_exists", {
         cpf_in: cpfDigits,
