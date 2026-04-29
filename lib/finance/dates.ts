@@ -20,6 +20,14 @@ export function lastDayOfMonthFromYM(ym: string): number {
   return new Date(y, m, 0).getDate();
 }
 
+/** Formato abreviado (ex.: "abr. de 2026") — usado em tabelas compactas. */
+export function monthShortLabel(ym: string): string {
+  if (!ym) return "-";
+  const [y, m] = ym.split("-").map((v) => Number(v));
+  const dt = new Date(y, (m ?? 1) - 1, 1);
+  return new Intl.DateTimeFormat("pt-BR", { month: "short", year: "numeric" }).format(dt);
+}
+
 export function monthLabel(ym: string): string {
   if (!ym) return "Todos os meses";
   const [y, m] = ym.split("-").map((v) => Number(v));

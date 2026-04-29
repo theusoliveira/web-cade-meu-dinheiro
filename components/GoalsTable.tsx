@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Button } from "./Button";
-import { formatCurrencyBRL } from "../lib/finance";
+import { formatCurrencyBRL, monthShortLabel } from "../lib/finance";
 import type { Goal } from "./AddGoalDialog";
 
 function percent(current: number, target: number): number {
@@ -10,11 +10,12 @@ function percent(current: number, target: number): number {
   return Math.max(0, Math.min(100, (current / target) * 100));
 }
 
-function monthLabel(ym: string): string {
-  if (!ym) return "-";
-  const [y, m] = ym.split("-").map((v) => Number(v));
-  const dt = new Date(y, (m ?? 1) - 1, 1);
-  return new Intl.DateTimeFormat("pt-BR", { month: "short", year: "numeric" }).format(dt);
+function ProgressBar({ value }: { value: number }) {
+  return (
+    <div className="h-2 w-full rounded-full bg-zinc-200 dark:bg-zinc-800">
+      <div className="h-2 rounded-full bg-emerald-500" style={{ width: `${value}%` }} />
+    </div>
+  );
 }
 
 export function GoalsTable({
@@ -37,13 +38,13 @@ export function GoalsTable({
   return (
     <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
       {/* Mobile: cards */}
-      <div className="sm:hidden divide-y divide-zinc-100 dark:divide-zinc-900">
+      <div className="divide-y divide-zinc-100 sm:hidden dark:divide-zinc-900">
         {goals.map((g) => {
           const p = percent(g.currentValue, g.targetValue);
           return (
             <div key={g.id} className="p-4">
               <div className="flex items-start justify-between gap-3">
-                <p className="min-w-0 text-sm font-semibold text-zinc-900 dark:text-zinc-50 break-words">
+                <p className="min-w-0 break-words text-sm font-semibold text-zinc-900 dark:text-zinc-50">
                   {g.description}
                 </p>
                 <p className="shrink-0 text-xs font-medium text-zinc-700 dark:text-zinc-200">
@@ -51,22 +52,25 @@ export function GoalsTable({
                 </p>
               </div>
 
-              <div className="mt-2 h-2 w-full rounded-full bg-zinc-200 dark:bg-zinc-800">
-                <div className="h-2 rounded-full bg-emerald-500" style={{ width: `${p}%` }} />
+              <div className="mt-2">
+                <ProgressBar value={p} />
               </div>
 
               <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
-                <div>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400">Valor atual</p>
-                  <p className="text-zinc-800 dark:text-zinc-200">{formatCurrencyBRL(g.currentValue)}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400">Objetivo</p>
-                  <p className="text-zinc-800 dark:text-zinc-200">{formatCurrencyBRL(g.targetValue)}</p>
-                </div>
+                {(
+                  [
+                    { label: "Valor atual", display: formatCurrencyBRL(g.currentValue) },
+                    { label: "Objetivo", display: formatCurrencyBRL(g.targetValue) },
+                  ] as const
+                ).map(({ label, display }) => (
+                  <div key={label}>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400">{label}</p>
+                    <p className="text-zinc-800 dark:text-zinc-200">{display}</p>
+                  </div>
+                ))}
                 <div className="col-span-2">
                   <p className="text-xs text-zinc-500 dark:text-zinc-400">Previsão</p>
-                  <p className="text-zinc-800 dark:text-zinc-200">{monthLabel(g.forecast)}</p>
+                  <p className="text-zinc-800 dark:text-zinc-200">{monthShortLabel(g.forecast)}</p>
                 </div>
               </div>
 
@@ -90,16 +94,17 @@ export function GoalsTable({
       </div>
 
       {/* Desktop: table */}
-      <div className="hidden sm:block overflow-x-auto">
-        <table className="min-w-[820px] w-full text-sm">
+      <div className="hidden overflow-x-auto sm:block">
+        <table className="w-full min-w-[820px] text-sm">
           <thead className="border-b border-zinc-200/60 dark:border-zinc-800/60">
             <tr className="text-left text-xs text-zinc-500 dark:text-zinc-400">
-              <th className="px-4 py-3 font-medium">Descrição</th>
-              <th className="px-4 py-3 font-medium">Valor atual</th>
-              <th className="px-4 py-3 font-medium">Objetivo</th>
-              <th className="px-4 py-3 font-medium">Previsão</th>
-              <th className="px-4 py-3 font-medium">Progresso</th>
-              <th className="px-4 py-3 font-medium text-right">Ações</th>
+              {["Descrição", "Valor atual", "Objetivo", "Previsão", "Progresso", ""].map(
+                (col) => (
+                  <th key={col} className={`px-4 py-3 font-medium${col === "" ? " text-right" : ""}`}>
+                    {col}
+                  </th>
+                ),
+              )}
             </tr>
           </thead>
 
@@ -120,14 +125,16 @@ export function GoalsTable({
                   <td className="px-4 py-3 text-zinc-700 dark:text-zinc-200">
                     {formatCurrencyBRL(g.targetValue)}
                   </td>
-                  <td className="px-4 py-3 text-zinc-700 dark:text-zinc-200">{monthLabel(g.forecast)}</td>
+                  <td className="px-4 py-3 text-zinc-700 dark:text-zinc-200">
+                    {monthShortLabel(g.forecast)}
+                  </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <span className="w-12 text-xs font-medium text-zinc-700 dark:text-zinc-200">
                         {Math.round(p)}%
                       </span>
-                      <div className="h-2 w-40 rounded-full bg-zinc-200 dark:bg-zinc-800">
-                        <div className="h-2 rounded-full bg-emerald-500" style={{ width: `${p}%` }} />
+                      <div className="w-40">
+                        <ProgressBar value={p} />
                       </div>
                     </div>
                   </td>

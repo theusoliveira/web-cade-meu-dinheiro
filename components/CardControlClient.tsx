@@ -4,30 +4,13 @@ import * as React from "react";
 import dynamic from "next/dynamic";
 import { Button } from "./Button";
 import { HistoryTable } from "./HistoryTable";
-import type { DonutSlice } from "./DonutChartCard";
-import { formatCurrencyBRL, type EntryKind, type FinanceEntry } from "../lib/finance";
-
-function ChartFallback() {
-  return (
-    <div className="rounded-2xl border border-zinc-200 bg-white p-6 text-center text-sm text-zinc-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400">
-      Carregando gráfico...
-    </div>
-  );
-}
+import { ChartFallback } from "./ChartFallback";
+import { formatCurrencyBRL, groupByCategory, type EntryKind, type FinanceEntry } from "../lib/finance";
 
 const DonutChartCard = dynamic(
   () => import("./DonutChartCard").then((mod) => mod.DonutChartCard),
   { loading: () => <ChartFallback /> },
 );
-
-function groupByCategory(entries: FinanceEntry[], kind: EntryKind): DonutSlice[] {
-  const map = new Map<string, number>();
-  for (const entry of entries) {
-    if (entry.kind !== kind) continue;
-    map.set(entry.category, (map.get(entry.category) ?? 0) + entry.value);
-  }
-  return [...map.entries()].map(([name, value]) => ({ name, value }));
-}
 
 type Props = {
   entries: FinanceEntry[];
@@ -76,41 +59,42 @@ export function CardControlClient({
           </p>
         </div>
 
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => openDialog("income")}
-              className="w-full gap-2 bg-emerald-100 text-emerald-800 hover:bg-emerald-200 sm:w-auto dark:bg-emerald-900/30 dark:text-emerald-100 dark:hover:bg-emerald-900/45"
-            >
-              + Adicionar receita
-            </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => openDialog("expense")}
-              className="w-full gap-2 bg-rose-100 text-rose-800 hover:bg-rose-200 sm:w-auto dark:bg-rose-900/30 dark:text-rose-100 dark:hover:bg-rose-900/45"
-            >
-              - Adicionar despesa
-            </Button>
-          </div>
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => openDialog("income")}
+            className="w-full gap-2 bg-emerald-100 text-emerald-800 hover:bg-emerald-200 sm:w-auto dark:bg-emerald-900/30 dark:text-emerald-100 dark:hover:bg-emerald-900/45"
+          >
+            + Adicionar receita
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => openDialog("expense")}
+            className="w-full gap-2 bg-rose-100 text-rose-800 hover:bg-rose-200 sm:w-auto dark:bg-rose-900/30 dark:text-rose-100 dark:hover:bg-rose-900/45"
+          >
+            - Adicionar despesa
+          </Button>
         </div>
       </div>
 
       <div className="mt-5 grid gap-3 sm:grid-cols-3">
-        <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900/40">
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">Receitas</p>
-          <p className="mt-1 text-lg font-semibold">{formatCurrencyBRL(totals.income)}</p>
-        </div>
-        <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900/40">
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">Despesas</p>
-          <p className="mt-1 text-lg font-semibold">{formatCurrencyBRL(totals.expense)}</p>
-        </div>
-        <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900/40">
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">Saldo</p>
-          <p className="mt-1 text-lg font-semibold">{formatCurrencyBRL(totals.balance)}</p>
-        </div>
+        {(
+          [
+            { label: "Receitas", value: totals.income },
+            { label: "Despesas", value: totals.expense },
+            { label: "Saldo", value: totals.balance },
+          ] as const
+        ).map(({ label, value }) => (
+          <div
+            key={label}
+            className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900/40"
+          >
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">{label}</p>
+            <p className="mt-1 text-lg font-semibold">{formatCurrencyBRL(value)}</p>
+          </div>
+        ))}
       </div>
 
       <div className="mt-6 grid gap-3 md:grid-cols-2">
