@@ -28,26 +28,28 @@ export function useSalaryDistribution() {
   const [loading, setLoading] = React.useState(false);
 
   const reload = React.useCallback(async () => {
-    setLoading(true);
-    try {
-      let [bData, cats] = await Promise.all([
-        fetchDistributionMonth(FIXED_MONTH),
-        fetchDistributionCategories(FIXED_MONTH),
-      ]);
+    await run(async () => {           // ← adicionar run aqui
+      setLoading(true);
+      try {
+        let [bData, cats] = await Promise.all([
+          fetchDistributionMonth(FIXED_MONTH),
+          fetchDistributionCategories(FIXED_MONTH),
+        ]);
 
-      if (cats.length === 0 || !cats.some((c) => c.isFixed)) {
-        const fixedCat = await initFixedCategory(FIXED_MONTH);
-        cats = [fixedCat, ...cats.filter((c) => !c.isFixed)];
+        if (cats.length === 0 || !cats.some((c) => c.isFixed)) {
+          const fixedCat = await initFixedCategory(FIXED_MONTH);
+          cats = [fixedCat, ...cats.filter((c) => !c.isFixed)];
+        }
+
+        setBilling(bData);
+        setCategories(cats);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
       }
-
-      setBilling(bData);
-      setCategories(cats);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    });
+  }, [run]);                          // ← run na dependência
 
   React.useEffect(() => {
     reload();

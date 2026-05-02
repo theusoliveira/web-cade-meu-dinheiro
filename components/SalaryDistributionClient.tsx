@@ -689,11 +689,11 @@ export function SalaryDistributionClient() {
             </div>
 
             {/* Subtotal + percentual */}
-            <div className="flex items-center justify-between border-t border-zinc-100 px-5 py-2 dark:border-zinc-800">
-              <span className="text-xs text-zinc-400">Subtotal</span>
+            <div className="flex items-center justify-between border-t border-zinc-100 px-5 py-2.5 dark:border-zinc-800">
+              <span className="text-sm text-zinc-400">Subtotal</span>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-zinc-400">{pct(catTotal)}</span>
-                <span className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
+                <span className="text-sm text-zinc-400">{pct(catTotal)}</span>
+                <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
                   {formatCurrencyBRL(catTotal)}
                 </span>
               </div>
