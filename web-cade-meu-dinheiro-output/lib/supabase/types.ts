@@ -98,6 +98,75 @@ export type Database = {
         Update: Partial<CardEntriesInsert>;
         Relationships: [];
       };
+      pj_salary_settings: {
+        Row: {
+          id: string;
+          month_year: string;
+          hours: number | string;
+          hourly_rate: number | string;
+          commission: number | string;
+          accounting: number | string;
+          inss: number | string;
+          simples_override: number | string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          month_year: string;
+          hours?: number;
+          hourly_rate?: number;
+          commission?: number;
+          accounting?: number;
+          inss?: number;
+          simples_override?: number | null;
+          updated_at?: string;
+        };
+        Update: Partial<{
+          hours: number;
+          hourly_rate: number;
+          commission: number;
+          accounting: number;
+          inss: number;
+          simples_override: number | null;
+          updated_at: string;
+        }>;
+        Relationships: [];
+      };
+      pj_salary_categories: {
+        Row: {
+          id: string;
+          month_year: string;
+          name: string;
+          sort_order: number | string;
+          created_at: string;
+        };
+        Insert: {
+          id: string;
+          month_year: string;
+          name: string;
+          sort_order?: number;
+        };
+        Update: Partial<{ name: string; sort_order: number }>;
+        Relationships: [];
+      };
+      pj_salary_items: {
+        Row: {
+          id: string;
+          category_id: string;
+          description: string;
+          value: number | string;
+          created_at: string;
+        };
+        Insert: {
+          id: string;
+          category_id: string;
+          description: string;
+          value: number;
+        };
+        Update: Partial<{ description: string; value: number }>;
+        Relationships: [];
+      };
       goals: {
         Row: {
           id: string;
@@ -109,72 +178,6 @@ export type Database = {
         };
         Insert: GoalsInsert;
         Update: Partial<GoalsInsert>;
-        Relationships: [];
-      };
-      pj_distribution_months: {
-        Row: {
-          id: string;
-          month: string;
-          hours: number | string;
-          hourly_rate: number | string;
-          commission: number | string;
-          simples_auto: boolean;
-          created_at: string;
-        };
-        Insert: {
-          id: string;
-          month: string;
-          hours: number;
-          hourly_rate: number;
-          commission: number;
-          simples_auto: boolean;
-        };
-        Update: {
-          hours?: number;
-          hourly_rate?: number;
-          commission?: number;
-          simples_auto?: boolean;
-        };
-        Relationships: [];
-      };
-      pj_distribution_categories: {
-        Row: {
-          id: string;
-          month: string;
-          name: string;
-          is_fixed: boolean;
-          sort_order: number;
-          created_at: string;
-        };
-        Insert: {
-          id: string;
-          month: string;
-          name: string;
-          is_fixed: boolean;
-          sort_order: number;
-        };
-        Update: { name?: string; sort_order?: number };
-        Relationships: [];
-      };
-      pj_distribution_items: {
-        Row: {
-          id: string;
-          category_id: string;
-          description: string;
-          value: number | string;
-          item_key: string | null;
-          sort_order: number;
-          created_at: string;
-        };
-        Insert: {
-          id: string;
-          category_id: string;
-          description: string;
-          value: number;
-          item_key?: string | null;
-          sort_order: number;
-        };
-        Update: { description?: string; value?: number; sort_order?: number };
         Relationships: [];
       };
       profiles: {
