@@ -28,19 +28,19 @@ const GoalsClient = dynamic(
   { loading: () => <SectionFallback label="Carregando metas..." /> },
 );
 
-const AddEntryDialog = dynamic(
-  () => import("./AddEntryDialog").then((mod) => mod.AddEntryDialog),
-);
-
 const SalaryDistributionClient = dynamic(
   () => import("./SalaryDistributionClient").then((mod) => mod.SalaryDistributionClient),
   { loading: () => <SectionFallback label="Carregando distribuição de salário..." /> },
 );
 
+const AddEntryDialog = dynamic(
+  () => import("./AddEntryDialog").then((mod) => mod.AddEntryDialog),
+);
+
 const TAB_TITLES: Record<NavKey, string> = {
   lancamentos: "Lançamentos",
   lancamentos_pj: "Lançamentos PJ",
-  distribuicao_pj: "Distribuição de Salário PJ",
+  distribuicao_pj: "Distribuição de salário PJ",
   metas: "Metas",
   controle: "Controle de gastos",
 };
@@ -68,9 +68,7 @@ export function HomeClient() {
 
   const isBusinessTab = activeTab === "lancamentos_pj";
   const isMonthlyTab = activeTab === "lancamentos" || isBusinessTab;
-  const showFAB = activeTab !== "metas" && activeTab !== "distribuicao_pj"
-    ? isMonthlyTab || activeTab === "controle"
-    : activeTab === "metas";
+  const showFAB = activeTab !== "metas" && activeTab !== "distribuicao_pj" ? isMonthlyTab || activeTab === "controle" : activeTab === "metas";
 
   const personalMonthlyEntries = useMonthlyEntries(month, activeTab === "lancamentos", "personal");
   const businessMonthlyEntries = useMonthlyEntries(month, isBusinessTab, "business");
