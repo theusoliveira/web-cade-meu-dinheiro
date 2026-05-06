@@ -22,6 +22,9 @@ type Props = {
   onSubmit: (entry: FinanceEntry) => void | Promise<void>;
 };
 
+const inputBase =
+  "h-10 w-full rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-900 outline-none transition focus:border-green-400 focus:ring-2 focus:ring-green-400/30 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50 dark:focus:border-green-500";
+
 export function AddEntryDialog({
   open,
   kind,
@@ -41,13 +44,10 @@ export function AddEntryDialog({
   const [error, setError] = React.useState<string | null>(null);
   const [submitting, setSubmitting] = React.useState(false);
 
-  // Popula o formulário quando o dialog abre ou quando o lançamento editado muda
   React.useEffect(() => {
     if (!open) return;
-
     setError(null);
     setSubmitting(false);
-
     if (initial) {
       setDate(initial.date);
       setCategory(initial.category);
@@ -66,14 +66,12 @@ export function AddEntryDialog({
     }
   }, [open, kind, initial]);
 
-  // Lançamentos fixos não têm valor — zera o campo quando a opção é marcada
   React.useEffect(() => {
     if (!open || !isFixedTemplate) return;
     setValueCents(0);
     setValueText(formatCurrencyBRL(0));
   }, [open, isFixedTemplate]);
 
-  // Fecha com ESC (exceto durante submit)
   React.useEffect(() => {
     if (!open) return;
     const onKeyDown = (e: KeyboardEvent) => {
@@ -83,7 +81,6 @@ export function AddEntryDialog({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [open, onClose, submitting]);
 
-  // Categorias disponíveis: inclui a categoria atual se ela não estiver na lista padrão (edição)
   const categoryOptions = React.useMemo<Category[]>(() => {
     const base = [...categoriesFor(kind)] as Category[];
     return category && !base.includes(category) ? [category, ...base] : base;
@@ -94,7 +91,6 @@ export function AddEntryDialog({
     if (submitting) return;
 
     setError(null);
-
     const desc = description.trim();
     const num = valueCents / 100;
 
@@ -143,6 +139,12 @@ export function AddEntryDialog({
 
   if (!open) return null;
 
+  const kindColors: Record<EntryKind, string> = {
+    income: "text-emerald-600",
+    expense: "text-rose-600",
+    investment: "text-green-600",
+  };
+
   return (
     <div
       className="fixed inset-0 z-[60] flex items-center justify-center p-4"
@@ -153,88 +155,84 @@ export function AddEntryDialog({
       <button
         type="button"
         aria-label="Fechar"
-        className="absolute inset-0 bg-black/40"
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm cursor-pointer"
         onClick={() => { if (!submitting) onClose(); }}
       />
 
-      <div className="relative w-full max-w-lg rounded-2xl border border-zinc-200 bg-white shadow-xl dark:border-zinc-800 dark:bg-zinc-950">
-        <div className="flex items-start justify-between gap-4 border-b border-zinc-200 p-5 dark:border-zinc-800">
+      <div className="relative w-full max-w-lg rounded-2xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-zinc-950">
+        <div className="flex items-start justify-between gap-4 border-b border-zinc-100 p-5 dark:border-zinc-800">
           <div>
-            <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+            <h2 className={`text-lg font-bold ${kindColors[kind]}`}>
               {initial ? "Editar" : "Adicionar"} {kindLabel(kind).toLowerCase()}
             </h2>
-            <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+            <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
               {initial ? "Atualize os dados do lançamento." : "Informe os dados do lançamento."}
             </p>
           </div>
-          <Button type="button" variant="ghost" size="sm" onClick={onClose} disabled={submitting}>
-            Fechar
-          </Button>
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={submitting}
+            className="grid h-8 w-8 shrink-0 cursor-pointer place-items-center rounded-lg text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 transition dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+            aria-label="Fechar"
+          >
+            <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden="true">
+              <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+          </button>
         </div>
 
         <form onSubmit={submit} className="p-5">
           <fieldset disabled={submitting} className="grid gap-4">
             {allowFixed && !initial ? (
-              <label className="flex items-start gap-3 rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-sm dark:border-zinc-800 dark:bg-zinc-900/40">
+              <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-sm hover:bg-zinc-100 transition dark:border-zinc-800 dark:bg-zinc-900/40 dark:hover:bg-zinc-900/60">
                 <input
                   type="checkbox"
                   checked={isFixedTemplate}
                   onChange={(e) => setIsFixedTemplate(e.target.checked)}
-                  className="mt-1 h-4 w-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-400/50 dark:border-zinc-700 dark:bg-zinc-950"
+                  className="mt-1 h-4 w-4 cursor-pointer rounded border-zinc-300 accent-green-600 dark:border-zinc-700"
                 />
                 <span className="grid gap-0.5">
-                  <span className="font-medium text-zinc-900 dark:text-zinc-100">
+                  <span className="font-semibold text-zinc-900 dark:text-zinc-100">
                     Lançamento fixo
                   </span>
-                  <span className="text-xs text-zinc-600 dark:text-zinc-300">
-                    Ele vai aparecer automaticamente em todos os meses com valor R$ 0,00 (no dia
-                    escolhido).
+                  <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                    Aparece automaticamente em todos os meses com valor R$ 0,00.
                   </span>
                 </span>
               </label>
             ) : null}
 
-            <label className="grid gap-2">
-              <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200">Data</span>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="h-10 rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 outline-none focus:ring-2 focus:ring-zinc-400/50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50"
-              />
+            <label className="grid gap-1.5">
+              <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Data</span>
+              <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className={inputBase} />
             </label>
 
-            <label className="grid gap-2">
-              <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
-                Categoria
-              </span>
+            <label className="grid gap-1.5">
+              <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Categoria</span>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as Category)}
-                className="h-10 rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 outline-none focus:ring-2 focus:ring-zinc-400/50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50"
+                className={inputBase + " cursor-pointer"}
               >
                 {categoryOptions.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
+                  <option key={c} value={c}>{c}</option>
                 ))}
               </select>
             </label>
 
-            <label className="grid gap-2">
-              <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
-                Descrição
-              </span>
+            <label className="grid gap-1.5">
+              <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Descrição</span>
               <input
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Ex.: almoço, gasolina, aporte..."
-                className="h-10 rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:ring-2 focus:ring-zinc-400/50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50"
+                className={inputBase}
               />
             </label>
 
-            <label className="grid gap-2">
-              <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200">Valor</span>
+            <label className="grid gap-1.5">
+              <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Valor</span>
               <input
                 type="text"
                 inputMode="numeric"
@@ -247,19 +245,19 @@ export function AddEntryDialog({
                 }}
                 disabled={isFixedTemplate}
                 placeholder="R$ 0,00"
-                className="h-10 rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:ring-2 focus:ring-zinc-400/50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50"
+                className={inputBase}
               />
             </label>
           </fieldset>
 
           {error ? (
-            <p className="mt-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-200">
+            <p className="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2.5 text-sm text-rose-700 dark:border-rose-900/50 dark:bg-rose-950/30 dark:text-rose-300">
               {error}
             </p>
           ) : null}
 
           <div className="mt-5 flex items-center justify-end gap-2">
-            <Button type="button" variant="secondary" onClick={onClose} disabled={submitting}>
+            <Button type="button" variant="ghost" onClick={onClose} disabled={submitting}>
               Cancelar
             </Button>
             <Button type="submit" disabled={submitting}>

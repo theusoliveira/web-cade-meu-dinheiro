@@ -14,8 +14,6 @@ const BusyContext = React.createContext<BusyContextValue | null>(null);
 export function BusyProvider({ children }: { children: React.ReactNode }) {
   const [count, setCount] = React.useState(0);
   const isBusy = count > 0;
-
-  // Evita "piscar" em ações muito rápidas
   const [visible, setVisible] = React.useState(false);
 
   React.useEffect(() => {
@@ -63,9 +61,9 @@ function LoadingOverlay() {
       aria-busy="true"
       aria-live="polite"
     >
-      <div className="flex items-center gap-3 rounded-2xl border border-white/20 bg-white/85 px-4 py-3 shadow-lg dark:border-zinc-800 dark:bg-zinc-950/80">
-        <div className="h-5 w-5 animate-spin rounded-full border-2 border-zinc-900/30 border-t-zinc-900 dark:border-zinc-100/30 dark:border-t-zinc-100" />
-        <p className="text-sm font-medium text-zinc-900 dark:text-zinc-50">Carregando…</p>
+      <div className="flex items-center gap-3 rounded-2xl border border-green-100 bg-white/90 px-5 py-3.5 shadow-xl dark:border-green-900/30 dark:bg-zinc-950/90">
+        <div className="h-5 w-5 animate-spin rounded-full border-2 border-green-200 border-t-green-600" />
+        <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Carregando…</p>
       </div>
     </div>
   );

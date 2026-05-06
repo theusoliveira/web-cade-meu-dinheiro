@@ -198,7 +198,7 @@ function AddCategoryModal({
   }
 
   const inputBase =
-    "w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm outline-none focus:border-zinc-400 dark:border-zinc-700 dark:bg-zinc-800 dark:focus:border-zinc-500";
+    "w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm outline-none focus:border-green-400 dark:border-zinc-700 dark:bg-zinc-800 dark:focus:border-zinc-500";
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
@@ -287,7 +287,7 @@ function AddItemModal({
   }
 
   const inputBase =
-    "w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm outline-none focus:border-zinc-400 dark:border-zinc-700 dark:bg-zinc-800 dark:focus:border-zinc-500";
+    "w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm outline-none focus:border-green-400 dark:border-zinc-700 dark:bg-zinc-800 dark:focus:border-zinc-500";
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
@@ -463,7 +463,7 @@ export function SalaryDistributionClient() {
   // ── Render ─────────────────────────────────────────────────────────────────
 
   const inputBase =
-    "w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm outline-none focus:border-zinc-400 dark:border-zinc-700 dark:bg-zinc-800 dark:focus:border-zinc-500";
+    "w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm outline-none focus:border-green-400 dark:border-zinc-700 dark:bg-zinc-800 dark:focus:border-zinc-500";
 
   return (
     <div className="space-y-6">
@@ -554,7 +554,7 @@ export function SalaryDistributionClient() {
               <h2 className="text-sm font-semibold">
                 {cat.name}
                 {cat.isFixed && (
-                  <span className="ml-2 rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-medium text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
+                  <span className="ml-2 rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-medium text-green-700 dark:bg-green-900/40 dark:text-green-300">
                     Fixo
                   </span>
                 )}
@@ -576,7 +576,7 @@ export function SalaryDistributionClient() {
                   <button
                     type="button"
                     onClick={() => setDeleteTarget({ id: cat.id, name: cat.name })}
-                    className="ml-1 rounded p-1.5 text-zinc-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+                    className="ml-1 cursor-pointer rounded p-1.5 text-zinc-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
                     title="Excluir categoria"
                   >
                     <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" aria-hidden>
@@ -640,7 +640,7 @@ export function SalaryDistributionClient() {
                               <button
                                 type="button"
                                 title="Voltar ao cálculo automático (6%)"
-                                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-6 p-1 text-zinc-400 hover:text-blue-500 dark:hover:text-blue-400"
+                                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-6 p-1 text-zinc-400 hover:text-green-500 dark:hover:text-green-400"
                                 onClick={() => {
                                   const newVal = faturamento * 0.06;
                                   const fixedCat = categories.find((c) => c.isFixed)!;

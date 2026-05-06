@@ -7,12 +7,9 @@ export type NavKey = "lancamentos" | "lancamentos_pj" | "metas" | "controle" | "
 type Props = {
   active: NavKey;
   onChange: (next: NavKey) => void;
-
-  /** Apenas para telas grandes (md+) */
   collapsed: boolean;
   onToggleCollapse: () => void;
-
-  /** @deprecated Mobile agora usa BottomNav. Mantido apenas para compatibilidade. */
+  /** @deprecated Mobile agora usa BottomNav. */
   mobileOpen?: boolean;
   onMobileClose?: () => void;
 };
@@ -21,7 +18,7 @@ function Icon({
   name,
   className,
 }: {
-  name: "list" | "target" | "card" | "chart";
+  name: "list" | "target" | "card" | "chart" | "wallet";
   className?: string;
 }) {
   const cls = className ?? "h-5 w-5";
@@ -37,18 +34,10 @@ function Icon({
   if (name === "list") {
     return (
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className={cls}>
-        <path
-          d="M8 6h13M8 12h13M8 18h13"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-        />
-        <path
-          d="M3.5 6h.01M3.5 12h.01M3.5 18h.01"
-          stroke="currentColor"
-          strokeWidth="3"
-          strokeLinecap="round"
-        />
+        <path d="M9 6h11M9 12h11M9 18h11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        <circle cx="4" cy="6" r="1.5" fill="currentColor" />
+        <circle cx="4" cy="12" r="1.5" fill="currentColor" />
+        <circle cx="4" cy="18" r="1.5" fill="currentColor" />
       </svg>
     );
   }
@@ -56,24 +45,18 @@ function Icon({
   if (name === "target") {
     return (
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className={cls}>
-        <path
-          d="M12 21a9 9 0 1 0-9-9"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-        />
-        <path
-          d="M12 17a5 5 0 1 0-5-5"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-        />
-        <path
-          d="M12 13a1 1 0 1 0-1-1"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-        />
+        <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
+        <circle cx="12" cy="12" r="5" stroke="currentColor" strokeWidth="2" />
+        <circle cx="12" cy="12" r="2" fill="currentColor" />
+      </svg>
+    );
+  }
+
+  if (name === "wallet") {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className={cls}>
+        <path d="M21 12V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M16 12h5v4h-5a2 2 0 0 1 0-4Z" stroke="currentColor" strokeWidth="2" />
       </svg>
     );
   }
@@ -81,24 +64,9 @@ function Icon({
   // card
   return (
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className={cls}>
-      <path
-        d="M4 7.5h16M4 10.5h16"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      <path
-        d="M6 5h12a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3Z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M7 16h4"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
+      <rect x="2" y="5" width="20" height="14" rx="3" stroke="currentColor" strokeWidth="2" />
+      <path d="M2 10h20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="M6 15h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }
@@ -119,11 +87,11 @@ function SidebarBody({
   const items: Array<{
     key: NavKey;
     label: string;
-    icon: "list" | "target" | "card" | "chart";
+    icon: "list" | "target" | "card" | "chart" | "wallet";
   }> = [
     { key: "lancamentos", label: "Lançamentos", icon: "list" },
-    { key: "lancamentos_pj", label: "Lançamentos PJ", icon: "list" },
-    { key: "distribuicao_pj", label: "Distribuição de salário PJ", icon: "chart" },
+    { key: "lancamentos_pj", label: "Lançamentos PJ", icon: "wallet" },
+    { key: "distribuicao_pj", label: "Distribuição PJ", icon: "chart" },
     { key: "metas", label: "Metas", icon: "target" },
     { key: "controle", label: "Controle de gastos", icon: "card" },
   ];
@@ -137,31 +105,31 @@ function SidebarBody({
 
   const itemClass = (isActive: boolean) => {
     const base =
-      "w-full flex cursor-pointer items-center rounded-xl text-sm font-medium transition-colors " +
-      (isCollapsed ? "justify-center px-2 py-3" : "gap-3 px-3 py-2");
+      "w-full flex cursor-pointer items-center rounded-xl text-sm font-semibold transition-all duration-150 " +
+      (isCollapsed ? "justify-center px-2 py-3" : "gap-3 px-3 py-2.5");
 
     return (
       base +
       " " +
       (isActive
-        ? "bg-white/15 text-white"
-        : "text-white/80 hover:bg-white/10 hover:text-white")
+        ? "bg-white/20 text-white shadow-sm"
+        : "text-white/75 hover:bg-white/10 hover:text-white")
     );
   };
 
   return (
     <div className="flex h-full flex-col">
-      <div className={isCollapsed ? "px-2 pt-4" : "px-3 pt-5"}>
+      <div className={isCollapsed ? "px-2 pt-5" : "px-4 pt-5"}>
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="grid h-9 w-9 place-items-center rounded-xl bg-white/15 text-white">
-              $
+            <div className="grid h-9 w-9 place-items-center rounded-xl bg-white/20 text-white font-bold text-lg shadow-inner">
+              💸
             </div>
 
             {isCollapsed ? null : (
               <div className="leading-tight">
-                <p className="text-sm font-semibold">Cadê meu dinheiro?</p>
-                <p className="text-xs text-white/70">Financeiro pessoal</p>
+                <p className="text-sm font-bold tracking-tight">Cadê meu dinheiro?</p>
+                <p className="text-xs text-white/60 font-medium">Financeiro pessoal</p>
               </div>
             )}
           </div>
@@ -170,7 +138,9 @@ function SidebarBody({
         </div>
       </div>
 
-      <nav className={isCollapsed ? "mt-6 px-1" : "mt-6 px-2"}>
+      <div className={isCollapsed ? "mx-2 mt-6 h-px bg-white/10" : "mx-4 mt-5 h-px bg-white/10"} />
+
+      <nav className={isCollapsed ? "mt-4 px-1 space-y-1" : "mt-4 px-2 space-y-1"}>
         {items.map((it) => (
           <button
             key={it.key}
@@ -180,7 +150,7 @@ function SidebarBody({
             title={isCollapsed ? it.label : undefined}
             aria-label={isCollapsed ? it.label : undefined}
           >
-            <Icon name={it.icon} className="h-5 w-5" />
+            <Icon name={it.icon} className="h-5 w-5 shrink-0" />
             {isCollapsed ? null : <span className="truncate">{it.label}</span>}
           </button>
         ))}
@@ -199,12 +169,12 @@ export function AppSidebar({
 
   return (
     <>
-      {/* Espaçador para o conteúdo não ficar embaixo da sidebar fixa */}
+      {/* Espaçador */}
       <div className={`hidden md:block ${desktopWidth}`} aria-hidden="true" />
 
       <aside
         className={
-          "hidden md:flex md:flex-col md:border-r md:border-white/10 md:bg-[#0b2a5b] md:text-white dark:md:bg-[#071b3b] " +
+          "hidden md:flex md:flex-col md:border-r md:border-green-900/30 md:bg-gradient-to-b md:from-green-900 md:to-green-950 md:text-white dark:md:from-green-950 dark:md:to-green-950 " +
           "md:fixed md:inset-y-0 md:left-0 md:z-40 md:h-dvh md:transition-[width] md:duration-200 " +
           desktopWidth
         }
@@ -222,20 +192,20 @@ export function AppSidebar({
           "hidden md:grid fixed z-[60] -translate-x-1/2 " +
           (collapsed ? "left-20 " : "left-64 ") +
           "top-[calc(env(safe-area-inset-top)+24px)] " +
-          "h-9 w-9 place-items-center rounded-full " +
-          "border border-[#93c5fd] bg-[#dbeafe] text-[#0b2a5b] shadow-md " +
-          "hover:bg-[#bfdbfe] focus:outline-none focus:ring-2 focus:ring-[#93c5fd]/60 " +
-          "dark:border-[#60a5fa]/60 dark:bg-[#0b2a5b] dark:text-white dark:hover:bg-[#0a2550]"
+          "h-8 w-8 place-items-center rounded-full " +
+          "border border-green-200 bg-white text-green-700 shadow-md cursor-pointer " +
+          "hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-400/60 " +
+          "dark:border-green-800 dark:bg-green-950 dark:text-green-300 dark:hover:bg-green-900"
         }
         aria-label={collapsed ? "Expandir menu" : "Minimizar menu"}
         title={collapsed ? "Expandir" : "Minimizar"}
       >
         {collapsed ? (
-          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
+          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" aria-hidden="true">
             <path d="M10 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         ) : (
-          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
+          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" aria-hidden="true">
             <path d="M14 6l-6 6 6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         )}
@@ -243,4 +213,3 @@ export function AppSidebar({
     </>
   );
 }
-

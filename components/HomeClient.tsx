@@ -45,9 +45,20 @@ const TAB_TITLES: Record<NavKey, string> = {
   controle: "Controle de gastos",
 };
 
+const TAB_SUBTITLES: Record<NavKey, string> = {
+  lancamentos: "Receitas, despesas e investimentos",
+  lancamentos_pj: "Conta pessoa jurídica",
+  distribuicao_pj: "Planeje seu faturamento",
+  metas: "Acompanhe sua evolução",
+  controle: "Visão geral sem filtro de mês",
+};
+
 function SectionFallback({ label }: { label: string }) {
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white p-6 text-sm text-zinc-600 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400">
+    <div className="rounded-2xl border border-green-100 bg-white p-8 text-center text-sm text-zinc-500 dark:border-green-900/30 dark:bg-zinc-950 dark:text-zinc-400">
+      <div className="mb-3 flex justify-center">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-green-200 border-t-green-600" />
+      </div>
       {label}
     </div>
   );
@@ -60,8 +71,6 @@ export function HomeClient() {
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [kind, setKind] = React.useState<EntryKind>("income");
   const [editing, setEditing] = React.useState<FinanceEntry | null>(null);
-
-  // Contador que aciona o dialog de metas dentro de GoalsClient
   const [goalAddTrigger, setGoalAddTrigger] = React.useState(0);
 
   const { displayName } = useProfile();
@@ -96,7 +105,6 @@ export function HomeClient() {
     });
   }, []);
 
-  // Fecha o dialog ao trocar de aba
   React.useEffect(() => {
     setDialogOpen(false);
     setEditing(null);
@@ -117,28 +125,26 @@ export function HomeClient() {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-zinc-50 text-zinc-900 dark:bg-black dark:text-zinc-50">
+    <div className="min-h-[100dvh] bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50">
       <div className="flex min-h-[100dvh]">
-        {/* Sidebar — visível apenas no desktop */}
         <AppSidebar
           active={activeTab}
           onChange={setActiveTab}
           collapsed={sidebarCollapsed}
           onToggleCollapse={toggleSidebarCollapsed}
-          // Props de mobile drawer não são mais necessárias mas mantemos a API
           mobileOpen={false}
           onMobileClose={() => {}}
         />
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-40 border-b border-zinc-200/60 bg-white/75 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:border-zinc-800/60 dark:bg-zinc-950/75 dark:supports-[backdrop-filter]:bg-zinc-950/60">
-            <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 pb-4 pt-[calc(env(safe-area-inset-top)+16px)] sm:px-6 lg:px-8">
+          <header className="sticky top-0 z-40 border-b border-green-100/80 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:border-green-900/20 dark:bg-zinc-950/80 dark:supports-[backdrop-filter]:bg-zinc-950/70">
+            <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 pb-3 pt-[calc(env(safe-area-inset-top)+12px)] sm:px-6 lg:px-8">
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold leading-tight">
+                <p className="truncate text-base font-bold leading-tight text-zinc-900 dark:text-zinc-50">
                   {TAB_TITLES[activeTab]}
                 </p>
-                <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
-                  Bem-vindo(a), {displayName}
+                <p className="truncate text-xs font-medium text-zinc-400 dark:text-zinc-500">
+                  {TAB_SUBTITLES[activeTab]}
                 </p>
               </div>
 
@@ -149,15 +155,9 @@ export function HomeClient() {
             </div>
           </header>
 
-          {/*
-            Padding bottom no mobile:
-            - h-16 (64px) da BottomNav
-            + safe-area-inset-bottom
-            + espaço extra para o FAB não cobrir conteúdo
-          */}
           <main className="w-full flex-1 px-4 py-6 sm:px-6 lg:px-8
             pb-[calc(env(safe-area-inset-bottom)+160px)]
-            md:pb-[calc(env(safe-area-inset-bottom)+24px)]">
+            md:pb-[calc(env(safe-area-inset-bottom)+32px)]">
             <div className="mx-auto w-full max-w-7xl">
               {isMonthlyTab ? (
                 <EntriesClient
@@ -226,10 +226,8 @@ export function HomeClient() {
         </div>
       </div>
 
-      {/* Navegação inferior — mobile only */}
       <BottomNav active={activeTab} onChange={setActiveTab} />
 
-      {/* FAB + Action Sheet — mobile only */}
       {showFAB ? (
         <MobileActionSheet
           activeTab={activeTab}

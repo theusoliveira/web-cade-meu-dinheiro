@@ -4,21 +4,33 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f8faf8;
+  --foreground: #0f1f0f;
+
+  /* Green brand palette */
+  --brand-50:  #f0fdf4;
+  --brand-100: #dcfce7;
+  --brand-200: #bbf7d0;
+  --brand-300: #86efac;
+  --brand-400: #4ade80;
+  --brand-500: #22c55e;
+  --brand-600: #16a34a;
+  --brand-700: #15803d;
+  --brand-800: #166534;
+  --brand-900: #14532d;
+  --brand-950: #052e16;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-nunito);
 }
 
-/* Dark theme variables (user-toggle via the .dark class on <html>) */
+/* Dark theme */
 .dark {
-  --background: #0a0a0a;
-  --foreground: #ededed;
+  --background: #050f05;
+  --foreground: #ecfdf5;
 }
 
 html,
@@ -29,12 +41,27 @@ body {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans);
+  font-family: var(--font-sans), sans-serif;
 
   /* Fix iOS Safari/PWA viewport sizing issues */
   min-height: 100dvh;
   min-height: -webkit-fill-available;
 
-  /* Optional: reduces weird bounce/resize jumps */
+  /* Reduces weird bounce/resize jumps */
   overscroll-behavior-y: none;
+}
+
+/* Global cursor pointer for all interactive elements */
+button,
+a,
+[role="button"],
+[role="link"],
+[role="menuitem"],
+select {
+  cursor: pointer;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  cursor: pointer;
 }

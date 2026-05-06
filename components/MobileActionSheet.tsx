@@ -21,12 +21,12 @@ const ENTRY_OPTIONS: Record<"personal" | "business" | "card", ActionOption[]> = 
   personal: [
     { kind: "income",     label: "Receita",      icon: "+", colorClass: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900/50" },
     { kind: "expense",    label: "Despesa",       icon: "−", colorClass: "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-900/50" },
-    { kind: "investment", label: "Investimento",  icon: "↑", colorClass: "bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-900/50" },
+    { kind: "investment", label: "Investimento",  icon: "↑", colorClass: "bg-green-50 text-green-700 border-green-200 dark:bg-green-950/40 dark:text-green-300 dark:border-green-900/50" },
   ],
   business: [
     { kind: "income",     label: "Entrada",    icon: "+", colorClass: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900/50" },
     { kind: "expense",    label: "Saída",      icon: "−", colorClass: "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-900/50" },
-    { kind: "investment", label: "Investimento",  icon: "↑", colorClass: "bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-900/50" },
+    { kind: "investment", label: "Investimento",  icon: "↑", colorClass: "bg-green-50 text-green-700 border-green-200 dark:bg-green-950/40 dark:text-green-300 dark:border-green-900/50" },
   ],
   card: [
     { kind: "income",  label: "Receita",  icon: "+", colorClass: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900/50" },
@@ -37,7 +37,6 @@ const ENTRY_OPTIONS: Record<"personal" | "business" | "card", ActionOption[]> = 
 export function MobileActionSheet({ activeTab, onSelectEntry, onAddGoal }: Props) {
   const [open, setOpen] = React.useState(false);
 
-  // Fecha com ESC ou back gesture
   React.useEffect(() => {
     if (!open) return;
     const onKeyDown = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
@@ -46,7 +45,6 @@ export function MobileActionSheet({ activeTab, onSelectEntry, onAddGoal }: Props
   }, [open]);
 
   function handleFABClick() {
-    // Metas: abre o dialog diretamente, sem action sheet
     if (activeTab === "metas") {
       onAddGoal();
       return;
@@ -66,12 +64,10 @@ export function MobileActionSheet({ activeTab, onSelectEntry, onAddGoal }: Props
         ? ENTRY_OPTIONS.business
         : ENTRY_OPTIONS.card;
 
-  // Posicionado acima da bottom nav (h-16 = 64px + safe area)
   const fabBottom = "bottom-[calc(env(safe-area-inset-bottom)+76px)]";
 
   return (
     <>
-      {/* Backdrop */}
       {open ? (
         <div
           className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm md:hidden"
@@ -80,7 +76,6 @@ export function MobileActionSheet({ activeTab, onSelectEntry, onAddGoal }: Props
         />
       ) : null}
 
-      {/* Action sheet — desliza de baixo para cima */}
       <div
         className={`fixed left-0 right-0 z-50 md:hidden transition-[transform,opacity] duration-300 ease-out ${
           open
@@ -92,8 +87,8 @@ export function MobileActionSheet({ activeTab, onSelectEntry, onAddGoal }: Props
         aria-label="Escolha o tipo de lançamento"
         aria-modal="true"
       >
-        <div className="mx-4 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-zinc-950">
-          <p className="border-b border-zinc-100 px-4 py-3 text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
+        <div className="mx-4 overflow-hidden rounded-2xl border border-green-100 bg-white shadow-2xl dark:border-green-900/40 dark:bg-zinc-950">
+          <p className="border-b border-zinc-100 px-4 py-3 text-xs font-bold uppercase tracking-widest text-zinc-400 dark:border-zinc-800 dark:text-zinc-500">
             Adicionar lançamento
           </p>
           <div className="p-3 grid gap-2">
@@ -102,7 +97,7 @@ export function MobileActionSheet({ activeTab, onSelectEntry, onAddGoal }: Props
                 key={opt.kind}
                 type="button"
                 onClick={() => handleSelect(opt.kind)}
-                className={`flex w-full items-center gap-4 rounded-xl border px-4 py-3.5 text-left text-sm font-semibold transition-opacity active:opacity-70 ${opt.colorClass}`}
+                className={`flex w-full cursor-pointer items-center gap-4 rounded-xl border px-4 py-3.5 text-left text-sm font-semibold transition-opacity active:opacity-70 ${opt.colorClass}`}
               >
                 <span
                   className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white/60 text-base font-bold dark:bg-black/30"
@@ -122,7 +117,7 @@ export function MobileActionSheet({ activeTab, onSelectEntry, onAddGoal }: Props
         type="button"
         onClick={handleFABClick}
         aria-label={open ? "Fechar menu de ações" : "Adicionar lançamento"}
-        className={`fixed right-4 z-50 md:hidden grid h-14 w-14 place-items-center rounded-full bg-[#0b2a5b] text-white shadow-lg shadow-black/20 transition-transform active:scale-95 dark:bg-blue-600 ${fabBottom}`}
+        className={`fixed right-4 z-50 md:hidden grid h-14 w-14 cursor-pointer place-items-center rounded-full bg-green-600 text-white shadow-lg shadow-green-900/30 transition-transform active:scale-95 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600 ${fabBottom}`}
       >
         <svg
           viewBox="0 0 24 24"

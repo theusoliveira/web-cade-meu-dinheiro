@@ -20,16 +20,9 @@ type Props = {
   onDeleteAll: () => void;
 };
 
-export function CardControlClient({
-  entries,
-  openDialog,
-  onEdit,
-  onDelete,
-  onDeleteAll,
-}: Props) {
+export function CardControlClient({ entries, openDialog, onEdit, onDelete, onDeleteAll }: Props) {
   const totals = React.useMemo(() => {
-    let income = 0;
-    let expense = 0;
+    let income = 0, expense = 0;
     for (const entry of entries) {
       if (entry.kind === "income") income += entry.value;
       if (entry.kind === "expense") expense += entry.value;
@@ -51,10 +44,8 @@ export function CardControlClient({
     <section>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-            Controle de gastos
-          </h1>
-          <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+          <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-50">Controle de gastos</h1>
+          <p className="mt-1 text-xs font-medium text-zinc-500 dark:text-zinc-400">
             Todos os lançamentos · {entries.length} registro{entries.length === 1 ? "" : "s"}
           </p>
         </div>
@@ -64,35 +55,35 @@ export function CardControlClient({
             type="button"
             variant="secondary"
             onClick={() => openDialog("income")}
-            className="w-full gap-2 bg-emerald-100 text-emerald-800 hover:bg-emerald-200 sm:w-auto dark:bg-emerald-900/30 dark:text-emerald-100 dark:hover:bg-emerald-900/45"
+            className="gap-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300 dark:hover:bg-emerald-950/60"
           >
-            + Adicionar receita
+            + Receita
           </Button>
           <Button
             type="button"
             variant="secondary"
             onClick={() => openDialog("expense")}
-            className="w-full gap-2 bg-rose-100 text-rose-800 hover:bg-rose-200 sm:w-auto dark:bg-rose-900/30 dark:text-rose-100 dark:hover:bg-rose-900/45"
+            className="gap-1.5 bg-rose-50 text-rose-700 hover:bg-rose-100 dark:bg-rose-950/40 dark:text-rose-300 dark:hover:bg-rose-950/60"
           >
-            - Adicionar despesa
+            − Despesa
           </Button>
         </div>
       </div>
 
-      <div className="mt-5 grid gap-3 sm:grid-cols-3">
+      <div className="mt-5 grid gap-3 grid-cols-3">
         {(
           [
-            { label: "Receitas", value: totals.income },
-            { label: "Despesas", value: totals.expense },
-            { label: "Saldo", value: totals.balance },
+            { label: "Receitas", value: totals.income, color: "text-green-700 dark:text-green-400" },
+            { label: "Despesas", value: totals.expense, color: "text-rose-700 dark:text-rose-400" },
+            { label: "Saldo", value: totals.balance, color: "text-zinc-900 dark:text-zinc-50" },
           ] as const
-        ).map(({ label, value }) => (
+        ).map(({ label, value, color }) => (
           <div
             key={label}
             className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900/40"
           >
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">{label}</p>
-            <p className="mt-1 text-lg font-semibold">{formatCurrencyBRL(value)}</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">{label}</p>
+            <p className={`mt-1.5 text-lg font-bold ${color}`}>{formatCurrencyBRL(value)}</p>
           </div>
         ))}
       </div>
@@ -101,7 +92,7 @@ export function CardControlClient({
         <DonutChartCard
           title="De onde vem meu dinheiro"
           data={incomeByCategory}
-          colors={["#10b981", "#14b8a6", "#22c55e", "#06b6d4"]}
+          colors={["#16a34a", "#22c55e", "#4ade80", "#10b981"]}
           centerLabel="Receitas"
         />
         <DonutChartCard
@@ -114,15 +105,15 @@ export function CardControlClient({
 
       <div className="mt-6">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">Histórico</h2>
+          <h2 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Histórico</h2>
           <Button
             type="button"
             variant="ghost"
             onClick={confirmDeleteAll}
             disabled={entries.length === 0}
-            className="w-full text-rose-700 hover:bg-rose-50 sm:w-auto dark:text-rose-200 dark:hover:bg-rose-950/30"
+            className="text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/30"
           >
-            Excluir todos os lançamentos
+            Excluir todos
           </Button>
         </div>
 
