@@ -1,20 +1,14 @@
 import type { Metadata, Viewport } from "next";
-import { Outfit, JetBrains_Mono } from "next/font/google";
+import { Open_Sans } from "next/font/google";
 import "./globals.css";
 import { ServiceWorkerRegister } from "@/components/features/ServiceWorkerRegister";
 import { BusyProvider } from "@/components/features/BusyProvider";
 
-const outfit = Outfit({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-outfit",
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-jetbrains-mono",
-});
+const openSans = Open_Sans({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  display: 'swap',
+})
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -74,7 +68,7 @@ export default function RootLayout({
     <html
       lang="pt-BR"
       suppressHydrationWarning
-      className={`${outfit.variable} ${jetbrainsMono.variable}`}
+      className={`${openSans.variable}`}
     >
       <body className="antialiased">
         <ThemeInitScript />
