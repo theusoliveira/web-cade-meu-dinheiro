@@ -177,9 +177,9 @@ export function EntriesClient({
       {/* Entry lists */}
       <div className="grid gap-5">
         {([
-          { label: incomeLabel, list: incomeEntries, color: "text-emerald-600 dark:text-emerald-400" },
-          { label: expenseLabel, list: expenseEntries, color: "text-rose-600 dark:text-rose-400" },
-          { label: "Investimentos", list: investmentEntries, color: "text-sky-600 dark:text-sky-400" },
+          { label: incomeLabel, list: incomeEntries, color: "text-[var(--muted)]" },
+          { label: expenseLabel, list: expenseEntries, color: "text-[var(--muted)]" },
+          { label: "Investimentos", list: investmentEntries, color: "text-[var(--muted)]" },
         ] as const).map(({ label, list, color }) => (
           <div key={label}>
             <div className="mb-3 flex items-center justify-between">
