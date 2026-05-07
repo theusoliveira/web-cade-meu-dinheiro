@@ -105,7 +105,7 @@ export function AddGoalDialog({ open, onClose, initial, onSubmit }: Props) {
   const inputClass =
     "w-full h-10 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm " +
     "text-[var(--foreground)] placeholder:text-[var(--muted-light)] outline-none " +
-    "focus:ring-2 focus:ring-[var(--accent)] focus:border-[var(--accent)] transition-all";
+    "focus:ring-1 focus:ring-[var(--investment)] focus:border-[var(--investment)] transition-all";
 
   return (
     <div className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center p-0 sm:p-4" role="dialog" aria-modal>
