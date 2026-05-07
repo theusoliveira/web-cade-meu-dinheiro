@@ -22,6 +22,23 @@ function ProgressBar({ value }: { value: number }) {
   );
 }
 
+function IconEdit() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" aria-hidden>
+      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function IconTrash() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" aria-hidden>
+      <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export function GoalsTable({
   goals,
   onEdit,
@@ -80,14 +97,15 @@ export function GoalsTable({
               </div>
 
               <div className="mt-3 flex items-center justify-end gap-1.5">
-                <Button variant="ghost" size="xs" onClick={() => onEdit(g)}>Editar</Button>
+                <Button variant="ghost" size="xs" onClick={() => onEdit(g)} title="Editar"><IconEdit /></Button>
                 <Button
                   variant="ghost"
                   size="xs"
                   onClick={() => onDelete(g)}
+                  title="Excluir"
                   className="text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/30"
                 >
-                  Excluir
+                  <IconTrash />
                 </Button>
               </div>
             </div>
@@ -128,14 +146,15 @@ export function GoalsTable({
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="inline-flex items-center gap-1">
-                      <Button variant="ghost" size="xs" onClick={() => onEdit(g)}>Editar</Button>
+                      <Button variant="ghost" size="xs" onClick={() => onEdit(g)} title="Editar"><IconEdit /></Button>
                       <Button
                         variant="ghost"
                         size="xs"
                         onClick={() => onDelete(g)}
+                        title="Excluir"
                         className="text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/30"
                       >
-                        Excluir
+                        <IconTrash />
                       </Button>
                     </div>
                   </td>
