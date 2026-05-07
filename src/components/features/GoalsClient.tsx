@@ -73,40 +73,42 @@ export function GoalsClient({ addTrigger }: { addTrigger?: number }) {
   }, [goals]);
 
   return (
-    <div className="grid gap-6 animate-fade-in">
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h1 className="text-xl font-bold text-[var(--foreground)]">Metas</h1>
-            <p className="mt-1 text-sm text-[var(--muted)]">Cadastre metas e acompanhe a evolução do valor atual.</p>
+    <>
+      <div className="grid gap-6 animate-fade-in">
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h1 className="text-xl font-bold text-[var(--foreground)]">Metas</h1>
+              <p className="mt-1 text-sm text-[var(--muted)]">Cadastre metas e acompanhe a evolução do valor atual.</p>
+            </div>
+            <Button onClick={openNew} className="hidden sm:inline-flex" size="sm">
+              + Adicionar meta
+            </Button>
           </div>
-          <Button onClick={openNew} className="hidden sm:inline-flex" size="sm">
-            + Adicionar meta
-          </Button>
+
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            <StatCard label="Total atual (somado)" value={formatCurrencyBRL(totals.current)} color="income" />
+            <StatCard label="Total objetivo (somado)" value={formatCurrencyBRL(totals.target)} color="investment" />
+          </div>
         </div>
 
-        <div className="mt-5 grid gap-3 sm:grid-cols-2">
-          <StatCard label="Total atual (somado)" value={formatCurrencyBRL(totals.current)} color="income" />
-          <StatCard label="Total objetivo (somado)" value={formatCurrencyBRL(totals.target)} color="investment" />
-        </div>
-      </div>
+        <div>
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-base font-bold text-[var(--foreground)]">Listagem de metas</h2>
+            <p className="text-xs text-[var(--muted)]">{goals.length} meta{goals.length === 1 ? "" : "s"}</p>
+          </div>
 
-      <div>
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-base font-bold text-[var(--foreground)]">Listagem de metas</h2>
-          <p className="text-xs text-[var(--muted)]">{goals.length} meta{goals.length === 1 ? "" : "s"}</p>
+          <GoalsTable
+            goals={goals}
+            onEdit={openEdit}
+            onDelete={(goal) => {
+              const ok = window.confirm(
+                `Excluir esta meta?\n\n${goal.description}\nAtual: ${formatCurrencyBRL(goal.currentValue)}\nObjetivo: ${formatCurrencyBRL(goal.targetValue)}`,
+              );
+              if (ok) deleteGoal(goal.id);
+            }}
+          />
         </div>
-
-        <GoalsTable
-          goals={goals}
-          onEdit={openEdit}
-          onDelete={(goal) => {
-            const ok = window.confirm(
-              `Excluir esta meta?\n\n${goal.description}\nAtual: ${formatCurrencyBRL(goal.currentValue)}\nObjetivo: ${formatCurrencyBRL(goal.targetValue)}`,
-            );
-            if (ok) deleteGoal(goal.id);
-          }}
-        />
       </div>
 
       <AddGoalDialog
@@ -115,6 +117,6 @@ export function GoalsClient({ addTrigger }: { addTrigger?: number }) {
         onClose={() => { setDialogOpen(false); setEditing(null); }}
         onSubmit={upsertGoal}
       />
-    </div>
+    </>
   );
 }
