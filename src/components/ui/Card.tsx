@@ -47,7 +47,7 @@ export function StatCard({
       className={`rounded-xl border bg-[var(--surface-raised)] p-4 border-[var(--border)] ${colors[color]}`}
     >
       <p className="text-xs font-medium text-[var(--muted)] uppercase tracking-wider">{label}</p>
-      <p className="mt-1.5 text-xl font-bold text-[var(--foreground)] font-mono">{value}</p>
+      <p className="mt-1.5 text-xl font-bold text-[var(--foreground)] ">{value}</p>
     </div>
   );
 }

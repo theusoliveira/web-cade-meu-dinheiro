@@ -270,7 +270,7 @@ export function AddEntryDialog({ open, kind, onClose, initial, allowFixed = fals
                 }}
                 disabled={isFixedTemplate}
                 placeholder="R$ 0,00"
-                className={`${inputClass} font-mono`}
+                className={`${inputClass} `}
               />
             </div>
           </fieldset>

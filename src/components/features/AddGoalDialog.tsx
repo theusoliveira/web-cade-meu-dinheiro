@@ -173,7 +173,7 @@ export function AddGoalDialog({ open, onClose, initial, onSubmit }: Props) {
                     setCurrentText(cents === 0 ? "" : formatFromCents(cents));
                   }}
                   placeholder="R$ 0,00"
-                  className={`${inputClass} font-mono`}
+                  className={`${inputClass} `}
                 />
               </div>
               <div className="grid gap-1.5">
@@ -188,7 +188,7 @@ export function AddGoalDialog({ open, onClose, initial, onSubmit }: Props) {
                     setTargetText(cents === 0 ? "" : formatFromCents(cents));
                   }}
                   placeholder="R$ 0,00"
-                  className={`${inputClass} font-mono`}
+                  className={`${inputClass} `}
                 />
               </div>
             </div>

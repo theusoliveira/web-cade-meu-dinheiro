@@ -48,10 +48,10 @@ export function HistoryTable({ entries, onEdit, onDelete, hideKind = false, empt
                     <span className="text-xs text-[var(--muted-light)]">{formatDateBR(e.date)}</span>
                   </div>
                   {e.description && (
-                    <p className="text-sm font-medium text-[var(--foreground)] break-words">{e.description}</p>
+                    <p className="text-sm font-medium text-[var(--muted)] break-words">{e.description}</p>
                   )}
                 </div>
-                <p className={`whitespace-nowrap text-sm font-bold font-mono shrink-0 ${e.kind === "income" ? "text-emerald-600 dark:text-emerald-400" : e.kind === "expense" ? "text-rose-600 dark:text-rose-400" : "text-sky-600 dark:text-sky-400"}`}>
+                <p className={`whitespace-nowrap text-sm font-bold  shrink-0 ${e.kind === "income" ? "text-emerald-600 dark:text-emerald-400" : e.kind === "expense" ? "text-rose-600 dark:text-rose-400" : "text-sky-600 dark:text-sky-400"}`}>
                   {kindPrefix(e.kind)} {formatCurrencyBRL(e.value)}
                 </p>
               </div>
@@ -99,7 +99,7 @@ export function HistoryTable({ entries, onEdit, onDelete, hideKind = false, empt
               const readOnly = Boolean(e.isAutoCarryover);
               return (
                 <tr key={e.id} className="hover:bg-[var(--surface-raised)] transition-colors">
-                  <td className="whitespace-nowrap px-4 py-3 text-xs text-[var(--muted)]">
+                  <td className="whitespace-nowrap px-4 py-3 text-xs text-[var(--foreground)]">
                     {formatDateBR(e.date)}
                   </td>
                   {!hideKind && (
@@ -107,9 +107,10 @@ export function HistoryTable({ entries, onEdit, onDelete, hideKind = false, empt
                       <Badge variant={KIND_TO_BADGE[e.kind]}>{kindLabel(e.kind)}</Badge>
                     </td>
                   )}
-                  <td className="px-4 py-3 text-sm text-[var(--muted)]">{e.category}</td>
+                  <td className="px-4 py-3 text-sm text-[var(--foreground)]">{e.category}</td>
                   <td className="px-4 py-3 text-sm font-medium text-[var(--foreground)] max-w-xs truncate">{e.description}</td>
-                  <td className={`whitespace-nowrap px-4 py-3 text-right text-sm font-bold font-mono ${e.kind === "income" ? "text-emerald-600 dark:text-emerald-400" : e.kind === "expense" ? "text-rose-600 dark:text-rose-400" : "text-sky-600 dark:text-sky-400"}`}>
+                  {/* <td className={`whitespace-nowrap px-4 py-3 text-right text-sm font-bold  ${e.kind === "income" ? "text-emerald-600 dark:text-emerald-400" : e.kind === "expense" ? "text-rose-600 dark:text-rose-400" : "text-sky-600 dark:text-sky-400"}`}> */}
+                  <td className={`whitespace-nowrap px-4 py-3 text-right text-sm font-medium  ${e.kind === "income" ? "text-emerald-600 dark:text-emerald-400" : e.kind === "expense" ? "text-rose-600 dark:text-rose-400" : "text-sky-600 dark:text-sky-400"}`}>
                     {kindPrefix(e.kind)} {formatCurrencyBRL(e.value)}
                   </td>
                   <td className="whitespace-nowrap px-4 py-3 text-right">

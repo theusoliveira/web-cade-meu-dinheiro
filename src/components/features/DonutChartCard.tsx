@@ -27,7 +27,7 @@ export function DonutChartCard({ title, data, colors, centerLabel }: DonutChartC
     <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
       <div className="flex items-center justify-between gap-2 mb-3">
         <h3 className="text-sm font-semibold text-[var(--foreground)] truncate">{title}</h3>
-        <span className="shrink-0 text-xs font-mono font-bold text-[var(--muted)]">{formatCurrencyBRL(total)}</span>
+        <span className="shrink-0 text-xs  font-bold text-[var(--muted)]">{formatCurrencyBRL(total)}</span>
       </div>
 
       {hasData ? (
@@ -53,7 +53,7 @@ export function DonutChartCard({ title, data, colors, centerLabel }: DonutChartC
 
             <div className="pointer-events-none absolute inset-0 grid place-items-center">
               <div className="text-center">
-                <p className="text-sm font-bold font-mono text-[var(--foreground)]">{formatCurrencyBRL(total)}</p>
+                <p className="text-sm font-bold  text-[var(--foreground)]">{formatCurrencyBRL(total)}</p>
                 {centerLabel && <p className="mt-0.5 text-[10px] text-[var(--muted)]">{centerLabel}</p>}
               </div>
             </div>
@@ -72,7 +72,7 @@ export function DonutChartCard({ title, data, colors, centerLabel }: DonutChartC
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
                   <span className="text-[var(--muted-light)]">{percent(d.value, total)}</span>
-                  <span className="font-semibold font-mono text-[var(--foreground)]">{formatCurrencyBRL(d.value)}</span>
+                  <span className="font-semibold  text-[var(--foreground)]">{formatCurrencyBRL(d.value)}</span>
                 </div>
               </div>
             ))}

@@ -67,11 +67,11 @@ export function GoalsTable({
               <div className="mt-3 grid grid-cols-3 gap-2 text-xs">
                 <div>
                   <p className="text-[var(--muted)]">Atual</p>
-                  <p className="font-semibold text-[var(--foreground)] font-mono">{formatCurrencyBRL(g.currentValue)}</p>
+                  <p className="font-semibold text-[var(--foreground)] ">{formatCurrencyBRL(g.currentValue)}</p>
                 </div>
                 <div>
                   <p className="text-[var(--muted)]">Objetivo</p>
-                  <p className="font-semibold text-[var(--foreground)] font-mono">{formatCurrencyBRL(g.targetValue)}</p>
+                  <p className="font-semibold text-[var(--foreground)] ">{formatCurrencyBRL(g.targetValue)}</p>
                 </div>
                 <div>
                   <p className="text-[var(--muted)]">Previsão</p>
@@ -113,8 +113,8 @@ export function GoalsTable({
               return (
                 <tr key={g.id} className="hover:bg-[var(--surface-raised)] transition-colors">
                   <td className="px-4 py-3 font-semibold text-[var(--foreground)] max-w-xs">{g.description}</td>
-                  <td className="px-4 py-3 font-mono text-sm text-[var(--foreground)]">{formatCurrencyBRL(g.currentValue)}</td>
-                  <td className="px-4 py-3 font-mono text-sm text-[var(--foreground)]">{formatCurrencyBRL(g.targetValue)}</td>
+                  <td className="px-4 py-3  text-sm text-[var(--foreground)]">{formatCurrencyBRL(g.currentValue)}</td>
+                  <td className="px-4 py-3  text-sm text-[var(--foreground)]">{formatCurrencyBRL(g.targetValue)}</td>
                   <td className="px-4 py-3 text-[var(--muted)]">{monthShortLabel(g.forecast)}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">

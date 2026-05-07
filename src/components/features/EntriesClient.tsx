@@ -138,7 +138,7 @@ export function EntriesClient({
           </div>
 
           <div className="flex items-center gap-2">
-            <label htmlFor="month-select" className="text-xs font-semibold text-[var(--muted)] uppercase tracking-wide">
+            <label htmlFor="month-select" className="text-xs font-semibold text-[var(--muted)] tracking-wide">
               Mês
             </label>
             <input
