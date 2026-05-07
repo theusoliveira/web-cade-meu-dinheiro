@@ -94,12 +94,12 @@ export function HistoryTable({ entries, onEdit, onDelete, hideKind = false, empt
           </colgroup>
           <thead className="bg-[var(--surface-raised)] border-b border-[var(--border)]">
             <tr>
-              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--foreground)]">Data</th>
-              {!hideKind && <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--foreground)]">Tipo</th>}
-              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--foreground)]">Categoria</th>
-              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--foreground)]">Descrição</th>
-              <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-[var(--foreground)]">Valor</th>
-              <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-[var(--foreground)]">Ações</th>
+              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">Data</th>
+              {!hideKind && <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">Tipo</th>}
+              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">Categoria</th>
+              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">Descrição</th>
+              <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">Valor</th>
+              <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">Ações</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--border)]">

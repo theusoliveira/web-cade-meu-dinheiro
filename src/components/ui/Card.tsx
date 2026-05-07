@@ -44,7 +44,7 @@ export function StatCard({
 
   return (
     <div
-      className={`rounded-xl border bg-[var(--surface-raised)] p-4 border-[var(--border)] ${colors[color]}`}
+      className={`rounded-xl border p-4 border-[var(--border)] ${colors[color]}`}
     >
       <p className="text-xs font-medium text-[var(--muted)] uppercase tracking-wider">{label}</p>
       <p className="mt-1.5 text-xl font-bold text-[var(--foreground)] ">{value}</p>
