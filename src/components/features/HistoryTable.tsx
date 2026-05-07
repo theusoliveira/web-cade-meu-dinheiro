@@ -88,18 +88,18 @@ export function HistoryTable({ entries, onEdit, onDelete, hideKind = false, empt
             <col className="w-[110px]" />
             {!hideKind && <col className="w-[110px]" />}
             <col className="w-[160px]" />
-            <col /> {/* Descrição ocupa o espaço restante */}
+            <col className="w-[160px]" />
             <col className="w-[140px]" />
             <col className="w-[130px]" />
           </colgroup>
           <thead className="bg-[var(--surface-raised)] border-b border-[var(--border)]">
             <tr>
-              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">Data</th>
-              {!hideKind && <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">Tipo</th>}
-              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">Categoria</th>
-              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">Descrição</th>
-              <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">Valor</th>
-              <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">Ações</th>
+              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--foreground)]">Data</th>
+              {!hideKind && <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--foreground)]">Tipo</th>}
+              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--foreground)]">Categoria</th>
+              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--foreground)]">Descrição</th>
+              <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-[var(--foreground)]">Valor</th>
+              <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-[var(--foreground)]">Ações</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--border)]">
@@ -107,7 +107,7 @@ export function HistoryTable({ entries, onEdit, onDelete, hideKind = false, empt
               const readOnly = Boolean(e.isAutoCarryover);
               return (
                 <tr key={e.id} className="hover:bg-[var(--surface-raised)] transition-colors">
-                  <td className="whitespace-nowrap px-4 py-3 text-xs text-[var(--foreground)]">
+                  <td className="whitespace-nowrap px-4 py-3 text-[var(--foreground)]">
                     {formatDateBR(e.date)}
                   </td>
                   {!hideKind && (
@@ -115,9 +115,9 @@ export function HistoryTable({ entries, onEdit, onDelete, hideKind = false, empt
                       <Badge variant={KIND_TO_BADGE[e.kind]}>{kindLabel(e.kind)}</Badge>
                     </td>
                   )}
-                  <td className="px-4 py-3 text-sm text-[var(--foreground)] truncate">{e.category}</td>
-                  <td className="px-4 py-3 text-sm font-medium text-[var(--foreground)] truncate">{e.description}</td>
-                  <td className={`whitespace-nowrap px-4 py-3 text-right text-sm font-medium ${e.kind === "income" ? "text-emerald-600 dark:text-emerald-400" : e.kind === "expense" ? "text-rose-600 dark:text-rose-400" : "text-sky-600 dark:text-sky-400"}`}>
+                  <td className="px-4 py-3 text-[var(--foreground)] truncate">{e.category}</td>
+                  <td className="px-4 py-3 text-[var(--foreground)] truncate">{e.description}</td>
+                  <td className={`whitespace-nowrap px-4 py-3 text-right ${e.kind === "income" ? "text-emerald-600 dark:text-emerald-400" : e.kind === "expense" ? "text-rose-600 dark:text-rose-400" : "text-sky-600 dark:text-sky-400"}`}>
                     {kindPrefix(e.kind)} {formatCurrencyBRL(e.value)}
                   </td>
                   <td className="whitespace-nowrap px-4 py-3 text-right">
