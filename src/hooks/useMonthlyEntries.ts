@@ -13,7 +13,7 @@ import {
   fetchOpeningBalance,
   upsertMonthlyEntry,
   type MonthlyEntriesScope,
-} from "@/lib/supabase/queries/entries";
+} from "@/actions/entries";
 
 export function useMonthlyEntries(
   month: string,

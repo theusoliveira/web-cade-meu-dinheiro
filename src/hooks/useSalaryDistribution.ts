@@ -13,7 +13,7 @@ import {
   updateItemValue,
   updateItemDescription,
   deleteItem,
-} from "@/lib/supabase/queries/salaryDistribution";
+} from "@/actions/salaryDistribution";
 
 const FIXED_MONTH = "global";
 
@@ -24,7 +24,7 @@ export function useSalaryDistribution() {
     id: string; month: string; hours: number;
     hourlyRate: number; commission: number; simplesAuto: boolean;
   } | null>(null);
-  const [categories, setCategories] = React.useState<import("@/lib/supabase/queries/salaryDistribution").DistributionCategory[]>([]);
+  const [categories, setCategories] = React.useState<import("@/lib/db/queries/salaryDistribution").DistributionCategory[]>([]);
   const [loading, setLoading] = React.useState(false);
 
   const reload = React.useCallback(async () => {
