@@ -6,14 +6,15 @@ import {
   fetchDistributionMonth,
   fetchDistributionCategories,
   upsertDistributionMonth,
-  initFixedCategory,
+  ensureFixedCategory,
   insertCategory,
   deleteCategory,
   insertItem,
   updateItemValue,
   updateItemDescription,
   deleteItem,
-} from "@/lib/supabase/queries/salaryDistribution";
+  type DistributionCategory,
+} from "@/actions/salaryDistribution";
 
 const FIXED_MONTH = "global";
 
@@ -24,22 +25,20 @@ export function useSalaryDistribution() {
     id: string; month: string; hours: number;
     hourlyRate: number; commission: number; simplesAuto: boolean;
   } | null>(null);
-  const [categories, setCategories] = React.useState<import("@/lib/supabase/queries/salaryDistribution").DistributionCategory[]>([]);
+  const [categories, setCategories] = React.useState<DistributionCategory[]>([]);
   const [loading, setLoading] = React.useState(false);
 
   const reload = React.useCallback(async () => {
-    await run(async () => {           // ← adicionar run aqui
+    await run(async () => {
       setLoading(true);
       try {
-        let [bData, cats] = await Promise.all([
+        // Ensure fixed category exists (idempotent — no-op if already there)
+        await ensureFixedCategory(FIXED_MONTH);
+
+        const [bData, cats] = await Promise.all([
           fetchDistributionMonth(FIXED_MONTH),
           fetchDistributionCategories(FIXED_MONTH),
         ]);
-
-        if (cats.length === 0 || !cats.some((c) => c.isFixed)) {
-          const fixedCat = await initFixedCategory(FIXED_MONTH);
-          cats = [fixedCat, ...cats.filter((c) => !c.isFixed)];
-        }
 
         setBilling(bData);
         setCategories(cats);
@@ -49,7 +48,7 @@ export function useSalaryDistribution() {
         setLoading(false);
       }
     });
-  }, [run]);                          // ← run na dependência
+  }, [run]);
 
   React.useEffect(() => {
     reload();
@@ -80,6 +79,7 @@ export function useSalaryDistribution() {
 
   const saveItemValue = React.useCallback(
     async (itemId: string, value: number, categoryId: string) => {
+      // Optimistic update
       setCategories((prev) =>
         prev.map((cat) =>
           cat.id !== categoryId
@@ -99,6 +99,7 @@ export function useSalaryDistribution() {
 
   const saveItemDescription = React.useCallback(
     async (itemId: string, description: string, categoryId: string) => {
+      // Optimistic update
       setCategories((prev) =>
         prev.map((cat) =>
           cat.id !== categoryId

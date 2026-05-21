@@ -11,7 +11,7 @@ import {
   deleteGoal as deleteGoalQuery,
   fetchGoals,
   upsertGoal as upsertGoalQuery,
-} from "@/lib/supabase/queries/goals";
+} from "@/actions/goals";
 
 export function GoalsClient({ addTrigger }: { addTrigger?: number }) {
   const [goals, setGoals] = React.useState<Goal[]>([]);

@@ -1,30 +1,24 @@
 "use client";
 
 import * as React from "react";
-import { supabase } from "@/lib/supabase/client";
+import { signOut, useSession } from "next-auth/react";
 import { useBusy } from "@/components/features/BusyProvider";
 
 type Props = { displayName?: string };
 
 export function UserMenu({ displayName }: Props) {
   const busy = useBusy();
+  const { data: session } = useSession();
   const [open, setOpen] = React.useState(false);
-  const [email, setEmail] = React.useState("");
   const containerRef = React.useRef<HTMLDivElement | null>(null);
-  const label = (displayName ?? "").trim();
+
+  const email = session?.user?.email ?? "";
+  const label = (displayName ?? session?.user?.name ?? "").trim();
   const initials = label
     .split(" ")
     .slice(0, 2)
     .map((w) => w[0]?.toUpperCase() ?? "")
     .join("");
-
-  React.useEffect(() => {
-    let alive = true;
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (alive) setEmail(user?.email ?? "");
-    });
-    return () => { alive = false; };
-  }, []);
 
   React.useEffect(() => {
     function onClickOutside(e: MouseEvent) {
@@ -46,8 +40,7 @@ export function UserMenu({ displayName }: Props) {
   async function logout() {
     setOpen(false);
     await busy.run(async () => {
-      const { error } = await supabase.auth.signOut();
-      if (error) alert("Não foi possível sair agora. Tente novamente.");
+      await signOut({ redirect: false });
     });
   }
 
@@ -74,7 +67,6 @@ export function UserMenu({ displayName }: Props) {
           role="menu"
           className="absolute right-0 mt-2 w-60 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-2xl shadow-black/10 animate-scale-in"
         >
-          {/* Avatar + info */}
           <div className="flex items-center gap-3 px-4 py-4 border-b border-[var(--border)]">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--accent)]/10 font-bold text-[var(--accent)] text-sm">
               {initials || "?"}

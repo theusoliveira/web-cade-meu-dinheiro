@@ -1,44 +1,53 @@
 # Cadê Meu Dinheiro?
 
-Controle inteligente de finanças pessoais e PJ.
+Controle financeiro inteligente para finanças pessoais e PJ.
 
-## Setup
+## Stack
 
-1. Instale as dependências:
-```bash
-npm install
-```
-
-2. Configure as variáveis de ambiente:
-```bash
-cp .env.local.example .env.local
-# Edite .env.local com suas chaves do Supabase
-```
-
-3. Execute as migrations no Supabase SQL Editor (veja `docs/`)
-
-4. Inicie o servidor de desenvolvimento:
-```bash
-npm run dev
-```
+- **Next.js 16** (App Router)
+- **React 19**
+- **TypeScript**
+- **Tailwind CSS v4**
+- **Neon** (PostgreSQL serverless)
+- **NextAuth v5** (autenticação com credentials)
+- **Recharts** (gráficos)
 
 ## Estrutura
 
 ```
 src/
-├── app/                  # Next.js App Router
+├── app/               # Rotas (App Router)
+│   ├── api/auth/      # NextAuth + registro
+│   └── layout.tsx
+├── actions/           # Server Actions por domínio
+│   ├── entries.ts
+│   ├── cardEntries.ts
+│   ├── goals.ts
+│   ├── profile.ts
+│   └── salaryDistribution.ts
 ├── components/
-│   ├── ui/               # Componentes genéricos (Button, Card, Input)
-│   ├── features/         # Componentes de domínio (AuthGate, HomeClient...)
-│   └── layout/           # Componentes de layout (AppSidebar, BottomNav...)
-├── hooks/                # Custom React hooks
+│   ├── features/      # Componentes de domínio
+│   ├── layout/        # Nav, sidebar, etc.
+│   └── ui/            # Componentes genéricos (Button, Input, Card)
+├── hooks/             # Custom hooks (client-side)
 ├── lib/
-│   ├── finance/          # Lógica financeira
-│   └── supabase/         # Cliente e queries Supabase
-└── types/                # Tipos TypeScript
+│   ├── db/            # Cliente Neon + mappers
+│   └── finance/       # Lógica de negócio (sem JSX)
+└── types/
 ```
 
-## Queries Supabase Necessárias
+## Setup
 
-Os arquivos em `src/lib/supabase/queries/` precisam ser criados com base
-no seu schema do Supabase. Veja o README em `src/lib/supabase/queries/`.
+1. Crie um banco no [Neon](https://neon.tech)
+2. Execute o schema em `neon/schema.sql`
+3. Execute as migrações em `neon/migrations/`
+4. Copie `.env.local.example` para `.env.local` e preencha
+5. `npm install && npm run dev`
+
+## Variáveis de ambiente
+
+```env
+DATABASE_URL=postgresql://...
+NEXTAUTH_SECRET=...
+NEXTAUTH_URL=http://localhost:3000
+```
