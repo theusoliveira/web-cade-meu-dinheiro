@@ -1,7 +1,7 @@
 "use server";
 
 import { auth } from "@/lib/auth";
-import { getDb } from "@/lib/db";
+import { getDb } from "@/lib/db/client";
 
 export async function fetchCurrentProfileDisplayName(): Promise<string> {
   const session = await auth();

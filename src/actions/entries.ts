@@ -1,8 +1,8 @@
 "use server";
 
 import { auth } from "@/lib/auth";
-import { getDb } from "@/lib/db";
-import { mapEntryRows, mapFixedEntryRows } from "@/lib/supabase/mappers";
+import { getDb } from "@/lib/db/client";
+import { mapEntryRows, mapFixedEntryRows } from "@/lib/db/mappers";
 import { calculateOpeningBalance, nextMonthStart } from "@/lib/finance";
 import type { FinanceEntry, FixedEntry } from "@/lib/finance";
 

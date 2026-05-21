@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/Input";
 import { HomeClient } from "@/components/features/HomeClient";
 import { useBusy } from "@/components/features/BusyProvider";
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
 function onlyDigits(v: string) {
   return v.replace(/\D/g, "");
 }
@@ -19,61 +21,7 @@ function maskCPF(v: string) {
     .replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d)/, "$1.$2.$3-$4");
 }
 
-// ─── Logo Icon ────────────────────────────────────────────────────────────────
-
-function LogoIcon() {
-  return (
-    <svg viewBox="0 0 48 48" fill="none" className="h-10 w-10" aria-hidden>
-      <circle cx="24" cy="24" r="24" fill="url(#logo-grad)" />
-      <path
-        d="M16 28c0 2.2 1.8 4 4 4h8c2.2 0 4-1.8 4-4v-2c0-2.2-1.8-4-4-4h-8c-2.2 0-4-1.8-4-4v-2c0-2.2 1.8-4 4-4h8c2.2 0 4 1.8 4 4"
-        stroke="white"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-      />
-      <path d="M24 12v24" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
-      <defs>
-        <linearGradient id="logo-grad" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#10b981" />
-          <stop offset="1" stopColor="#059669" />
-        </linearGradient>
-      </defs>
-    </svg>
-  );
-}
-
-// ─── Floating dots decoration ─────────────────────────────────────────────────
-
-function BackgroundDecoration() {
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
-      <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-emerald-500/8 blur-3xl" />
-      <div className="absolute -bottom-32 -right-32 w-96 h-96 rounded-full bg-blue-500/8 blur-3xl" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-emerald-500/5 blur-3xl" />
-      <svg className="absolute inset-0 w-full h-full opacity-[0.04]" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse">
-            <circle cx="2" cy="2" r="1.5" fill="currentColor" />
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#dots)" />
-      </svg>
-    </div>
-  );
-}
-
-// ─── Feature badge ─────────────────────────────────────────────────────────────
-
-function FeatureBadge({ icon, text }: { icon: React.ReactNode; text: string }) {
-  return (
-    <div className="flex items-center gap-2 text-sm text-[var(--muted)]">
-      <span className="text-[var(--accent)]">{icon}</span>
-      {text}
-    </div>
-  );
-}
-
-// ─── Eye icon for password ────────────────────────────────────────────────────
+// ─── Sub-components ────────────────────────────────────────────────────────────
 
 function EyeIcon({ open }: { open: boolean }) {
   if (open) {
@@ -92,6 +40,124 @@ function EyeIcon({ open }: { open: boolean }) {
   );
 }
 
+function PasswordField({
+  label,
+  value,
+  onChange,
+  placeholder,
+  autoComplete,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  autoComplete?: string;
+}) {
+  const [show, setShow] = React.useState(false);
+  return (
+    <Input
+      type={show ? "text" : "password"}
+      label={label}
+      placeholder={placeholder ?? "••••••"}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      autoComplete={autoComplete}
+      rightIcon={
+        <button
+          type="button"
+          onClick={() => setShow((v) => !v)}
+          className="text-[var(--muted)] hover:text-[var(--foreground)] cursor-pointer"
+          aria-label={show ? "Ocultar senha" : "Mostrar senha"}
+          tabIndex={-1}
+        >
+          <EyeIcon open={show} />
+        </button>
+      }
+    />
+  );
+}
+
+function AlertBanner({ type, message }: { type: "error" | "success"; message: string }) {
+  const styles =
+    type === "error"
+      ? "bg-rose-50 dark:bg-rose-950/30 border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-300"
+      : "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-900/50 text-emerald-700 dark:text-emerald-300";
+
+  const icon =
+    type === "error" ? (
+      <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4 shrink-0 text-rose-500">
+        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+      </svg>
+    ) : (
+      <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4 shrink-0 text-emerald-500">
+        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
+      </svg>
+    );
+
+  return (
+    <div className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 ${styles}`}>
+      {icon}
+      <p className="text-sm">{message}</p>
+    </div>
+  );
+}
+
+// ─── Sidebar brand panel ──────────────────────────────────────────────────────
+
+function BrandPanel() {
+  return (
+    <div
+      className="hidden lg:flex flex-col justify-between p-10 w-[380px] shrink-0"
+      style={{ backgroundColor: "var(--sidebar-bg)" }}
+    >
+      {/* Logo */}
+      <div>
+        <div className="flex items-center gap-3 mb-10">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--accent)]">
+            <svg viewBox="0 0 48 48" fill="none" className="h-6 w-6" aria-hidden>
+              <path
+                d="M16 28c0 2.2 1.8 4 4 4h8c2.2 0 4-1.8 4-4v-2c0-2.2-1.8-4-4-4h-8c-2.2 0-4-1.8-4-4v-2c0-2.2 1.8-4 4-4h8c2.2 0 4 1.8 4 4"
+                stroke="white"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+              />
+              <path d="M24 12v24" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
+            </svg>
+          </div>
+          <div>
+            <p className="text-white font-bold text-base leading-none">Cadê meu</p>
+            <p className="text-[var(--accent)] font-bold text-base leading-none">dinheiro?</p>
+          </div>
+        </div>
+
+        <h2 className="text-white text-2xl font-bold leading-snug mb-3">
+          Controle financeiro inteligente
+        </h2>
+        <p className="text-white/50 text-sm leading-relaxed">
+          Gerencie receitas, despesas e investimentos pessoais e PJ em um só lugar.
+        </p>
+      </div>
+
+      {/* Feature list */}
+      <div className="space-y-4">
+        {[
+          { icon: "📊", text: "Lançamentos pessoais e PJ" },
+          { icon: "🎯", text: "Metas e planejamento" },
+          { icon: "💳", text: "Controle de cartão" },
+          { icon: "📈", text: "Distribuição de salário PJ" },
+        ].map(({ icon, text }) => (
+          <div key={text} className="flex items-center gap-3">
+            <span className="text-lg">{icon}</span>
+            <span className="text-white/70 text-sm">{text}</span>
+          </div>
+        ))}
+      </div>
+
+      <p className="text-white/25 text-xs">© {new Date().getFullYear()} Cadê Meu Dinheiro?</p>
+    </div>
+  );
+}
+
 // ─── AuthGate ─────────────────────────────────────────────────────────────────
 
 export function AuthGate() {
@@ -101,50 +167,44 @@ export function AuthGate() {
 
   const [mode, setMode] = React.useState<"login" | "signup">("login");
 
-  // Signup extras
+  // Signup fields
   const [fullName, setFullName] = React.useState("");
   const [displayName, setDisplayName] = React.useState("");
   const [cpf, setCpf] = React.useState("");
 
-  // Shared
+  // Shared fields
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
-  const [showPassword, setShowPassword] = React.useState(false);
-  const [showConfirm, setShowConfirm] = React.useState(false);
 
   const [error, setError] = React.useState<string | null>(null);
   const [message, setMessage] = React.useState<string | null>(null);
 
   const { run, isBusy } = useBusy();
 
-  function goToLogin(withMessage?: string) {
-    setMode("login");
+  function switchMode(next: "login" | "signup") {
+    setMode(next);
     setError(null);
-    setMessage(withMessage ?? null);
+    setMessage(null);
     setPassword("");
     setConfirmPassword("");
-    setShowPassword(false);
-    setShowConfirm(false);
+  }
+
+  function goToLogin(withMessage?: string) {
+    switchMode("login");
+    setMessage(withMessage ?? null);
   }
 
   async function handleSignIn(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setMessage(null);
-
     if (!email.trim()) return setError("Informe seu e-mail.");
     if (!password) return setError("Informe sua senha.");
 
     await run(async () => {
-      const result = await signIn("credentials", {
-        email: email.trim(),
-        password,
-        redirect: false,
-      });
-      if (result?.error) {
-        setError("E-mail ou senha incorretos.");
-      }
+      const result = await signIn("credentials", { email: email.trim(), password, redirect: false });
+      if (result?.error) setError("E-mail ou senha incorretos.");
     });
   }
 
@@ -154,7 +214,6 @@ export function AuthGate() {
     setMessage(null);
 
     const cpfDigits = onlyDigits(cpf);
-
     if (!fullName.trim()) return setError("Informe seu nome completo.");
     if (!displayName.trim()) return setError("Informe como quer ser chamado.");
     if (!email.trim()) return setError("Informe seu e-mail.");
@@ -174,207 +233,163 @@ export function AuthGate() {
           cpf: cpfDigits,
         }),
       });
-
       const body = await res.json();
-
       if (!res.ok) {
         setError(body.error ?? "Erro ao criar conta. Tente novamente.");
         return;
       }
-
       goToLogin("Conta criada com sucesso! Agora faça login.");
     });
   }
 
-  async function handleSignOut() {
-    await signOut({ redirect: false });
-  }
-
+  // Loading state
   if (checking) {
     return (
       <div className="min-h-[100dvh] flex items-center justify-center bg-[var(--background)]">
         <div className="flex flex-col items-center gap-4">
-          <div className="relative">
-            <div className="h-12 w-12 rounded-full border-2 border-[var(--accent)]/20 border-t-[var(--accent)] animate-spin" />
-          </div>
+          <div className="h-10 w-10 rounded-full border-2 border-[var(--accent)]/20 border-t-[var(--accent)] animate-spin" />
           <p className="text-sm text-[var(--muted)]">Carregando…</p>
         </div>
       </div>
     );
   }
 
-  if (signedIn) {
-    return <HomeClient />;
-  }
+  if (signedIn) return <HomeClient />;
 
   return (
-    <div className="relative min-h-[100dvh] flex items-center justify-center bg-[var(--background)] px-4 py-8">
-      <BackgroundDecoration />
+    <div className="min-h-[100dvh] flex bg-[var(--background)]">
+      {/* Left brand panel — only on desktop */}
+      <BrandPanel />
 
-      <div className="relative z-10 w-full max-w-md animate-fade-in">
-        {/* Logo & brand */}
-        <div className="mb-8 flex flex-col items-center text-center">
-          <div className="mb-4 flex items-center justify-center rounded-2xl bg-[var(--surface)] p-3 shadow-lg shadow-black/10 border border-[var(--border)]">
-            <LogoIcon />
-          </div>
-          <h1 className="text-2xl font-bold text-[var(--foreground)] tracking-tight">
-            Cadê meu dinheiro?
-          </h1>
-          <p className="mt-1 text-sm text-[var(--muted)]">
-            {mode === "login"
-              ? "Gerencie suas finanças com inteligência"
-              : "Crie sua conta e comece agora"}
-          </p>
-        </div>
+      {/* Right auth panel */}
+      <div className="flex flex-1 items-center justify-center px-4 py-10 sm:px-8">
+        <div className="w-full max-w-sm animate-fade-in">
 
-        {/* Card */}
-        <div className="rounded-2xl bg-[var(--surface)] border border-[var(--border)] shadow-xl shadow-black/8 overflow-hidden">
-          {/* Tab switcher */}
-          <div className="flex border-b border-[var(--border)]">
-            <button
-              type="button"
-              onClick={() => { setMode("login"); setError(null); setMessage(null); }}
-              className={`flex-1 py-3.5 text-sm font-semibold transition-all cursor-pointer ${
-                mode === "login"
-                  ? "text-[var(--accent)] border-b-2 border-[var(--accent)] bg-[var(--accent)]/5"
-                  : "text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-raised)]"
-              }`}
-            >
-              Entrar
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setMode("signup");
-                setError(null);
-                setMessage(null);
-                setPassword("");
-                setConfirmPassword("");
-              }}
-              className={`flex-1 py-3.5 text-sm font-semibold transition-all cursor-pointer ${
-                mode === "signup"
-                  ? "text-[var(--accent)] border-b-2 border-[var(--accent)] bg-[var(--accent)]/5"
-                  : "text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-raised)]"
-              }`}
-            >
-              Criar conta
-            </button>
-          </div>
-
-          <div className="p-6">
-            {mode === "login" ? (
-              <form onSubmit={handleSignIn} className="grid gap-4">
-                <Input
-                  type="email"
-                  label="E-mail"
-                  placeholder="seu@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  autoComplete="email"
-                  autoFocus
-                  leftIcon={
-                    <svg viewBox="0 0 20 20" fill="none" className="h-4 w-4">
-                      <path d="M2.5 6.667A1.667 1.667 0 0 1 4.167 5h11.666A1.667 1.667 0 0 1 17.5 6.667v6.666A1.667 1.667 0 0 1 15.833 15H4.167A1.667 1.667 0 0 1 2.5 13.333V6.667z" stroke="currentColor" strokeWidth="1.5" />
-                      <path d="m2.5 6.667 7.5 5 7.5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  }
+          {/* Mobile-only logo */}
+          <div className="mb-8 flex flex-col items-center text-center lg:hidden">
+            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--accent)]">
+              <svg viewBox="0 0 48 48" fill="none" className="h-7 w-7" aria-hidden>
+                <path
+                  d="M16 28c0 2.2 1.8 4 4 4h8c2.2 0 4-1.8 4-4v-2c0-2.2-1.8-4-4-4h-8c-2.2 0-4-1.8-4-4v-2c0-2.2 1.8-4 4-4h8c2.2 0 4 1.8 4 4"
+                  stroke="white" strokeWidth="2.5" strokeLinecap="round"
                 />
-
-                <div className="grid gap-1.5">
-                  <label className="text-sm font-medium text-[var(--foreground)]">Senha</label>
-                  <div className="relative flex items-center">
-                    <span className="absolute left-3 text-[var(--muted)] pointer-events-none">
-                      <svg viewBox="0 0 20 20" fill="none" className="h-4 w-4">
-                        <rect x="3" y="9" width="14" height="9" rx="2" stroke="currentColor" strokeWidth="1.5" />
-                        <path d="M7 9V6a3 3 0 0 1 6 0v3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                      </svg>
-                    </span>
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Sua senha"
-                      autoComplete="current-password"
-                      className="w-full h-10 rounded-xl border border-[var(--border)] bg-[var(--surface)] pl-10 pr-10 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-light)] outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-[var(--accent)] transition-all"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword((v) => !v)}
-                      className="absolute right-3 text-[var(--muted)] hover:text-[var(--foreground)] cursor-pointer"
-                      aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
-                    >
-                      <EyeIcon open={showPassword} />
-                    </button>
-                  </div>
-                </div>
-
-                {error && (
-                  <div className="flex items-center gap-2 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/50 px-3 py-2.5">
-                    <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4 text-rose-500 shrink-0">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
-                    </svg>
-                    <p className="text-sm text-rose-700 dark:text-rose-300">{error}</p>
-                  </div>
-                )}
-
-                {message && (
-                  <div className="flex items-center gap-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/50 px-3 py-2.5">
-                    <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4 text-emerald-500 shrink-0">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
-                    </svg>
-                    <p className="text-sm text-emerald-700 dark:text-emerald-300">{message}</p>
-                  </div>
-                )}
-
-                <Button type="submit" loading={isBusy} className="w-full mt-1">
-                  Entrar
-                </Button>
-              </form>
-            ) : (
-              <form onSubmit={handleSignUp} className="grid gap-3.5">
-                <Input type="text" label="Nome completo" placeholder="João da Silva" value={fullName} onChange={(e) => setFullName(e.target.value)} autoComplete="name" autoFocus />
-                <Input type="text" label="Como quer ser chamado" placeholder="João" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
-                <Input type="text" label="CPF" placeholder="000.000.000-00" value={cpf} onChange={(e) => setCpf(maskCPF(e.target.value))} inputMode="numeric" />
-                <Input type="email" label="E-mail" placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
-
-                <div className="grid gap-1.5">
-                  <label className="text-sm font-medium text-[var(--foreground)]">Senha</label>
-                  <div className="relative flex items-center">
-                    <input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Mínimo 6 caracteres" className="w-full h-10 rounded-xl border border-[var(--border)] bg-[var(--surface)] pl-3 pr-10 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-light)] outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-[var(--accent)] transition-all" />
-                    <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute right-3 text-[var(--muted)] hover:text-[var(--foreground)] cursor-pointer"><EyeIcon open={showPassword} /></button>
-                  </div>
-                </div>
-
-                <div className="grid gap-1.5">
-                  <label className="text-sm font-medium text-[var(--foreground)]">Confirmar senha</label>
-                  <div className="relative flex items-center">
-                    <input type={showConfirm ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Repita a senha" className="w-full h-10 rounded-xl border border-[var(--border)] bg-[var(--surface)] pl-3 pr-10 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-light)] outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-[var(--accent)] transition-all" />
-                    <button type="button" onClick={() => setShowConfirm((v) => !v)} className="absolute right-3 text-[var(--muted)] hover:text-[var(--foreground)] cursor-pointer"><EyeIcon open={showConfirm} /></button>
-                  </div>
-                </div>
-
-                {error && (
-                  <div className="flex items-center gap-2 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/50 px-3 py-2.5">
-                    <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4 text-rose-500 shrink-0">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
-                    </svg>
-                    <p className="text-sm text-rose-700 dark:text-rose-300">{error}</p>
-                  </div>
-                )}
-
-                <Button type="submit" loading={isBusy} className="w-full mt-1">
-                  Criar conta
-                </Button>
-              </form>
-            )}
+                <path d="M24 12v24" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
+              </svg>
+            </div>
+            <h1 className="text-xl font-bold text-[var(--foreground)]">Cadê meu dinheiro?</h1>
+            <p className="mt-1 text-sm text-[var(--muted)]">Controle financeiro inteligente</p>
           </div>
-        </div>
 
-        {/* Features */}
-        <div className="mt-6 flex flex-wrap justify-center gap-x-6 gap-y-2">
-          <FeatureBadge icon={<svg viewBox="0 0 16 16" fill="currentColor" className="h-3.5 w-3.5"><path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm3.5 5.5-4 4a.5.5 0 0 1-.708 0l-2-2a.5.5 0 1 1 .708-.708L7 9.293l3.646-3.647a.5.5 0 0 1 .708.708z"/></svg>} text="Dados seguros" />
-          <FeatureBadge icon={<svg viewBox="0 0 16 16" fill="currentColor" className="h-3.5 w-3.5"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1h3A1.5 1.5 0 0 1 7 2.5v3A1.5 1.5 0 0 1 5.5 7h-3A1.5 1.5 0 0 1 1 5.5v-3zm8 0A1.5 1.5 0 0 1 10.5 1h3A1.5 1.5 0 0 1 15 2.5v3A1.5 1.5 0 0 1 13.5 7h-3A1.5 1.5 0 0 1 9 5.5v-3zm-8 8A1.5 1.5 0 0 1 2.5 9h3A1.5 1.5 0 0 1 7 10.5v3A1.5 1.5 0 0 1 5.5 15h-3A1.5 1.5 0 0 1 1 13.5v-3zm8 0A1.5 1.5 0 0 1 10.5 9h3A1.5 1.5 0 0 1 15 10.5v3A1.5 1.5 0 0 1 13.5 15h-3A1.5 1.5 0 0 1 9 13.5v-3z"/></svg>} text="Suporte PWA" />
-          <FeatureBadge icon={<svg viewBox="0 0 16 16" fill="currentColor" className="h-3.5 w-3.5"><path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1H0V4zm0 3h16v5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V7zm3 2a.5.5 0 0 0 0 1h1a.5.5 0 0 0 0-1H3zm2.5 0a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5z"/></svg>} text="PJ e pessoal" />
+          {/* Card */}
+          <div className="rounded-2xl bg-[var(--surface)] border border-[var(--border)] shadow-lg shadow-black/5 overflow-hidden">
+
+            {/* Tab switcher */}
+            <div className="flex border-b border-[var(--border)]">
+              {(["login", "signup"] as const).map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => switchMode(m)}
+                  className={`flex-1 py-3.5 text-sm font-semibold transition-all cursor-pointer ${
+                    mode === m
+                      ? "text-[var(--accent)] border-b-2 border-[var(--accent)] bg-[var(--accent)]/5"
+                      : "text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-raised)]"
+                  }`}
+                >
+                  {m === "login" ? "Entrar" : "Criar conta"}
+                </button>
+              ))}
+            </div>
+
+            <div className="p-6">
+              {mode === "login" ? (
+                <form onSubmit={handleSignIn} className="grid gap-4">
+                  <Input
+                    type="email"
+                    label="E-mail"
+                    placeholder="seu@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    autoComplete="email"
+                    autoFocus
+                  />
+                  <PasswordField
+                    label="Senha"
+                    value={password}
+                    onChange={setPassword}
+                    placeholder="Sua senha"
+                    autoComplete="current-password"
+                  />
+
+                  {error && <AlertBanner type="error" message={error} />}
+                  {message && <AlertBanner type="success" message={message} />}
+
+                  <Button type="submit" loading={isBusy} className="w-full mt-1">
+                    Entrar
+                  </Button>
+                </form>
+              ) : (
+                <form onSubmit={handleSignUp} className="grid gap-3.5">
+                  <Input
+                    type="text"
+                    label="Nome completo"
+                    placeholder="João da Silva"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    autoComplete="name"
+                    autoFocus
+                  />
+                  <Input
+                    type="text"
+                    label="Como quer ser chamado"
+                    placeholder="João"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                  />
+                  <Input
+                    type="text"
+                    label="CPF"
+                    placeholder="000.000.000-00"
+                    value={cpf}
+                    onChange={(e) => setCpf(maskCPF(e.target.value))}
+                    inputMode="numeric"
+                  />
+                  <Input
+                    type="email"
+                    label="E-mail"
+                    placeholder="seu@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    autoComplete="email"
+                  />
+                  <PasswordField
+                    label="Senha"
+                    value={password}
+                    onChange={setPassword}
+                    placeholder="Mínimo 6 caracteres"
+                    autoComplete="new-password"
+                  />
+                  <PasswordField
+                    label="Confirmar senha"
+                    value={confirmPassword}
+                    onChange={setConfirmPassword}
+                    placeholder="Repita a senha"
+                    autoComplete="new-password"
+                  />
+
+                  {error && <AlertBanner type="error" message={error} />}
+
+                  <Button type="submit" loading={isBusy} className="w-full mt-1">
+                    Criar conta
+                  </Button>
+                </form>
+              )}
+            </div>
+          </div>
+
+          <p className="mt-6 text-center text-xs text-[var(--muted)]">
+            Seus dados são armazenados com segurança e nunca compartilhados.
+          </p>
         </div>
       </div>
     </div>

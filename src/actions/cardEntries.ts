@@ -1,8 +1,8 @@
 "use server";
 
 import { auth } from "@/lib/auth";
-import { getDb } from "@/lib/db";
-import { mapEntryRows } from "@/lib/supabase/mappers";
+import { getDb } from "@/lib/db/client";
+import { mapEntryRows } from "@/lib/db/mappers";
 import type { FinanceEntry } from "@/lib/finance";
 
 async function getUserId() {
