@@ -8,7 +8,7 @@ import {
   deleteCardEntry,
   fetchCardEntries,
   upsertCardEntry,
-} from "@/lib/supabase/queries/cardEntries";
+} from "@/actions/cardEntries";
 
 export function useCardEntries(enabled: boolean) {
   const [entries, setEntries] = React.useState<FinanceEntry[]>([]);

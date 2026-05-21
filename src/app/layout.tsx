@@ -3,6 +3,7 @@ import { Open_Sans } from "next/font/google";
 import "./globals.css";
 import { ServiceWorkerRegister } from "@/components/features/ServiceWorkerRegister";
 import { BusyProvider } from "@/components/features/BusyProvider";
+import { SessionProvider } from "next-auth/react";
 
 const openSans = Open_Sans({
   subsets: ['latin'],
@@ -73,7 +74,9 @@ export default function RootLayout({
       <body className="antialiased">
         <ThemeInitScript />
         <ServiceWorkerRegister />
-        <BusyProvider>{children}</BusyProvider>
+        <SessionProvider>
+          <BusyProvider>{children}</BusyProvider>
+        </SessionProvider>
       </body>
     </html>
   );
