@@ -14,12 +14,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const sql = getDb();
         if (!credentials?.email || !credentials?.password) return null;
 
-        const rows = await sql`
-          SELECT id, email, password, display_name, full_name
-          FROM public.users
-          WHERE email = ${credentials.email as string}
-          LIMIT 1
-        `;
+        const rows = await sql(
+          `SELECT id, email, password, display_name, full_name
+           FROM public.users
+           WHERE email = $1
+           LIMIT 1`,
+          [credentials.email as string],
+        );
 
         const user = rows[0];
         if (!user) return null;

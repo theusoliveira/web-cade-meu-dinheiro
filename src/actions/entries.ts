@@ -56,7 +56,7 @@ export async function fetchOpeningBalance(ym: string, scope: MonthlyEntriesScope
   const fn = scope === "business" ? "get_pj_opening_balance" : "get_opening_balance";
   const start = `${ym}-01`;
   try {
-    const rows = await sql(`SELECT public.${fn}($1, $2::date) AS balance`, [userId, start]);
+    const rows = await sql(`SELECT public.${fn}($1, $2::date) AS balance`, [userId, start]) as Record<string, unknown>[];
     return Number(rows[0]?.balance ?? 0);
   } catch {
     const entries = await fetchEntriesBeforeMonth(ym, scope);

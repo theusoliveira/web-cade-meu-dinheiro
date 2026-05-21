@@ -1,14 +1,17 @@
 import "server-only";
 import { neon } from "@neondatabase/serverless";
 
-// Singleton — reutiliza a conexão durante o lifecycle do servidor
-// evita criar um novo cliente a cada chamada de Server Action
-let _db: ReturnType<typeof neon> | null = null;
+type QueryResult = Record<string, unknown>[];
 
-export function getDb() {
+type NeonClient = (query: string, params?: unknown[]) => Promise<QueryResult>;
+
+let _db: NeonClient | null = null;
+
+export function getDb(): NeonClient {
   if (_db) return _db;
   const url = process.env.DATABASE_URL;
   if (!url) throw new Error("Missing environment variable: DATABASE_URL");
-  _db = neon(url);
+  const sql = neon(url);
+  _db = (query, params) => sql(query, params) as Promise<QueryResult>;
   return _db;
 }
