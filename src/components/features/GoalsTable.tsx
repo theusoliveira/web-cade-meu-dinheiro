@@ -72,7 +72,7 @@ export function GoalsTable({
             <div key={g.id} className="p-4">
               <div className="flex items-start justify-between gap-3">
                 <p className="min-w-0 text-sm font-semibold text-[var(--foreground)] break-words">{g.description}</p>
-                <span className={`shrink-0 text-xs font-bold ${p >= 100 ? "text-emerald-500" : p >= 50 ? "text-sky-500" : "text-amber-500"}`}>
+                <span className={`shrink-0 text-xs font-bold ${p >= 100 ? "text-emerald-500" : "text-zinc-500"}`}>
                   {Math.round(p)}%
                 </span>
               </div>

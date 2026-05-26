@@ -132,10 +132,10 @@ export function HistoryTable({
                         <span className="text-xs text-[var(--muted-light)]">{formatDateBR(e.date)}</span>
                       </div>
                       {e.description && (
-                        <p className="text-sm font-medium text-[var(--muted)] break-words">{e.description}</p>
+                        <p className="text-sm font-medium break-words">{e.description}</p>
                       )}
                     </div>
-                    <p className={`whitespace-nowrap text-sm font-bold shrink-0 ${e.kind === "income" ? "text-emerald-600 dark:text-emerald-400" : e.kind === "expense" ? "text-rose-600 dark:text-rose-400" : "text-sky-600 dark:text-sky-400"}`}>
+                    <p className={`whitespace-nowrap text-sm font-medium shrink-0 ${e.kind === "income" ? "text-emerald-600 dark:text-emerald-400" : e.kind === "expense" ? "text-rose-600 dark:text-rose-400" : "text-sky-600 dark:text-sky-400"}`}>
                       {kindPrefix(e.kind)} {formatCurrencyBRL(e.value)}
                     </p>
                   </div>
