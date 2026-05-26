@@ -18,9 +18,12 @@ type Props = {
   onEdit: (entry: FinanceEntry) => void;
   onDelete: (entry: FinanceEntry) => void;
   onDeleteAll: () => void;
+  onDeleteSelected?: (ids: string[]) => void;
 };
 
-export function CardControlClient({ entries, openDialog, onEdit, onDelete, onDeleteAll }: Props) {
+export function CardControlClient({ entries, openDialog, onEdit, onDelete, onDeleteAll, onDeleteSelected }: Props) {
+  const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
+
   const totals = React.useMemo(() => {
     let income = 0;
     let expense = 0;
@@ -34,11 +37,31 @@ export function CardControlClient({ entries, openDialog, onEdit, onDelete, onDel
   const incomeByCategory = React.useMemo(() => groupByCategory(entries, "income"), [entries]);
   const expenseByCategory = React.useMemo(() => groupByCategory(entries, "expense"), [entries]);
 
+  // Limpa seleção quando entries muda (após deleção, por exemplo)
+  React.useEffect(() => {
+    setSelectedIds((prev) => {
+      const entryIds = new Set(entries.map((e) => e.id));
+      const next = new Set([...prev].filter((id) => entryIds.has(id)));
+      return next.size === prev.size ? prev : next;
+    });
+  }, [entries]);
+
   function confirmDeleteAll() {
     const ok = window.confirm(
       "Excluir TODOS os lançamentos do Controle de gastos?\n\nEssa ação não pode ser desfeita.",
     );
     if (ok) onDeleteAll();
+  }
+
+  function confirmDeleteSelected() {
+    const count = selectedIds.size;
+    const ok = window.confirm(
+      `Excluir ${count} lançamento${count === 1 ? "" : "s"} selecionado${count === 1 ? "" : "s"}?\n\nEssa ação não pode ser desfeita.`,
+    );
+    if (ok) {
+      onDeleteSelected?.([...selectedIds]);
+      setSelectedIds(new Set());
+    }
   }
 
   return (
@@ -103,20 +126,47 @@ export function CardControlClient({ entries, openDialog, onEdit, onDelete, onDel
 
       {/* History */}
       <div>
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-base font-bold text-[var(--foreground)]">Histórico</h2>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={confirmDeleteAll}
-            disabled={entries.length === 0}
-            className="text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/30"
-          >
-            Excluir todos
-          </Button>
+        <div className="mb-3 flex items-center justify-between gap-2 flex-wrap">
+          <div className="flex items-center gap-3">
+            <h2 className="text-base font-bold text-[var(--foreground)]">Histórico</h2>
+            {selectedIds.size > 0 && (
+              <span className="text-xs text-[var(--muted)] bg-[var(--surface-raised)] border border-[var(--border)] rounded-full px-2.5 py-0.5">
+                {selectedIds.size} selecionado{selectedIds.size === 1 ? "" : "s"}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            {selectedIds.size > 0 && onDeleteSelected && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={confirmDeleteSelected}
+                className="text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/30"
+              >
+                Excluir selecionados ({selectedIds.size})
+              </Button>
+            )}
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={confirmDeleteAll}
+              disabled={entries.length === 0}
+              className="text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/30"
+            >
+              Excluir todos
+            </Button>
+          </div>
         </div>
-        <HistoryTable entries={entries} onEdit={onEdit} onDelete={onDelete} />
+        <HistoryTable
+          entries={entries}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          selectable
+          selectedIds={selectedIds}
+          onSelectionChange={setSelectedIds}
+        />
       </div>
     </div>
   );

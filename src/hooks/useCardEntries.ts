@@ -5,6 +5,7 @@ import type { FinanceEntry } from "@/lib/finance";
 import { useBusy } from "@/components/features/BusyProvider";
 import {
   deleteAllCardEntries,
+  deleteCardEntries,
   deleteCardEntry,
   fetchCardEntries,
   upsertCardEntry,
@@ -76,5 +77,20 @@ export function useCardEntries(enabled: boolean) {
     });
   }, [run]);
 
-  return { entries, reload, upsertEntry, removeEntry, removeAll };
+  const removeSelected = React.useCallback(
+    async (ids: string[]) => {
+      await run(async () => {
+        try {
+          await deleteCardEntries(ids);
+          setEntries(await fetchCardEntries());
+        } catch (error) {
+          console.error(error);
+          alert("Erro ao excluir selecionados (cartão). Veja o console.");
+        }
+      });
+    },
+    [run],
+  );
+
+  return { entries, reload, upsertEntry, removeEntry, removeAll, removeSelected };
 }

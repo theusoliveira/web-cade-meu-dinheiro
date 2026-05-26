@@ -195,6 +195,7 @@ export function HomeClient() {
                     if (ok) cardEntries.removeEntry(entry);
                   }}
                   onDeleteAll={cardEntries.removeAll}
+                  onDeleteSelected={cardEntries.removeSelected}
                 />
               )}
 
