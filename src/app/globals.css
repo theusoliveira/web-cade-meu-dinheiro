@@ -13,11 +13,12 @@
   /* Brand */
   --accent: #10b981;
   --accent-light: #d1fae5;
+  --accent-dark: #059669;
 
   /* Surfaces */
-  --background: #f7f8fa;
+  --background: #f4f6f9;
   --surface: #ffffff;
-  --surface-raised: #f0f2f5;
+  --surface-raised: #f0f3f7;
   --border: #e2e8f0;
   --border-strong: #cbd5e1;
 
@@ -26,8 +27,16 @@
   --muted: #64748b;
   --muted-light: #94a3b8;
 
-  /* Sidebar */
-  --sidebar-bg: #0f2744;
+  /* Sidebar — light, clean */
+  --sidebar-bg: #ffffff;
+  --sidebar-border: #e8edf4;
+  --sidebar-text: #374151;
+  --sidebar-text-muted: #9ca3af;
+  --sidebar-active-bg: #f0fdf4;
+  --sidebar-active-text: #059669;
+  --sidebar-active-icon: #10b981;
+  --sidebar-hover-bg: #f8fafc;
+  --sidebar-logo-bg: #10b981;
 
   /* Status colors */
   --income: #059669;
@@ -44,7 +53,16 @@
   --foreground: #f1f5f9;
   --muted: #8ba0b8;
   --muted-light: #4a6580;
+
   --sidebar-bg: #060d18;
+  --sidebar-border: #0f1c2e;
+  --sidebar-text: #e2e8f0;
+  --sidebar-text-muted: #4a6580;
+  --sidebar-active-bg: #10b98115;
+  --sidebar-active-text: #34d399;
+  --sidebar-active-icon: #34d399;
+  --sidebar-hover-bg: #0f1c2e;
+  --sidebar-logo-bg: #10b981;
 }
 
 /* ─── Base ─────────────────────────────────────────────────────────── */
@@ -86,13 +104,6 @@ textarea {
 [aria-disabled="true"] {
   cursor: not-allowed !important;
 }
-
-/* ─── Focus ─────────────────────────────────────────────────────────── */
-
-/* :focus-visible {
-  outline: 1px solid #3b82f6;
-  outline-offset: 2px;
-} */
 
 /* ─── Scrollbar ─────────────────────────────────────────────────────── */
 
