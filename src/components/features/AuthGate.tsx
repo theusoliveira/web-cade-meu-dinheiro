@@ -102,62 +102,6 @@ function AlertBanner({ type, message }: { type: "error" | "success"; message: st
   );
 }
 
-// ─── Sidebar brand panel ──────────────────────────────────────────────────────
-
-function BrandPanel() {
-  return (
-    <div
-      className="hidden lg:flex flex-col justify-between p-10 w-[380px] shrink-0"
-      style={{ backgroundColor: "var(--sidebar-bg)" }}
-    >
-      {/* Logo */}
-      <div>
-        <div className="flex items-center gap-3 mb-10">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--accent)]">
-            <svg viewBox="0 0 48 48" fill="none" className="h-6 w-6" aria-hidden>
-              <path
-                d="M16 28c0 2.2 1.8 4 4 4h8c2.2 0 4-1.8 4-4v-2c0-2.2-1.8-4-4-4h-8c-2.2 0-4-1.8-4-4v-2c0-2.2 1.8-4 4-4h8c2.2 0 4 1.8 4 4"
-                stroke="white"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-              />
-              <path d="M24 12v24" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
-            </svg>
-          </div>
-          <div>
-            <p className="text-white font-bold text-base leading-none">Cadê meu</p>
-            <p className="text-[var(--accent)] font-bold text-base leading-none">dinheiro?</p>
-          </div>
-        </div>
-
-        <h2 className="text-white text-2xl font-bold leading-snug mb-3">
-          Controle financeiro inteligente
-        </h2>
-        <p className="text-white/50 text-sm leading-relaxed">
-          Gerencie receitas, despesas e investimentos pessoais e PJ em um só lugar.
-        </p>
-      </div>
-
-      {/* Feature list */}
-      <div className="space-y-4">
-        {[
-          { icon: "📊", text: "Lançamentos pessoais e PJ" },
-          { icon: "🎯", text: "Metas e planejamento" },
-          { icon: "💳", text: "Controle de cartão" },
-          { icon: "📈", text: "Distribuição de salário PJ" },
-        ].map(({ icon, text }) => (
-          <div key={text} className="flex items-center gap-3">
-            <span className="text-lg">{icon}</span>
-            <span className="text-white/70 text-sm">{text}</span>
-          </div>
-        ))}
-      </div>
-
-      <p className="text-white/25 text-xs">© {new Date().getFullYear()} Cadê Meu Dinheiro?</p>
-    </div>
-  );
-}
-
 // ─── AuthGate ─────────────────────────────────────────────────────────────────
 
 export function AuthGate() {
@@ -246,10 +190,7 @@ export function AuthGate() {
   if (checking) {
     return (
       <div className="min-h-[100dvh] flex items-center justify-center bg-[var(--background)]">
-        <div className="flex flex-col items-center gap-4">
-          <div className="h-10 w-10 rounded-full border-2 border-[var(--accent)]/20 border-t-[var(--accent)] animate-spin" />
-          <p className="text-sm text-[var(--muted)]">Carregando…</p>
-        </div>
+        <div className="h-8 w-8 rounded-full border-2 border-[var(--accent)]/20 border-t-[var(--accent)] animate-spin" />
       </div>
     );
   }
@@ -257,140 +198,135 @@ export function AuthGate() {
   if (signedIn) return <HomeClient />;
 
   return (
-    <div className="min-h-[100dvh] flex bg-[var(--background)]">
-      {/* Left brand panel — only on desktop */}
-      <BrandPanel />
+    <div className="min-h-[100dvh] flex flex-col items-center justify-center bg-[var(--background)] px-4 py-10">
+      <div className="w-full max-w-sm animate-fade-in">
 
-      {/* Right auth panel */}
-      <div className="flex flex-1 items-center justify-center px-4 py-10 sm:px-8">
-        <div className="w-full max-w-sm animate-fade-in">
-
-          {/* Mobile-only logo */}
-          <div className="mb-8 flex flex-col items-center text-center lg:hidden">
-            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--accent)]">
-              <svg viewBox="0 0 48 48" fill="none" className="h-7 w-7" aria-hidden>
-                <path
-                  d="M16 28c0 2.2 1.8 4 4 4h8c2.2 0 4-1.8 4-4v-2c0-2.2-1.8-4-4-4h-8c-2.2 0-4-1.8-4-4v-2c0-2.2 1.8-4 4-4h8c2.2 0 4 1.8 4 4"
-                  stroke="white" strokeWidth="2.5" strokeLinecap="round"
-                />
-                <path d="M24 12v24" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
-              </svg>
-            </div>
-            <h1 className="text-xl font-bold text-[var(--foreground)]">Cadê meu dinheiro?</h1>
-            <p className="mt-1 text-sm text-[var(--muted)]">Controle financeiro inteligente</p>
+        {/* Logo */}
+        <div className="mb-8 flex flex-col items-center text-center">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 shadow-lg shadow-emerald-900/20">
+            <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6" aria-hidden>
+              <path
+                d="M12 6v12M8 10c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2v.5c0 1.1-.9 2-2 2h-4c-1.1 0-2 .9-2 2v.5c0 1.1.9 2 2 2h4c1.1 0 2-.9 2-2"
+                stroke="white"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+              />
+            </svg>
           </div>
-
-          {/* Card */}
-          <div className="rounded-2xl bg-[var(--surface)] border border-[var(--border)] shadow-lg shadow-black/5 overflow-hidden">
-
-            {/* Tab switcher */}
-            <div className="flex border-b border-[var(--border)]">
-              {(["login", "signup"] as const).map((m) => (
-                <button
-                  key={m}
-                  type="button"
-                  onClick={() => switchMode(m)}
-                  className={`flex-1 py-3.5 text-sm font-semibold transition-all cursor-pointer ${
-                    mode === m
-                      ? "text-[var(--accent)] border-b-2 border-[var(--accent)] bg-[var(--accent)]/5"
-                      : "text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-raised)]"
-                  }`}
-                >
-                  {m === "login" ? "Entrar" : "Criar conta"}
-                </button>
-              ))}
-            </div>
-
-            <div className="p-6">
-              {mode === "login" ? (
-                <form onSubmit={handleSignIn} className="grid gap-4">
-                  <Input
-                    type="email"
-                    label="E-mail"
-                    placeholder="seu@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    autoComplete="email"
-                    autoFocus
-                  />
-                  <PasswordField
-                    label="Senha"
-                    value={password}
-                    onChange={setPassword}
-                    placeholder="Sua senha"
-                    autoComplete="current-password"
-                  />
-
-                  {error && <AlertBanner type="error" message={error} />}
-                  {message && <AlertBanner type="success" message={message} />}
-
-                  <Button type="submit" loading={isBusy} className="w-full mt-1">
-                    Entrar
-                  </Button>
-                </form>
-              ) : (
-                <form onSubmit={handleSignUp} className="grid gap-3.5">
-                  <Input
-                    type="text"
-                    label="Nome completo"
-                    placeholder="João da Silva"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    autoComplete="name"
-                    autoFocus
-                  />
-                  <Input
-                    type="text"
-                    label="Como quer ser chamado"
-                    placeholder="João"
-                    value={displayName}
-                    onChange={(e) => setDisplayName(e.target.value)}
-                  />
-                  <Input
-                    type="text"
-                    label="CPF"
-                    placeholder="000.000.000-00"
-                    value={cpf}
-                    onChange={(e) => setCpf(maskCPF(e.target.value))}
-                    inputMode="numeric"
-                  />
-                  <Input
-                    type="email"
-                    label="E-mail"
-                    placeholder="seu@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    autoComplete="email"
-                  />
-                  <PasswordField
-                    label="Senha"
-                    value={password}
-                    onChange={setPassword}
-                    placeholder="Mínimo 6 caracteres"
-                    autoComplete="new-password"
-                  />
-                  <PasswordField
-                    label="Confirmar senha"
-                    value={confirmPassword}
-                    onChange={setConfirmPassword}
-                    placeholder="Repita a senha"
-                    autoComplete="new-password"
-                  />
-
-                  {error && <AlertBanner type="error" message={error} />}
-
-                  <Button type="submit" loading={isBusy} className="w-full mt-1">
-                    Criar conta
-                  </Button>
-                </form>
-              )}
-            </div>
-          </div>
-
-          <p className="mt-6 text-center text-xs text-[var(--muted)]">
-            Seus dados são armazenados com segurança e nunca compartilhados.
-          </p>
+          <h1 className="text-xl font-bold text-[var(--foreground)]">Cadê Meu Dinheiro?</h1>
+          <p className="mt-1 text-sm text-[var(--muted)]">Controle financeiro pessoal e PJ</p>
         </div>
+
+        {/* Card */}
+        <div className="rounded-2xl bg-[var(--surface)] border border-[var(--border)] shadow-sm overflow-hidden">
+
+          {/* Tab switcher */}
+          <div className="flex border-b border-[var(--border)]">
+            {(["login", "signup"] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => switchMode(m)}
+                className={`flex-1 py-3 text-sm font-semibold transition-all cursor-pointer ${
+                  mode === m
+                    ? "text-[var(--accent)] border-b-2 border-[var(--accent)]"
+                    : "text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-raised)]"
+                }`}
+              >
+                {m === "login" ? "Entrar" : "Criar conta"}
+              </button>
+            ))}
+          </div>
+
+          <div className="p-6">
+            {mode === "login" ? (
+              <form onSubmit={handleSignIn} className="grid gap-4">
+                <Input
+                  type="email"
+                  label="E-mail"
+                  placeholder="seu@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="email"
+                  autoFocus
+                />
+                <PasswordField
+                  label="Senha"
+                  value={password}
+                  onChange={setPassword}
+                  placeholder="Sua senha"
+                  autoComplete="current-password"
+                />
+
+                {error && <AlertBanner type="error" message={error} />}
+                {message && <AlertBanner type="success" message={message} />}
+
+                <Button type="submit" loading={isBusy} className="w-full mt-1">
+                  Entrar
+                </Button>
+              </form>
+            ) : (
+              <form onSubmit={handleSignUp} className="grid gap-3.5">
+                <Input
+                  type="text"
+                  label="Nome completo"
+                  placeholder="João da Silva"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  autoComplete="name"
+                  autoFocus
+                />
+                <Input
+                  type="text"
+                  label="Como quer ser chamado"
+                  placeholder="João"
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                />
+                <Input
+                  type="text"
+                  label="CPF"
+                  placeholder="000.000.000-00"
+                  value={cpf}
+                  onChange={(e) => setCpf(maskCPF(e.target.value))}
+                  inputMode="numeric"
+                />
+                <Input
+                  type="email"
+                  label="E-mail"
+                  placeholder="seu@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="email"
+                />
+                <PasswordField
+                  label="Senha"
+                  value={password}
+                  onChange={setPassword}
+                  placeholder="Mínimo 6 caracteres"
+                  autoComplete="new-password"
+                />
+                <PasswordField
+                  label="Confirmar senha"
+                  value={confirmPassword}
+                  onChange={setConfirmPassword}
+                  placeholder="Repita a senha"
+                  autoComplete="new-password"
+                />
+
+                {error && <AlertBanner type="error" message={error} />}
+
+                <Button type="submit" loading={isBusy} className="w-full mt-1">
+                  Criar conta
+                </Button>
+              </form>
+            )}
+          </div>
+        </div>
+
+        <p className="mt-5 text-center text-xs text-[var(--muted)]">
+          © {new Date().getFullYear()} Cadê Meu Dinheiro?
+        </p>
       </div>
     </div>
   );

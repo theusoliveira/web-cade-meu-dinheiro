@@ -96,8 +96,8 @@ function LogoMark({ collapsed }: { collapsed: boolean }) {
       </div>
       {!collapsed && (
         <div>
-          <p className="text-sm font-bold text-white leading-tight">Cadê Meu</p>
-          <p className="text-xs text-emerald-400 font-semibold leading-tight">Dinheiro?</p>
+          <p className="text-sm font-bold text-[var(--sidebar-text)] leading-tight">Cadê Meu</p>
+          <p className="text-xs text-emerald-500 font-semibold leading-tight">Dinheiro?</p>
         </div>
       )}
     </div>
@@ -123,7 +123,7 @@ export function AppSidebar({
           "hidden md:flex md:flex-col",
           "md:fixed md:inset-y-0 md:left-0 md:z-40",
           "md:h-dvh md:transition-[width] md:duration-200",
-          "bg-[var(--sidebar-bg)] border-r border-white/5",
+          "bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)]",
           width,
         ].join(" ")}
       >
@@ -134,7 +134,7 @@ export function AppSidebar({
             <button
               type="button"
               onClick={onToggleCollapse}
-              className="h-7 w-7 flex items-center justify-center rounded-lg text-white/40 hover:text-white hover:bg-white/10 cursor-pointer transition-colors"
+              className="h-7 w-7 flex items-center justify-center rounded-lg text-[var(--sidebar-text-muted)] hover:text-[var(--sidebar-text)] hover:bg-[var(--sidebar-hover-bg)] cursor-pointer transition-colors"
               aria-label="Minimizar menu"
             >
               <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden>
@@ -149,7 +149,7 @@ export function AppSidebar({
             <button
               type="button"
               onClick={onToggleCollapse}
-              className="h-7 w-7 flex items-center justify-center rounded-lg text-white/40 hover:text-white hover:bg-white/10 cursor-pointer transition-colors"
+              className="h-7 w-7 flex items-center justify-center rounded-lg text-[var(--sidebar-text-muted)] hover:text-[var(--sidebar-text)] hover:bg-[var(--sidebar-hover-bg)] cursor-pointer transition-colors"
               aria-label="Expandir menu"
             >
               <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden>
@@ -160,15 +160,10 @@ export function AppSidebar({
         )}
 
         {/* Divider */}
-        <div className="mx-4 mb-2 h-px bg-white/8" />
+        <div className="mx-4 mb-2 h-px bg-[var(--sidebar-border)]" />
 
         {/* Nav */}
         <nav className={`flex-1 overflow-y-auto py-2 ${collapsed ? "px-2" : "px-3"}`}>
-          {!collapsed && (
-            <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-widest text-white/30">
-              Navegação
-            </p>
-          )}
 
           <ul className="grid gap-0.5">
             {NAV_ITEMS.map((item) => {
@@ -185,11 +180,11 @@ export function AppSidebar({
                       "w-full flex items-center rounded-xl transition-all cursor-pointer",
                       collapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2.5",
                       isActive
-                        ? "bg-emerald-500/15 text-white"
-                        : "text-white/55 hover:bg-white/6 hover:text-white/90",
+                        ? "bg-[var(--sidebar-active-bg)] text-[var(--sidebar-active-text)]"
+                        : "text-[var(--sidebar-text-muted)] hover:bg-[var(--sidebar-hover-bg)] hover:text-[var(--sidebar-text)]",
                     ].join(" ")}
                   >
-                    <span className={isActive ? "text-emerald-400" : ""}>
+                    <span className={isActive ? "text-[var(--sidebar-active-icon)]" : ""}>
                       {item.icon}
                     </span>
                     {!collapsed && (
@@ -204,9 +199,9 @@ export function AppSidebar({
 
         {/* Bottom */}
         <div className={`py-4 ${collapsed ? "px-2" : "px-4"}`}>
-          <div className="h-px bg-white/8 mb-4" />
+          <div className="h-px bg-[var(--sidebar-border)] mb-4" />
           {!collapsed && (
-            <p className="text-[10px] text-white/25 text-center">
+            <p className="text-[10px] text-[var(--sidebar-label)] text-center">
               © 2026 Cadê Meu Dinheiro?
             </p>
           )}
