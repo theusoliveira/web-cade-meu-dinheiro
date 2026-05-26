@@ -102,58 +102,108 @@ function AlertBanner({ type, message }: { type: "error" | "success"; message: st
   );
 }
 
-// ─── Sidebar brand panel ──────────────────────────────────────────────────────
+// ─── Brand panel (left side) ──────────────────────────────────────────────────
 
 function BrandPanel() {
+  const features = [
+    {
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden>
+          <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="1.8"/>
+          <path d="M7 9h10M7 12h7M7 15h4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+        </svg>
+      ),
+      text: "Lançamentos pessoais e PJ",
+    },
+    {
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden>
+          <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8"/>
+          <circle cx="12" cy="12" r="5" stroke="currentColor" strokeWidth="1.8"/>
+          <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+        </svg>
+      ),
+      text: "Metas e planejamento",
+    },
+    {
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden>
+          <rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" strokeWidth="1.8"/>
+          <path d="M2 10h20" stroke="currentColor" strokeWidth="1.8"/>
+          <path d="M6 15h3M15 15h3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+        </svg>
+      ),
+      text: "Controle de gastos",
+    },
+    {
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden>
+          <path d="M21 21H3M21 3H3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+          <path d="M6 21V12M10 21V6M14 21V10M18 21V4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+        </svg>
+      ),
+      text: "Distribuição de salário",
+    },
+  ];
+
   return (
     <div
-      className="hidden lg:flex flex-col justify-between p-10 w-[380px] shrink-0"
-      style={{ backgroundColor: "var(--sidebar-bg)" }}
+      className="hidden lg:flex flex-col justify-between p-10 w-[400px] shrink-0 relative overflow-hidden"
+      style={{ backgroundColor: "#0f172a" }}
     >
+      {/* Decorative blobs */}
+      <div
+        className="absolute -top-24 -right-24 h-72 w-72 rounded-full opacity-20 blur-3xl pointer-events-none"
+        style={{ background: "radial-gradient(circle, #10b981, transparent)" }}
+      />
+      <div
+        className="absolute bottom-0 left-0 h-56 w-56 rounded-full opacity-10 blur-3xl pointer-events-none"
+        style={{ background: "radial-gradient(circle, #3b82f6, transparent)" }}
+      />
+
       {/* Logo */}
-      <div>
-        <div className="flex items-center gap-3 mb-10">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--accent)]">
-            <svg viewBox="0 0 48 48" fill="none" className="h-6 w-6" aria-hidden>
+      <div className="relative">
+        <div className="flex items-center gap-3 mb-12">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500 shadow-lg shadow-emerald-500/30">
+            <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
               <path
-                d="M16 28c0 2.2 1.8 4 4 4h8c2.2 0 4-1.8 4-4v-2c0-2.2-1.8-4-4-4h-8c-2.2 0-4-1.8-4-4v-2c0-2.2 1.8-4 4-4h8c2.2 0 4 1.8 4 4"
+                d="M12 6v12M8 10c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2v.5c0 1.1-.9 2-2 2h-4c-1.1 0-2 .9-2 2v.5c0 1.1.9 2 2 2h4c1.1 0 2-.9 2-2"
                 stroke="white"
-                strokeWidth="2.5"
+                strokeWidth="1.8"
                 strokeLinecap="round"
               />
-              <path d="M24 12v24" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
             </svg>
           </div>
           <div>
             <p className="text-white font-bold text-base leading-none">Cadê meu</p>
-            <p className="text-[var(--accent)] font-bold text-base leading-none">dinheiro?</p>
+            <p className="text-emerald-400 font-bold text-base leading-none">dinheiro?</p>
           </div>
         </div>
 
         <h2 className="text-white text-2xl font-bold leading-snug mb-3">
-          Controle financeiro inteligente
+          Controle financeiro{" "}
+          <span className="text-emerald-400">inteligente</span>
         </h2>
-        <p className="text-white/50 text-sm leading-relaxed">
-          Gerencie receitas, despesas e investimentos pessoais e PJ em um só lugar.
+        <p className="text-white/50 text-sm leading-relaxed mb-10">
+          Gerencie receitas, despesas e investimentos pessoais e PJ em um só lugar, com clareza e simplicidade.
         </p>
+
+        {/* Feature pills */}
+        <div className="grid gap-3">
+          {features.map(({ icon, text }) => (
+            <div
+              key={text}
+              className="flex items-center gap-3 rounded-xl px-4 py-3"
+              style={{ backgroundColor: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}
+            >
+              <span className="text-emerald-400 shrink-0">{icon}</span>
+              <span className="text-white/70 text-sm">{text}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* Feature list */}
-      <div className="space-y-4">
-        {[
-          { icon: "📊", text: "Lançamentos pessoais e PJ" },
-          { icon: "🎯", text: "Metas e planejamento" },
-          { icon: "💳", text: "Controle de cartão" },
-          { icon: "📈", text: "Distribuição de salário PJ" },
-        ].map(({ icon, text }) => (
-          <div key={text} className="flex items-center gap-3">
-            <span className="text-lg">{icon}</span>
-            <span className="text-white/70 text-sm">{text}</span>
-          </div>
-        ))}
-      </div>
-
-      <p className="text-white/25 text-xs">© {new Date().getFullYear()} Cadê Meu Dinheiro?</p>
+      <p className="text-white/25 text-xs relative">© {new Date().getFullYear()} Cadê Meu Dinheiro?</p>
     </div>
   );
 }
@@ -257,50 +307,42 @@ export function AuthGate() {
   if (signedIn) return <HomeClient />;
 
   return (
-    <div className="min-h-[100dvh] flex bg-[var(--background)]">
-      {/* Left brand panel — only on desktop */}
+    <div className="min-h-[100dvh] flex" style={{ backgroundColor: "var(--background)" }}>
+      {/* Left brand panel */}
       <BrandPanel />
 
       {/* Right auth panel */}
       <div className="flex flex-1 items-center justify-center px-4 py-10 sm:px-8">
-        <div className="w-full max-w-sm animate-fade-in">
+        <div className="w-full max-w-[380px] animate-fade-in">
 
           {/* Mobile-only logo */}
           <div className="mb-8 flex flex-col items-center text-center lg:hidden">
-            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--accent)]">
-              <svg viewBox="0 0 48 48" fill="none" className="h-7 w-7" aria-hidden>
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500 shadow-lg shadow-emerald-500/25">
+              <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6" aria-hidden>
                 <path
-                  d="M16 28c0 2.2 1.8 4 4 4h8c2.2 0 4-1.8 4-4v-2c0-2.2-1.8-4-4-4h-8c-2.2 0-4-1.8-4-4v-2c0-2.2 1.8-4 4-4h8c2.2 0 4 1.8 4 4"
-                  stroke="white" strokeWidth="2.5" strokeLinecap="round"
+                  d="M12 6v12M8 10c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2v.5c0 1.1-.9 2-2 2h-4c-1.1 0-2 .9-2 2v.5c0 1.1.9 2 2 2h4c1.1 0 2-.9 2-2"
+                  stroke="white" strokeWidth="1.8" strokeLinecap="round"
                 />
-                <path d="M24 12v24" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
               </svg>
             </div>
             <h1 className="text-xl font-bold text-[var(--foreground)]">Cadê meu dinheiro?</h1>
             <p className="mt-1 text-sm text-[var(--muted)]">Controle financeiro inteligente</p>
           </div>
 
+          {/* Heading */}
+          <div className="mb-6 lg:block">
+            <h2 className="text-2xl font-bold text-[var(--foreground)]">
+              {mode === "login" ? "Bem-vindo de volta" : "Criar conta"}
+            </h2>
+            <p className="mt-1 text-sm text-[var(--muted)]">
+              {mode === "login"
+                ? "Entre com seu e-mail e senha para continuar."
+                : "Preencha os dados abaixo para criar sua conta."}
+            </p>
+          </div>
+
           {/* Card */}
-          <div className="rounded-2xl bg-[var(--surface)] border border-[var(--border)] shadow-lg shadow-black/5 overflow-hidden">
-
-            {/* Tab switcher */}
-            <div className="flex border-b border-[var(--border)]">
-              {(["login", "signup"] as const).map((m) => (
-                <button
-                  key={m}
-                  type="button"
-                  onClick={() => switchMode(m)}
-                  className={`flex-1 py-3.5 text-sm font-semibold transition-all cursor-pointer ${
-                    mode === m
-                      ? "text-[var(--accent)] border-b-2 border-[var(--accent)] bg-[var(--accent)]/5"
-                      : "text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-raised)]"
-                  }`}
-                >
-                  {m === "login" ? "Entrar" : "Criar conta"}
-                </button>
-              ))}
-            </div>
-
+          <div className="rounded-2xl bg-[var(--surface)] border border-[var(--border)] shadow-sm overflow-hidden">
             <div className="p-6">
               {mode === "login" ? (
                 <form onSubmit={handleSignIn} className="grid gap-4">
@@ -387,7 +429,19 @@ export function AuthGate() {
             </div>
           </div>
 
-          <p className="mt-6 text-center text-xs text-[var(--muted)]">
+          {/* Mode switcher */}
+          <p className="mt-5 text-center text-sm text-[var(--muted)]">
+            {mode === "login" ? "Ainda não tem conta? " : "Já tem uma conta? "}
+            <button
+              type="button"
+              onClick={() => switchMode(mode === "login" ? "signup" : "login")}
+              className="font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 cursor-pointer transition-colors"
+            >
+              {mode === "login" ? "Criar conta" : "Entrar"}
+            </button>
+          </p>
+
+          <p className="mt-4 text-center text-xs text-[var(--muted-light)]">
             Seus dados são armazenados com segurança e nunca compartilhados.
           </p>
         </div>

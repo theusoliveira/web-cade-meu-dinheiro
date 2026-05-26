@@ -43,6 +43,18 @@ export async function deleteCardEntry(id: string) {
   await sql(`DELETE FROM public.card_entries WHERE id = $1 AND user_id = $2`, [id, userId]);
 }
 
+export async function deleteCardEntries(ids: string[]) {
+  if (ids.length === 0) return;
+  const sql = getDb();
+  const userId = await getUserId();
+  // Cria placeholders: $1 = userId, $2..$N = ids
+  const placeholders = ids.map((_, i) => `$${i + 2}`).join(", ");
+  await sql(
+    `DELETE FROM public.card_entries WHERE user_id = $1 AND id IN (${placeholders})`,
+    [userId, ...ids],
+  );
+}
+
 export async function deleteAllCardEntries() {
   const sql = getDb();
   const userId = await getUserId();

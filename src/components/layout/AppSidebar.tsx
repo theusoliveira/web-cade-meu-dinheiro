@@ -29,9 +29,9 @@ const NAV_ITEMS: NavItem[] = [
   {
     key: "lancamentos",
     label: "Lançamentos",
-    shortLabel: "Pessoal",
+    shortLabel: "Lanc.",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+      <svg viewBox="0 0 24 24" fill="none" className="h-[18px] w-[18px]" aria-hidden>
         <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="1.8" />
         <path d="M7 9h10M7 12h7M7 15h4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       </svg>
@@ -40,9 +40,9 @@ const NAV_ITEMS: NavItem[] = [
   {
     key: "lancamentos_pj",
     label: "Lançamentos PJ",
-    shortLabel: "PJ",
+    shortLabel: "Lanc. PJ",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+      <svg viewBox="0 0 24 24" fill="none" className="h-[18px] w-[18px]" aria-hidden>
         <path d="M3 21V8l9-5 9 5v13" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
         <path d="M9 21V13h6v8" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
       </svg>
@@ -51,9 +51,9 @@ const NAV_ITEMS: NavItem[] = [
   {
     key: "distribuicao_pj",
     label: "Distribuição PJ",
-    shortLabel: "Distrib.",
+    shortLabel: "Salário PJ",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+      <svg viewBox="0 0 24 24" fill="none" className="h-[18px] w-[18px]" aria-hidden>
         <path d="M21 21H3M21 3H3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
         <path d="M6 21V12M10 21V6M14 21V10M18 21V4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       </svg>
@@ -64,7 +64,7 @@ const NAV_ITEMS: NavItem[] = [
     label: "Metas",
     shortLabel: "Metas",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+      <svg viewBox="0 0 24 24" fill="none" className="h-[18px] w-[18px]" aria-hidden>
         <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8" />
         <circle cx="12" cy="12" r="5" stroke="currentColor" strokeWidth="1.8" />
         <circle cx="12" cy="12" r="1.5" fill="currentColor" />
@@ -75,9 +75,9 @@ const NAV_ITEMS: NavItem[] = [
   {
     key: "controle",
     label: "Controle de Gastos",
-    shortLabel: "Cartão",
+    shortLabel: "Gastos",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+      <svg viewBox="0 0 24 24" fill="none" className="h-[18px] w-[18px]" aria-hidden>
         <rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" strokeWidth="1.8" />
         <path d="M2 10h20" stroke="currentColor" strokeWidth="1.8" />
         <path d="M6 15h3M15 15h3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
@@ -88,16 +88,16 @@ const NAV_ITEMS: NavItem[] = [
 
 function LogoMark({ collapsed }: { collapsed: boolean }) {
   return (
-    <div className={`flex items-center gap-3 ${collapsed ? "justify-center" : ""}`}>
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 shadow-lg shadow-emerald-900/40">
-        <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
+    <div className={`flex items-center gap-2.5 ${collapsed ? "justify-center" : ""}`}>
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500 shadow-sm">
+        <svg viewBox="0 0 24 24" fill="none" className="h-4.5 w-4.5" aria-hidden>
           <path d="M12 6v12M8 10c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2v.5c0 1.1-.9 2-2 2h-4c-1.1 0-2 .9-2 2v.5c0 1.1.9 2 2 2h4c1.1 0 2-.9 2-2" stroke="white" strokeWidth="1.8" strokeLinecap="round" />
         </svg>
       </div>
       {!collapsed && (
-        <div>
-          <p className="text-sm font-bold text-white leading-tight">Cadê Meu</p>
-          <p className="text-xs text-emerald-400 font-semibold leading-tight">Dinheiro?</p>
+        <div className="leading-tight">
+          <p className="text-sm font-bold text-[var(--foreground)]">Cadê Meu</p>
+          <p className="text-xs font-semibold text-emerald-500">Dinheiro?</p>
         </div>
       )}
     </div>
@@ -110,7 +110,7 @@ export function AppSidebar({
   collapsed,
   onToggleCollapse,
 }: Props) {
-  const width = collapsed ? "md:w-[72px]" : "md:w-60";
+  const width = collapsed ? "md:w-[72px]" : "md:w-65";
 
   return (
     <>
@@ -123,9 +123,13 @@ export function AppSidebar({
           "hidden md:flex md:flex-col",
           "md:fixed md:inset-y-0 md:left-0 md:z-40",
           "md:h-dvh md:transition-[width] md:duration-200",
-          "bg-[var(--sidebar-bg)] border-r border-white/5",
+          "border-r",
           width,
         ].join(" ")}
+        style={{
+          backgroundColor: "var(--sidebar-bg)",
+          borderColor: "var(--sidebar-border)",
+        }}
       >
         {/* Header */}
         <div className={`flex items-center py-5 ${collapsed ? "justify-center px-3" : "px-4 justify-between"}`}>
@@ -134,7 +138,18 @@ export function AppSidebar({
             <button
               type="button"
               onClick={onToggleCollapse}
-              className="h-7 w-7 flex items-center justify-center rounded-lg text-white/40 hover:text-white hover:bg-white/10 cursor-pointer transition-colors"
+              className="h-7 w-7 flex items-center justify-center rounded-lg transition-colors cursor-pointer"
+              style={{
+                color: "var(--sidebar-text-muted)",
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.backgroundColor = "var(--sidebar-hover-bg)";
+                (e.currentTarget as HTMLElement).style.color = "var(--sidebar-text)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.backgroundColor = "transparent";
+                (e.currentTarget as HTMLElement).style.color = "var(--sidebar-text-muted)";
+              }}
               aria-label="Minimizar menu"
             >
               <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden>
@@ -149,7 +164,16 @@ export function AppSidebar({
             <button
               type="button"
               onClick={onToggleCollapse}
-              className="h-7 w-7 flex items-center justify-center rounded-lg text-white/40 hover:text-white hover:bg-white/10 cursor-pointer transition-colors"
+              className="h-7 w-7 flex items-center justify-center rounded-lg transition-colors cursor-pointer"
+              style={{ color: "var(--sidebar-text-muted)" }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.backgroundColor = "var(--sidebar-hover-bg)";
+                (e.currentTarget as HTMLElement).style.color = "var(--sidebar-text)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.backgroundColor = "transparent";
+                (e.currentTarget as HTMLElement).style.color = "var(--sidebar-text-muted)";
+              }}
               aria-label="Expandir menu"
             >
               <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden>
@@ -160,15 +184,10 @@ export function AppSidebar({
         )}
 
         {/* Divider */}
-        <div className="mx-4 mb-2 h-px bg-white/8" />
+        <div className="mx-4 mb-3 h-px" style={{ backgroundColor: "var(--sidebar-border)" }} />
 
         {/* Nav */}
-        <nav className={`flex-1 overflow-y-auto py-2 ${collapsed ? "px-2" : "px-3"}`}>
-          {!collapsed && (
-            <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-widest text-white/30">
-              Navegação
-            </p>
-          )}
+        <nav className={`flex-1 overflow-y-auto py-1 ${collapsed ? "px-2" : "px-3"}`}>
 
           <ul className="grid gap-0.5">
             {NAV_ITEMS.map((item) => {
@@ -182,18 +201,39 @@ export function AppSidebar({
                     aria-label={item.label}
                     aria-current={isActive ? "page" : undefined}
                     className={[
-                      "w-full flex items-center rounded-xl transition-all cursor-pointer",
+                      "w-full flex items-center rounded-lg transition-all duration-150 cursor-pointer",
                       collapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2.5",
-                      isActive
-                        ? "bg-emerald-500/15 text-white"
-                        : "text-white/55 hover:bg-white/6 hover:text-white/90",
                     ].join(" ")}
+                    style={
+                      isActive
+                        ? {
+                            backgroundColor: "var(--sidebar-active-bg)",
+                            color: "var(--sidebar-active-text)",
+                          }
+                        : {
+                            color: "var(--sidebar-text)",
+                          }
+                    }
+                    onMouseEnter={(e) => {
+                      if (!isActive) {
+                        (e.currentTarget as HTMLElement).style.backgroundColor = "var(--sidebar-hover-bg)";
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isActive) {
+                        (e.currentTarget as HTMLElement).style.backgroundColor = "transparent";
+                      }
+                    }}
                   >
-                    <span className={isActive ? "text-emerald-400" : ""}>
+                    <span
+                      style={{
+                        color: isActive ? "var(--sidebar-active-icon)" : "var(--sidebar-text-muted)",
+                      }}
+                    >
                       {item.icon}
                     </span>
                     {!collapsed && (
-                      <span className="text-sm font-medium truncate">{item.label}</span>
+                      <span className="text-[13px] font-semibold truncate">{item.label}</span>
                     )}
                   </button>
                 </li>
@@ -204,10 +244,13 @@ export function AppSidebar({
 
         {/* Bottom */}
         <div className={`py-4 ${collapsed ? "px-2" : "px-4"}`}>
-          <div className="h-px bg-white/8 mb-4" />
+          <div className="h-px mb-4" style={{ backgroundColor: "var(--sidebar-border)" }} />
           {!collapsed && (
-            <p className="text-[10px] text-white/25 text-center">
-              © 2026 Cadê Meu Dinheiro?
+            <p
+              className="text-[10px] text-center"
+              style={{ color: "var(--sidebar-text-muted)" }}
+            >
+              © {new Date().getFullYear()} Cadê Meu Dinheiro?
             </p>
           )}
         </div>
