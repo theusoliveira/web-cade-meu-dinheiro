@@ -11,7 +11,7 @@ function percent(current: number, target: number): number {
 }
 
 function ProgressBar({ value }: { value: number }) {
-  const color = value >= 100 ? "bg-emerald-500" : value >= 50 ? "bg-sky-500" : "bg-amber-500";
+  const color = value >= 100 ? "bg-emerald-500" : "bg-zinc-400";
   return (
     <div className="h-2 w-full rounded-full bg-[var(--surface-raised)]">
       <div
@@ -139,7 +139,7 @@ export function GoalsTable({
                       <div className="w-32">
                         <ProgressBar value={p} />
                       </div>
-                      <span className={`text-xs font-bold w-10 ${p >= 100 ? "text-emerald-500" : p >= 50 ? "text-sky-500" : "text-amber-500"}`}>
+                      <span className={`text-xs font-bold w-10 ${p >= 100 ? "text-emerald-500" : "text-zinc-500"}`}>
                         {Math.round(p)}%
                       </span>
                     </div>
