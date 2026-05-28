@@ -12,8 +12,57 @@ import {
   toggleAlert,
   type AlertRecord,
 } from "@/actions/alerts";
-import { formatCurrencyBRL, formatDateBR } from "@/lib/finance";
+import { formatCurrencyBRL, formatBRLFromCents, formatDateBR } from "@/lib/finance";
 import { newId } from "@/lib/finance/id";
+
+// ─── Ícones — mesmo estilo stroke do sistema ──────────────────────────────────
+
+function IconEdit() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className="h-3.5 w-3.5" aria-hidden>
+      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+        stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+        stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function IconTrash() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className="h-3.5 w-3.5" aria-hidden>
+      <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"
+        stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function IconBell() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className="h-10 w-10" aria-hidden>
+      <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+        stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function IconWarning() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden>
+      <path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
+        stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function IconRepeat() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className="h-3 w-3" aria-hidden>
+      <path d="M17 1l4 4-4 4M3 11V9a4 4 0 014-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 01-4 4H3"
+        stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -24,12 +73,63 @@ function daysUntil(dueDate: string): number {
   return Math.ceil((due.getTime() - today.getTime()) / 86_400_000);
 }
 
+/**
+ * Para alertas recorrentes, calcula a próxima data de vencimento a partir
+ * do dayOfMonth. Se o dia já passou neste mês, avança para o mês seguinte.
+ */
+function nextRecurringDate(dayOfMonth: number): string {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const year = today.getFullYear();
+  const month = today.getMonth(); // 0-indexed
+
+  // Clamp day para o último dia do mês corrente
+  const maxDay = new Date(year, month + 1, 0).getDate();
+  const day = Math.min(dayOfMonth, maxDay);
+  const candidate = new Date(year, month, day);
+
+  if (candidate >= today) {
+    return candidate.toISOString().slice(0, 10);
+  }
+  // Próximo mês
+  const nextMonth = month + 1;
+  const nextYear = nextMonth > 11 ? year + 1 : year;
+  const nm = nextMonth > 11 ? 0 : nextMonth;
+  const maxDayNext = new Date(nextYear, nm + 1, 0).getDate();
+  const dayNext = Math.min(dayOfMonth, maxDayNext);
+  return new Date(nextYear, nm, dayNext).toISOString().slice(0, 10);
+}
+
 function urgencyBadge(daysLeft: number, active: boolean) {
   if (!active) return { label: "Inativo", className: "bg-[var(--surface-raised)] text-[var(--muted)] border-[var(--border)]" };
   if (daysLeft < 0) return { label: "Vencida", className: "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/30 dark:text-rose-300 dark:border-rose-900/50" };
   if (daysLeft === 0) return { label: "Vence hoje", className: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-300 dark:border-amber-900/50" };
   if (daysLeft <= 3) return { label: `${daysLeft}d`, className: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-300 dark:border-amber-900/50" };
   return { label: `${daysLeft}d`, className: "bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/30 dark:text-sky-300 dark:border-sky-900/50" };
+}
+
+// ─── Currency input mask ──────────────────────────────────────────────────────
+
+function useCurrencyMask(initialCents: number, onChange: (cents: number) => void) {
+  const [text, setText] = React.useState(() =>
+    initialCents > 0 ? formatCurrencyBRL(initialCents / 100) : "",
+  );
+  const [cents, setCents] = React.useState(initialCents);
+
+  React.useEffect(() => {
+    setText(initialCents > 0 ? formatCurrencyBRL(initialCents / 100) : "");
+    setCents(initialCents);
+  }, [initialCents]);
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const digits = e.target.value.replace(/\D/g, "");
+    const c = digits ? parseInt(digits, 10) : 0;
+    setCents(c);
+    setText(c === 0 ? "" : formatCurrencyBRL(c / 100));
+    onChange(c);
+  }
+
+  return { value: text, onChange: handleChange, cents };
 }
 
 // ─── Alert Dialog ─────────────────────────────────────────────────────────────
@@ -43,22 +143,30 @@ type AlertDialogProps = {
 
 function AlertDialog({ open, initial, onClose, onSubmit }: AlertDialogProps) {
   const [name, setName] = React.useState("");
+  const [recurring, setRecurring] = React.useState(false);
+  const [dayOfMonth, setDayOfMonth] = React.useState(1);
   const [dueDate, setDueDate] = React.useState("");
   const [reminderDays, setReminderDays] = React.useState(3);
-  const [valueStr, setValueStr] = React.useState("");
+  const [valueCents, setValueCents] = React.useState(0);
+
+  const currencyMask = useCurrencyMask(valueCents, setValueCents);
 
   React.useEffect(() => {
     if (!open) return;
     if (initial) {
       setName(initial.name);
+      setRecurring(initial.recurring);
+      setDayOfMonth(initial.dayOfMonth ?? 1);
       setDueDate(initial.dueDate);
       setReminderDays(initial.reminderDays);
-      setValueStr(initial.expectedValue != null ? String(initial.expectedValue) : "");
+      setValueCents(initial.expectedValue != null ? Math.round(initial.expectedValue * 100) : 0);
     } else {
       setName("");
+      setRecurring(false);
+      setDayOfMonth(new Date().getDate());
       setDueDate("");
       setReminderDays(3);
-      setValueStr("");
+      setValueCents(0);
     }
   }, [open, initial]);
 
@@ -66,18 +174,28 @@ function AlertDialog({ open, initial, onClose, onSubmit }: AlertDialogProps) {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name.trim() || !dueDate) return;
-    const parsedValue = valueStr.trim() ? parseFloat(valueStr.replace(",", ".")) : null;
+    if (!name.trim()) return;
+    if (!recurring && !dueDate) return;
+
+    const resolvedDueDate = recurring
+      ? nextRecurringDate(dayOfMonth)
+      : dueDate;
+
     onSubmit({
       id: initial?.id ?? newId(),
       name: name.trim(),
-      dueDate,
+      dueDate: resolvedDueDate,
       reminderDays,
-      expectedValue: Number.isFinite(parsedValue ?? NaN) ? parsedValue : null,
+      expectedValue: valueCents > 0 ? valueCents / 100 : null,
       active: initial?.active ?? true,
+      recurring,
+      dayOfMonth: recurring ? dayOfMonth : null,
       createdAt: initial?.createdAt ?? Date.now(),
     });
   }
+
+  const inputClass =
+    "h-10 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm text-[var(--foreground)] outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-[var(--accent)] transition-all";
 
   return (
     <div
@@ -91,7 +209,9 @@ function AlertDialog({ open, initial, onClose, onSubmit }: AlertDialogProps) {
         <h2 className="mb-5 text-lg font-bold text-[var(--foreground)]">
           {initial ? "Editar alerta" : "Novo alerta de conta"}
         </h2>
+
         <form onSubmit={handleSubmit} className="grid gap-4">
+          {/* Nome */}
           <Input
             label="Nome da conta"
             value={name}
@@ -100,7 +220,49 @@ function AlertDialog({ open, initial, onClose, onSubmit }: AlertDialogProps) {
             required
             autoFocus
           />
-          <div className="grid grid-cols-2 gap-3">
+
+          {/* Toggle recorrente */}
+          <div className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--surface-raised)] px-4 py-3">
+            <div>
+              <p className="text-sm font-semibold text-[var(--foreground)]">Conta recorrente</p>
+              <p className="text-xs text-[var(--muted)]">Repete todo mês no mesmo dia</p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={recurring}
+              onClick={() => setRecurring((v) => !v)}
+              className={[
+                "relative inline-flex h-6 w-10 shrink-0 cursor-pointer items-center rounded-full transition-colors focus-visible:outline focus-visible:outline-2",
+                recurring ? "bg-[var(--accent)]" : "bg-[var(--border-strong)]",
+              ].join(" ")}
+            >
+              <span className={[
+                "inline-block h-4 w-4 rounded-full bg-white shadow transition-transform",
+                recurring ? "translate-x-5" : "translate-x-1",
+              ].join(" ")} />
+            </button>
+          </div>
+
+          {/* Data / Dia do mês */}
+          {recurring ? (
+            <div className="grid gap-1.5">
+              <label className="text-sm font-medium text-[var(--foreground)]">
+                Dia de vencimento todo mês
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  min={1}
+                  max={31}
+                  value={dayOfMonth}
+                  onChange={(e) => setDayOfMonth(Math.min(31, Math.max(1, Number(e.target.value))))}
+                  className={inputClass}
+                />
+                <span className="shrink-0 text-sm text-[var(--muted)]">de cada mês</span>
+              </div>
+            </div>
+          ) : (
             <Input
               label="Data de vencimento"
               type="date"
@@ -108,9 +270,13 @@ function AlertDialog({ open, initial, onClose, onSubmit }: AlertDialogProps) {
               onChange={(e) => setDueDate(e.target.value)}
               required
             />
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-semibold text-[var(--muted)] uppercase tracking-wide">
-                Lembrar com antecedência
+          )}
+
+          {/* Lembrete + Valor */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="grid gap-1.5">
+              <label className="text-sm font-medium text-[var(--foreground)]">
+                Lembrar antes
               </label>
               <div className="flex items-center gap-2">
                 <input
@@ -119,19 +285,22 @@ function AlertDialog({ open, initial, onClose, onSubmit }: AlertDialogProps) {
                   max={30}
                   value={reminderDays}
                   onChange={(e) => setReminderDays(Number(e.target.value))}
-                  className="h-10 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm text-[var(--foreground)] outline-none focus:ring-2 focus:ring-[var(--accent)] transition-all"
+                  className={inputClass}
                 />
-                <span className="text-sm text-[var(--muted)] whitespace-nowrap">dias</span>
+                <span className="shrink-0 text-sm text-[var(--muted)]">dias</span>
               </div>
             </div>
+
+            <Input
+              label="Valor previsto"
+              value={currencyMask.value}
+              onChange={currencyMask.onChange}
+              placeholder="R$ 0,00"
+              inputMode="numeric"
+            />
           </div>
-          <Input
-            label="Valor previsto (opcional)"
-            value={valueStr}
-            onChange={(e) => setValueStr(e.target.value)}
-            placeholder="0,00"
-            inputMode="decimal"
-          />
+
+          {/* Ações */}
           <div className="flex gap-3 pt-1">
             <Button type="button" variant="ghost" className="flex-1" onClick={onClose}>
               Cancelar
@@ -171,7 +340,7 @@ function AlertRow({
           : "border-[var(--border)] bg-[var(--surface-raised)] opacity-60",
       ].join(" ")}
     >
-      {/* Toggle */}
+      {/* Toggle ativo */}
       <button
         type="button"
         role="switch"
@@ -183,30 +352,39 @@ function AlertRow({
           alert.active ? "bg-[var(--accent)]" : "bg-[var(--border-strong)]",
         ].join(" ")}
       >
-        <span
-          className={[
-            "inline-block h-4 w-4 rounded-full bg-white shadow transition-transform",
-            alert.active ? "translate-x-5" : "translate-x-1",
-          ].join(" ")}
-        />
+        <span className={[
+          "inline-block h-4 w-4 rounded-full bg-white shadow transition-transform",
+          alert.active ? "translate-x-5" : "translate-x-1",
+        ].join(" ")} />
       </button>
 
       {/* Info */}
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
           <p className="text-sm font-semibold text-[var(--foreground)] truncate">{alert.name}</p>
+          {alert.recurring && (
+            <span className="inline-flex items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--surface-raised)] px-2 py-0.5 text-[10px] font-medium text-[var(--muted)]">
+              <IconRepeat />
+              Mensal
+            </span>
+          )}
           <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${badge.className}`}>
             {badge.label}
           </span>
         </div>
         <div className="mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-[var(--muted)]">
-          <span>Vence: {formatDateBR(alert.dueDate)}</span>
+          {alert.recurring
+            ? <span>Todo dia {alert.dayOfMonth} · próximo: {formatDateBR(alert.dueDate)}</span>
+            : <span>Vence: {formatDateBR(alert.dueDate)}</span>
+          }
           <span>Lembrar {alert.reminderDays}d antes</span>
-          {alert.expectedValue != null && <span>Valor: {formatCurrencyBRL(alert.expectedValue)}</span>}
+          {alert.expectedValue != null && (
+            <span>Valor: {formatCurrencyBRL(alert.expectedValue)}</span>
+          )}
         </div>
       </div>
 
-      {/* Actions */}
+      {/* Ações */}
       <div className="flex shrink-0 items-center gap-1">
         <button
           type="button"
@@ -214,10 +392,7 @@ function AlertRow({
           aria-label="Editar alerta"
           className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--muted)] transition-colors hover:bg-[var(--surface-raised)] hover:text-[var(--foreground)]"
         >
-          <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden>
-            <path d="M5.433 13.917l1.262-3.155A4 4 0 017.58 9.42l6.92-6.918a2.121 2.121 0 013 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 01-.65-.65z" />
-            <path d="M3.5 5.75c0-.69.56-1.25 1.25-1.25H10A.75.75 0 0010 3H4.75A2.75 2.75 0 002 5.75v9.5A2.75 2.75 0 004.75 18h9.5A2.75 2.75 0 0017 15.25V10a.75.75 0 00-1.5 0v5.25c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-9.5z" />
-          </svg>
+          <IconEdit />
         </button>
         <button
           type="button"
@@ -225,9 +400,7 @@ function AlertRow({
           aria-label="Excluir alerta"
           className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--muted)] transition-colors hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/30"
         >
-          <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden>
-            <path fillRule="evenodd" d="M8.75 1A2.75 2.75 0 006 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 10.23 1.482l.149-.022.841 10.518A2.75 2.75 0 007.596 19h4.807a2.75 2.75 0 002.742-2.53l.841-10.52.149.023a.75.75 0 00.23-1.482A41.03 41.03 0 0014 4.193V3.75A2.75 2.75 0 0011.25 1h-2.5zM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4zM8.58 7.72a.75.75 0 00-1.5.06l.3 7.5a.75.75 0 101.5-.06l-.3-7.5zm4.34.06a.75.75 0 10-1.5-.06l-.3 7.5a.75.75 0 101.5.06l.3-7.5z" clipRule="evenodd" />
-          </svg>
+          <IconTrash />
         </button>
       </div>
     </div>
@@ -294,7 +467,9 @@ export function AlertsClient() {
 
   const activeAlerts = alerts.filter((a) => a.active);
   const inactiveAlerts = alerts.filter((a) => !a.active);
-  const dueCount = activeAlerts.filter((a) => daysUntil(a.dueDate) <= a.reminderDays && daysUntil(a.dueDate) >= 0).length;
+  const dueCount = activeAlerts.filter(
+    (a) => daysUntil(a.dueDate) <= a.reminderDays && daysUntil(a.dueDate) >= 0,
+  ).length;
 
   return (
     <>
@@ -319,10 +494,10 @@ export function AlertsClient() {
 
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
             <div className="rounded-xl border border-[var(--border)] p-4">
-              <p className="text-xs font-medium uppercase tracking-wider text-[var(--muted)]">Total de alertas</p>
+              <p className="text-xs font-medium uppercase tracking-wider text-[var(--muted)]">Total</p>
               <p className="mt-1.5 text-xl font-bold text-[var(--foreground)]">{alerts.length}</p>
             </div>
-            <div className="rounded-xl border border-[var(--border)] p-4 border-l-4 border-l-emerald-500">
+            <div className="rounded-xl border border-l-4 border-emerald-500 border-[var(--border)] p-4">
               <p className="text-xs font-medium uppercase tracking-wider text-[var(--muted)]">Ativos</p>
               <p className="mt-1.5 text-xl font-bold text-[var(--foreground)]">{activeAlerts.length}</p>
             </div>
@@ -337,9 +512,7 @@ export function AlertsClient() {
 
         {alerts.length === 0 ? (
           <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface-raised)] py-16 text-center">
-            <svg viewBox="0 0 24 24" fill="none" className="h-10 w-10 text-[var(--muted)]" aria-hidden>
-              <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+            <span className="text-[var(--muted)]"><IconBell /></span>
             <p className="text-sm font-semibold text-[var(--foreground)]">Nenhum alerta cadastrado</p>
             <p className="text-xs text-[var(--muted)]">Clique em &quot;Novo alerta&quot; para começar</p>
           </div>
@@ -349,14 +522,16 @@ export function AlertsClient() {
               <div>
                 <div className="mb-3 flex items-center justify-between">
                   <h2 className="text-sm font-bold text-[var(--foreground)]">Alertas ativos</h2>
-                  <span className="text-xs text-[var(--muted)]">{activeAlerts.length} alerta{activeAlerts.length !== 1 ? "s" : ""}</span>
+                  <span className="text-xs text-[var(--muted)]">
+                    {activeAlerts.length} alerta{activeAlerts.length !== 1 ? "s" : ""}
+                  </span>
                 </div>
                 <div className="grid gap-2">
                   {activeAlerts.map((a) => (
                     <AlertRow
                       key={a.id}
                       alert={a}
-                      onEdit={(alert) => { setEditing(alert); setDialogOpen(true); }}
+                      onEdit={(al) => { setEditing(al); setDialogOpen(true); }}
                       onDelete={handleDelete}
                       onToggle={handleToggle}
                     />
@@ -376,7 +551,7 @@ export function AlertsClient() {
                     <AlertRow
                       key={a.id}
                       alert={a}
-                      onEdit={(alert) => { setEditing(alert); setDialogOpen(true); }}
+                      onEdit={(al) => { setEditing(al); setDialogOpen(true); }}
                       onDelete={handleDelete}
                       onToggle={handleToggle}
                     />

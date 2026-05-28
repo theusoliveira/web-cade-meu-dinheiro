@@ -96,8 +96,9 @@ export function NotificationBell({ onNavigateAlerts }: Props) {
                   <li key={alert.id} className="px-4 py-3">
                     <div className="flex items-start gap-3">
                       <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${days === 0 ? "bg-rose-100 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400" : "bg-amber-100 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400"}`}>
-                        <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden>
-                          <path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                        <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden>
+                          <path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
+                            stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                       </div>
                       <div className="min-w-0 flex-1">

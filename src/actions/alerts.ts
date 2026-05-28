@@ -7,10 +7,12 @@ import { newId } from "@/lib/finance/id";
 export type AlertRecord = {
   id: string;
   name: string;
-  dueDate: string; // YYYY-MM-DD
+  dueDate: string;       // YYYY-MM-DD — para não-recorrentes; para recorrentes é a próxima ocorrência calculada
   reminderDays: number;
   expectedValue: number | null;
   active: boolean;
+  recurring: boolean;    // true = repete todo mês
+  dayOfMonth: number | null; // 1–31, usado quando recurring = true
   createdAt: number;
 };
 
@@ -20,24 +22,31 @@ async function getUserId() {
   return session.user.id;
 }
 
-export async function fetchAlerts(): Promise<AlertRecord[]> {
-  const sql = getDb();
-  const userId = await getUserId();
-  const rows = await sql(
-    `SELECT id, name, due_date::text, reminder_days, expected_value::float8, active, created_at
-     FROM public.alerts WHERE user_id = $1
-     ORDER BY due_date ASC, created_at DESC`,
-    [userId],
-  );
-  return rows.map((row) => ({
+function mapRow(row: Record<string, unknown>): AlertRecord {
+  return {
     id: row.id as string,
     name: row.name as string,
     dueDate: (row.due_date as string) ?? "",
     reminderDays: Number(row.reminder_days ?? 3),
     expectedValue: row.expected_value != null ? Number(row.expected_value) : null,
     active: Boolean(row.active),
+    recurring: Boolean(row.recurring),
+    dayOfMonth: row.day_of_month != null ? Number(row.day_of_month) : null,
     createdAt: new Date(row.created_at as string).getTime(),
-  }));
+  };
+}
+
+export async function fetchAlerts(): Promise<AlertRecord[]> {
+  const sql = getDb();
+  const userId = await getUserId();
+  const rows = await sql(
+    `SELECT id, name, due_date::text, reminder_days, expected_value::float8,
+            active, recurring, day_of_month, created_at
+     FROM public.alerts WHERE user_id = $1
+     ORDER BY due_date ASC, created_at DESC`,
+    [userId],
+  );
+  return (rows as Record<string, unknown>[]).map(mapRow);
 }
 
 export async function upsertAlert(alert: AlertRecord): Promise<void> {
@@ -45,15 +54,19 @@ export async function upsertAlert(alert: AlertRecord): Promise<void> {
   const userId = await getUserId();
   const id = alert.id || newId();
   await sql(
-    `INSERT INTO public.alerts (id, user_id, name, due_date, reminder_days, expected_value, active)
-     VALUES ($1, $2, $3, $4::date, $5, $6, $7)
+    `INSERT INTO public.alerts
+       (id, user_id, name, due_date, reminder_days, expected_value, active, recurring, day_of_month)
+     VALUES ($1, $2, $3, $4::date, $5, $6, $7, $8, $9)
      ON CONFLICT (id) DO UPDATE SET
-       name = EXCLUDED.name,
-       due_date = EXCLUDED.due_date,
-       reminder_days = EXCLUDED.reminder_days,
+       name           = EXCLUDED.name,
+       due_date       = EXCLUDED.due_date,
+       reminder_days  = EXCLUDED.reminder_days,
        expected_value = EXCLUDED.expected_value,
-       active = EXCLUDED.active`,
-    [id, userId, alert.name, alert.dueDate, alert.reminderDays, alert.expectedValue, alert.active],
+       active         = EXCLUDED.active,
+       recurring      = EXCLUDED.recurring,
+       day_of_month   = EXCLUDED.day_of_month`,
+    [id, userId, alert.name, alert.dueDate, alert.reminderDays,
+     alert.expectedValue, alert.active, alert.recurring, alert.dayOfMonth],
   );
 }
 
@@ -72,12 +85,13 @@ export async function toggleAlert(id: string, active: boolean): Promise<void> {
   );
 }
 
-/** Retorna alertas cujo lembrete está ativo hoje (dueDate - reminderDays <= today <= dueDate) */
+/** Retorna alertas cujo lembrete está ativo hoje */
 export async function fetchDueAlerts(): Promise<AlertRecord[]> {
   const sql = getDb();
   const userId = await getUserId();
   const rows = await sql(
-    `SELECT id, name, due_date::text, reminder_days, expected_value::float8, active, created_at
+    `SELECT id, name, due_date::text, reminder_days, expected_value::float8,
+            active, recurring, day_of_month, created_at
      FROM public.alerts
      WHERE user_id = $1
        AND active = true
@@ -86,13 +100,5 @@ export async function fetchDueAlerts(): Promise<AlertRecord[]> {
      ORDER BY due_date ASC`,
     [userId],
   );
-  return rows.map((row) => ({
-    id: row.id as string,
-    name: row.name as string,
-    dueDate: (row.due_date as string) ?? "",
-    reminderDays: Number(row.reminder_days ?? 3),
-    expectedValue: row.expected_value != null ? Number(row.expected_value) : null,
-    active: Boolean(row.active),
-    createdAt: new Date(row.created_at as string).getTime(),
-  }));
+  return (rows as Record<string, unknown>[]).map(mapRow);
 }
