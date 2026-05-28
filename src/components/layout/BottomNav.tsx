@@ -16,7 +16,7 @@ const NAV_ITEMS: Array<{
 }> = [
   {
     key: "lancamentos",
-    label: "Pessoal",
+    label: "Lanc.",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
         <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="1.8" />
@@ -32,7 +32,7 @@ const NAV_ITEMS: Array<{
   },
   {
     key: "lancamentos_pj",
-    label: "PJ",
+    label: "Lanc. PJ",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
         <path d="M3 21V8l9-5 9 5v13" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
@@ -48,7 +48,7 @@ const NAV_ITEMS: Array<{
   },
   {
     key: "distribuicao_pj",
-    label: "Distrib.",
+    label: "Salário PJ",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
         <path d="M21 21H3M6 21V12M10 21V6M14 21V10M18 21V4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
@@ -63,7 +63,7 @@ const NAV_ITEMS: Array<{
   },
   {
     key: "controle",
-    label: "Cartão",
+    label: "Gastos",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
         <rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" strokeWidth="1.8" />

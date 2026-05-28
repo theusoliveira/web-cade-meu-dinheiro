@@ -33,12 +33,13 @@ export function StatCard({
 }: {
   label: string;
   value: string;
-  color?: "income" | "expense" | "investment" | "neutral";
+  color?: "income" | "expense" | "investment" | "balance" | "neutral";
 }) {
   const colors = {
     income: "border-l-4 border-l-emerald-500",
     expense: "border-l-4 border-l-rose-500",
     investment: "border-l-4 border-l-sky-500",
+    balance: "border-l-4 border-l-amber-400",
     neutral: "",
   };
 

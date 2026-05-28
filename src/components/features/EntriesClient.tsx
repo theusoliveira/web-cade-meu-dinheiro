@@ -122,7 +122,7 @@ export function EntriesClient({
           <StatCard
             label="Saldo"
             value={formatCurrencyBRL(totals.balance)}
-            color={totals.balance >= 0 ? "income" : "expense"}
+            color="balance"
           />
         </div>
       </Card>

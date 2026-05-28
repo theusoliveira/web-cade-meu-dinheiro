@@ -1,0 +1,15 @@
+- Adicionar dashboard
+    - Criar um dashboard visual de informações que sejam interessantes mostrar ao usuário de cara.
+- Adicionar distribuição de salário para CLT
+    - A diferença do salário PJ para o CLT é que no CLT eu não preciso colocar quantidade de horas trabalhadas, nem o valor hora. Eu só posso informar o salário.
+    - Eu não preciso ter nenhuma categoria fixa, pois nessa funcionalidade, vamos abranger apenas o salário líquido. Então o usuário fica livre para cadastrar as categorias.
+- Mudar cor do card do saldo para amarelo.
+    - Atualmente a borda do card de saldo está verde. Deve-se mudar para amarelo
+- Adicionar alerta de contas a vencer (notificações)
+    - Deve-se ter um menu de Alertas. Neste menu, o usuário deve visualizar a lista de alertas cadastrados. Pode editar, ativar e desativar (switch) ou excluir.
+    - Também deve ter um botão de adicionar. Ao clicar nesse botão, o usuário terá um modal para cadastrar um alerta, que nesse momento só pode ser uma conta.
+    - O usuário pode informar o nome dessa conta, a data de vencimento, quantos dias antes ela quer ser lembrada dessa conta e qual o valor previsto dela.
+    - Quando a conta atingir a data de lembrete, o sistema deve exibir uma notificação ao usuário de que há uma conta a vencer. Portanto deve ter uma opção de ver as notificações no menu superior, próximo ao botão de acessar dados do usuário.
+- Adaptar menu para PWA
+    - Com novas adições no menu, o modo mobile deve ter a opção de expandir e minimizar o menu via "hamburguer", para que o menu inferior não fique tão cheio e ocupe muito espaço da tela.
+    - Neste momento, podemos comentar o código (ou retirar) que contém o menu fixo inferior.

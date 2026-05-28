@@ -3,11 +3,14 @@
 import * as React from "react";
 
 export type NavKey =
+  | "dashboard"
   | "lancamentos"
   | "lancamentos_pj"
   | "metas"
   | "controle"
-  | "distribuicao_pj";
+  | "distribuicao_pj"
+  | "distribuicao_clt"
+  | "alertas";
 
 type NavItem = {
   key: NavKey;
@@ -23,9 +26,24 @@ type Props = {
   onToggleCollapse: () => void;
   mobileOpen?: boolean;
   onMobileClose?: () => void;
+  /** Quando true, renderiza sem as classes "hidden md:flex" — para o slide-over mobile */
+  forMobile?: boolean;
 };
 
 const NAV_ITEMS: NavItem[] = [
+  {
+    key: "dashboard",
+    label: "Dashboard",
+    shortLabel: "Início",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" className="h-[18px] w-[18px]" aria-hidden>
+        <rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
+        <rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
+        <rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
+        <rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
+      </svg>
+    ),
+  },
   {
     key: "lancamentos",
     label: "Lançamentos",
@@ -60,6 +78,18 @@ const NAV_ITEMS: NavItem[] = [
     ),
   },
   {
+    key: "distribuicao_clt",
+    label: "Distribuição CLT",
+    shortLabel: "Salário CLT",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" className="h-[18px] w-[18px]" aria-hidden>
+        <rect x="2" y="7" width="20" height="14" rx="2" stroke="currentColor" strokeWidth="1.8" />
+        <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+        <path d="M12 12v4M10 14h4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
     key: "metas",
     label: "Metas",
     shortLabel: "Metas",
@@ -81,6 +111,16 @@ const NAV_ITEMS: NavItem[] = [
         <rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" strokeWidth="1.8" />
         <path d="M2 10h20" stroke="currentColor" strokeWidth="1.8" />
         <path d="M6 15h3M15 15h3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
+    key: "alertas",
+    label: "Alertas",
+    shortLabel: "Alertas",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" className="h-[18px] w-[18px]" aria-hidden>
+        <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
   },
@@ -109,22 +149,25 @@ export function AppSidebar({
   onChange,
   collapsed,
   onToggleCollapse,
+  forMobile = false,
 }: Props) {
   const width = collapsed ? "md:w-[72px]" : "md:w-65";
 
   return (
     <>
-      {/* Spacer */}
-      <div className={`hidden md:block shrink-0 ${width} transition-[width] duration-200`} aria-hidden />
+      {/* Spacer — só no desktop */}
+      {!forMobile && (
+        <div className={`hidden md:block shrink-0 ${width} transition-[width] duration-200`} aria-hidden />
+      )}
 
       {/* Sidebar */}
       <aside
         className={[
-          "hidden md:flex md:flex-col",
-          "md:fixed md:inset-y-0 md:left-0 md:z-40",
-          "md:h-dvh md:transition-[width] md:duration-200",
+          forMobile
+            ? "flex flex-col w-full h-full"
+            : "hidden md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 md:z-40 md:h-dvh md:transition-[width] md:duration-200",
           "border-r",
-          width,
+          forMobile ? "" : width,
         ].join(" ")}
         style={{
           backgroundColor: "var(--sidebar-bg)",
