@@ -1,0 +1,4 @@
+- Adicionar dashboard
+- Adicionar distribuição de salário para CLT
+- Mudar cor do card do saldo para amarelo
+- Adicionar alerta de contas a vencer (notificações)
