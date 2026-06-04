@@ -103,19 +103,13 @@ export function CardControlClient({ entries, openDialog, onEdit, onDelete, onDel
           <StatCard
             label="Saldo"
             value={formatCurrencyBRL(totals.balance)}
-            color={totals.balance >= 0 ? "income" : "expense"}
+            color="balance"
           />
         </div>
       </div>
 
       {/* Charts */}
-      <div className="grid gap-3 md:grid-cols-2">
-        <DonutChartCard
-          title="De onde vem meu dinheiro"
-          data={incomeByCategory}
-          colors={["#10b981", "#14b8a6", "#22c55e", "#06b6d4", "#3b82f6"]}
-          centerLabel="Receitas"
-        />
+      <div className="grid gap-3">
         <DonutChartCard
           title="Onde estou gastando mais"
           data={expenseByCategory}
