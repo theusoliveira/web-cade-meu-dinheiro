@@ -98,7 +98,7 @@ export function AddEntryDialog({ open, kind, onClose, initial, allowFixed = fals
     if (!date) return setError("Selecione uma data.");
     if (!category) return setError("Selecione uma categoria.");
     if (!desc) return setError("Digite uma descrição.");
-    if (!isFixedTemplate && valueCents <= 0) return setError("Digite um valor válido.");
+    if (!isFixedTemplate && valueCents < 0) return setError("Digite um valor válido.");
 
     const editingVirtualFixed = Boolean(initial?.isVirtualFixed && initial?.fixedEntryId);
 

@@ -292,7 +292,7 @@ export function DashboardClient({ onNavigateAlerts }: { onNavigateAlerts?: () =>
       </div>
 
       {/* ─── Saldo anterior ───────────────────────────────────────────────── */}
-      <Card>
+      {/* <Card>
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm font-bold text-[var(--foreground)]">Saldo inicial do mês</p>
@@ -302,7 +302,7 @@ export function DashboardClient({ onNavigateAlerts }: { onNavigateAlerts?: () =>
             {formatCurrencyBRL(openingBalance)}
           </p>
         </div>
-      </Card>
+      </Card> */}
     </div>
   );
 }

@@ -103,19 +103,13 @@ export function CardControlClient({ entries, openDialog, onEdit, onDelete, onDel
           <StatCard
             label="Saldo"
             value={formatCurrencyBRL(totals.balance)}
-            color={totals.balance >= 0 ? "income" : "expense"}
+            color="balance"
           />
         </div>
       </div>
 
       {/* Charts */}
-      <div className="grid gap-3 md:grid-cols-2">
-        <DonutChartCard
-          title="De onde vem meu dinheiro"
-          data={incomeByCategory}
-          colors={["#10b981", "#14b8a6", "#22c55e", "#06b6d4", "#3b82f6"]}
-          centerLabel="Receitas"
-        />
+      <div className="grid gap-3">
         <DonutChartCard
           title="Onde estou gastando mais"
           data={expenseByCategory}
@@ -147,7 +141,7 @@ export function CardControlClient({ entries, openDialog, onEdit, onDelete, onDel
                 Excluir selecionados ({selectedIds.size})
               </Button>
             )}
-            <Button
+            {/* <Button
               type="button"
               variant="ghost"
               size="sm"
@@ -156,7 +150,7 @@ export function CardControlClient({ entries, openDialog, onEdit, onDelete, onDel
               className="text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/30"
             >
               Excluir todos
-            </Button>
+            </Button> */}
           </div>
         </div>
         <HistoryTable
