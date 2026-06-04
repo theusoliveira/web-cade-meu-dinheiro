@@ -141,7 +141,7 @@ export function CardControlClient({ entries, openDialog, onEdit, onDelete, onDel
                 Excluir selecionados ({selectedIds.size})
               </Button>
             )}
-            {/* <Button
+            <Button
               type="button"
               variant="ghost"
               size="sm"
@@ -150,7 +150,7 @@ export function CardControlClient({ entries, openDialog, onEdit, onDelete, onDel
               className="text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/30"
             >
               Excluir todos
-            </Button> */}
+            </Button>
           </div>
         </div>
         <HistoryTable
