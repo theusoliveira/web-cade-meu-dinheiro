@@ -7,8 +7,8 @@ import { StatCard } from "@/components/ui/Card";
 import { HistoryTable } from "@/components/features/HistoryTable";
 import { formatCurrencyBRL, groupByCategory, type EntryKind, type FinanceEntry } from "@/lib/finance";
 
-const DonutChartCard = dynamic(
-  () => import("@/components/features/DonutChartCard").then((m) => m.DonutChartCard),
+const BudgetDonutCard = dynamic(
+  () => import("@/components/features/DonutChartCard").then((m) => m.BudgetDonutCard),
   { loading: () => <div className="skeleton h-48 rounded-2xl" /> },
 );
 
@@ -110,11 +110,10 @@ export function CardControlClient({ entries, openDialog, onEdit, onDelete, onDel
 
       {/* Charts */}
       <div className="grid gap-3">
-        <DonutChartCard
-          title="Onde estou gastando mais"
+        <BudgetDonutCard
+          title="Controle do saldo"
           data={expenseByCategory}
-          colors={["#f43f5e", "#f59e0b", "#8b5cf6", "#ef4444", "#ec4899"]}
-          centerLabel="Despesas"
+          income={totals.income}
         />
       </div>
 
