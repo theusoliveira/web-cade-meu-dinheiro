@@ -66,7 +66,8 @@ function PasswordField({
         <button
           type="button"
           onClick={() => setShow((v) => !v)}
-          className="text-[var(--muted)] hover:text-[var(--foreground)] cursor-pointer"
+          className="cursor-pointer"
+          style={{ color: "var(--muted)" }}
           aria-label={show ? "Ocultar senha" : "Mostrar senha"}
           tabIndex={-1}
         >
@@ -78,31 +79,30 @@ function PasswordField({
 }
 
 function AlertBanner({ type, message }: { type: "error" | "success"; message: string }) {
-  const styles =
-    type === "error"
-      ? "bg-rose-50 dark:bg-rose-950/30 border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-300"
-      : "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-900/50 text-emerald-700 dark:text-emerald-300";
+  const isError = type === "error";
+  const style = isError
+    ? { backgroundColor: "#fef2f2", borderColor: "#fecaca", color: "#b91c1c" }
+    : { backgroundColor: "#ecfdf5", borderColor: "#a7f3d0", color: "#065f46" };
 
-  const icon =
-    type === "error" ? (
-      <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4 shrink-0 text-rose-500">
-        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
-      </svg>
-    ) : (
-      <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4 shrink-0 text-emerald-500">
-        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
-      </svg>
-    );
+  const icon = isError ? (
+    <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4 shrink-0">
+      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+    </svg>
+  ) : (
+    <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4 shrink-0">
+      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
+    </svg>
+  );
 
   return (
-    <div className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 ${styles}`}>
+    <div className="flex items-center gap-2 rounded-xl border px-3 py-2.5" style={style}>
       {icon}
       <p className="text-sm">{message}</p>
     </div>
   );
 }
 
-// ─── Brand panel (left side) ──────────────────────────────────────────────────
+// ─── Brand panel (left side) — Ivory Identity ──────────────────────────────────
 
 function BrandPanel() {
   const features = [
@@ -148,43 +148,43 @@ function BrandPanel() {
 
   return (
     <div
-      className="hidden lg:flex flex-col justify-between p-10 w-[400px] shrink-0 relative overflow-hidden"
-      style={{ backgroundColor: "#0f172a" }}
+      className="hidden lg:flex flex-col justify-between p-10 w-[420px] shrink-0 relative overflow-hidden"
+      style={{ backgroundColor: "var(--ivory-blue)" }}
     >
-      {/* Decorative blobs */}
+      {/* Decorative blobs — Ivory brand colors */}
       <div
         className="absolute -top-24 -right-24 h-72 w-72 rounded-full opacity-20 blur-3xl pointer-events-none"
-        style={{ background: "radial-gradient(circle, #10b981, transparent)" }}
+        style={{ background: "radial-gradient(circle, #F35B04, transparent)" }}
       />
       <div
-        className="absolute bottom-0 left-0 h-56 w-56 rounded-full opacity-10 blur-3xl pointer-events-none"
-        style={{ background: "radial-gradient(circle, #3b82f6, transparent)" }}
+        className="absolute bottom-0 left-0 h-56 w-56 rounded-full opacity-15 blur-3xl pointer-events-none"
+        style={{ background: "radial-gradient(circle, #00C49A, transparent)" }}
+      />
+      <div
+        className="absolute top-1/2 right-0 h-48 w-48 rounded-full opacity-10 blur-3xl pointer-events-none"
+        style={{ background: "radial-gradient(circle, #FFEEC2, transparent)" }}
       />
 
-      {/* Logo */}
+      {/* Logo — Ivory brand */}
       <div className="relative">
         <div className="flex items-center gap-3 mb-12">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500 shadow-lg shadow-emerald-500/30">
-            <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
-              <path
-                d="M12 6v12M8 10c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2v.5c0 1.1-.9 2-2 2h-4c-1.1 0-2 .9-2 2v.5c0 1.1.9 2 2 2h4c1.1 0 2-.9 2-2"
-                stroke="white"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-              />
-            </svg>
+          <div
+            className="flex h-10 w-10 items-center justify-center rounded-xl shadow-lg font-black text-white text-lg"
+            style={{ backgroundColor: "var(--ivory-orange)" }}
+          >
+            $
           </div>
           <div>
-            <p className="text-white font-bold text-base leading-none">Cadê meu</p>
-            <p className="text-emerald-400 font-bold text-base leading-none">dinheiro?</p>
+            <p className="font-bold text-base leading-none" style={{ color: "var(--ivory-cream)" }}>Cadê meu</p>
+            <p className="font-bold text-base leading-none" style={{ color: "var(--ivory-orange)" }}>dinheiro?</p>
           </div>
         </div>
 
-        <h2 className="text-white text-2xl font-bold leading-snug mb-3">
+        <h2 className="text-2xl font-bold leading-snug mb-3" style={{ color: "var(--ivory-cream)" }}>
           Controle financeiro{" "}
-          <span className="text-emerald-400">inteligente</span>
+          <span style={{ color: "var(--ivory-orange)" }}>inteligente</span>
         </h2>
-        <p className="text-white/50 text-sm leading-relaxed mb-10">
+        <p className="text-sm leading-relaxed mb-10" style={{ color: "rgba(255,238,194,0.6)" }}>
           Gerencie receitas, despesas e investimentos pessoais e PJ em um só lugar, com clareza e simplicidade.
         </p>
 
@@ -194,16 +194,21 @@ function BrandPanel() {
             <div
               key={text}
               className="flex items-center gap-3 rounded-xl px-4 py-3"
-              style={{ backgroundColor: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}
+              style={{
+                backgroundColor: "rgba(255,238,194,0.06)",
+                border: "1px solid rgba(255,238,194,0.12)",
+              }}
             >
-              <span className="text-emerald-400 shrink-0">{icon}</span>
-              <span className="text-white/70 text-sm">{text}</span>
+              <span style={{ color: "var(--ivory-orange)" }} className="shrink-0">{icon}</span>
+              <span className="text-sm" style={{ color: "rgba(255,238,194,0.75)" }}>{text}</span>
             </div>
           ))}
         </div>
       </div>
 
-      <p className="text-white/25 text-xs relative">© {new Date().getFullYear()} Cadê Meu Dinheiro?</p>
+      <p className="text-xs relative font-light" style={{ color: "rgba(255,238,194,0.3)" }}>
+        © {new Date().getFullYear()} Cadê Meu Dinheiro?
+      </p>
     </div>
   );
 }
@@ -217,12 +222,10 @@ export function AuthGate() {
 
   const [mode, setMode] = React.useState<"login" | "signup">("login");
 
-  // Signup fields
   const [fullName, setFullName] = React.useState("");
   const [displayName, setDisplayName] = React.useState("");
   const [cpf, setCpf] = React.useState("");
 
-  // Shared fields
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
@@ -295,10 +298,16 @@ export function AuthGate() {
   // Loading state
   if (checking) {
     return (
-      <div className="min-h-[100dvh] flex items-center justify-center bg-[var(--background)]">
+      <div className="min-h-[100dvh] flex items-center justify-center" style={{ backgroundColor: "var(--background)" }}>
         <div className="flex flex-col items-center gap-4">
-          <div className="h-10 w-10 rounded-full border-2 border-[var(--accent)]/20 border-t-[var(--accent)] animate-spin" />
-          <p className="text-sm text-[var(--muted)]">Carregando…</p>
+          <div
+            className="h-10 w-10 rounded-full border-2 animate-spin"
+            style={{
+              borderColor: "rgba(243,91,4,0.2)",
+              borderTopColor: "var(--ivory-orange)",
+            }}
+          />
+          <p className="text-sm font-medium" style={{ color: "var(--muted)" }}>Carregando…</p>
         </div>
       </div>
     );
@@ -317,24 +326,22 @@ export function AuthGate() {
 
           {/* Mobile-only logo */}
           <div className="mb-8 flex flex-col items-center text-center lg:hidden">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500 shadow-lg shadow-emerald-500/25">
-              <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6" aria-hidden>
-                <path
-                  d="M12 6v12M8 10c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2v.5c0 1.1-.9 2-2 2h-4c-1.1 0-2 .9-2 2v.5c0 1.1.9 2 2 2h4c1.1 0 2-.9 2-2"
-                  stroke="white" strokeWidth="1.8" strokeLinecap="round"
-                />
-              </svg>
+            <div
+              className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl shadow-lg font-black text-white text-xl"
+              style={{ backgroundColor: "var(--ivory-orange)" }}
+            >
+              $
             </div>
-            <h1 className="text-xl font-bold text-[var(--foreground)]">Cadê meu dinheiro?</h1>
-            <p className="mt-1 text-sm text-[var(--muted)]">Controle financeiro inteligente</p>
+            <h1 className="text-xl font-bold" style={{ color: "var(--foreground)" }}>Cadê meu dinheiro?</h1>
+            <p className="mt-1 text-sm" style={{ color: "var(--muted)" }}>Controle financeiro inteligente</p>
           </div>
 
           {/* Heading */}
-          <div className="mb-6 lg:block">
-            <h2 className="text-2xl font-bold text-[var(--foreground)]">
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold" style={{ color: "var(--foreground)" }}>
               {mode === "login" ? "Bem-vindo de volta" : "Criar conta"}
             </h2>
-            <p className="mt-1 text-sm text-[var(--muted)]">
+            <p className="mt-1 text-sm" style={{ color: "var(--muted)" }}>
               {mode === "login"
                 ? "Entre com seu e-mail e senha para continuar."
                 : "Preencha os dados abaixo para criar sua conta."}
@@ -342,7 +349,13 @@ export function AuthGate() {
           </div>
 
           {/* Card */}
-          <div className="rounded-2xl bg-[var(--surface)] border border-[var(--border)] shadow-sm overflow-hidden">
+          <div
+            className="rounded-2xl border shadow-sm overflow-hidden"
+            style={{
+              backgroundColor: "var(--surface)",
+              borderColor: "var(--border)",
+            }}
+          >
             <div className="p-6">
               {mode === "login" ? (
                 <form onSubmit={handleSignIn} className="grid gap-4">
@@ -430,18 +443,21 @@ export function AuthGate() {
           </div>
 
           {/* Mode switcher */}
-          <p className="mt-5 text-center text-sm text-[var(--muted)]">
+          <p className="mt-5 text-center text-sm" style={{ color: "var(--muted)" }}>
             {mode === "login" ? "Ainda não tem conta? " : "Já tem uma conta? "}
             <button
               type="button"
               onClick={() => switchMode(mode === "login" ? "signup" : "login")}
-              className="font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 cursor-pointer transition-colors"
+              className="font-semibold cursor-pointer transition-colors"
+              style={{ color: "var(--ivory-orange)" }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--cta-dark)"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--ivory-orange)"; }}
             >
               {mode === "login" ? "Criar conta" : "Entrar"}
             </button>
           </p>
 
-          <p className="mt-4 text-center text-xs text-[var(--muted-light)]">
+          <p className="mt-4 text-center text-xs font-light" style={{ color: "var(--muted-light)" }}>
             Seus dados são armazenados com segurança e nunca compartilhados.
           </p>
         </div>

@@ -25,7 +25,7 @@ export function Button({
   const base =
     "inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl font-semibold " +
     "transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 " +
-    "focus-visible:ring-[var(--accent)] select-none " +
+    "focus-visible:ring-[var(--ivory-orange)] select-none " +
     "disabled:cursor-not-allowed disabled:opacity-50 disabled:pointer-events-none " +
     "active:scale-[0.97]";
 
@@ -38,7 +38,7 @@ export function Button({
 
   const variants = {
     primary:
-      "bg-[var(--accent)] text-white hover:brightness-110 shadow-sm shadow-emerald-900/20",
+      "text-white shadow-sm",
     secondary:
       "bg-[var(--surface-raised)] text-[var(--foreground)] hover:bg-[var(--border)] border border-[var(--border)]",
     ghost:
@@ -46,14 +46,19 @@ export function Button({
     danger:
       "bg-rose-600 text-white hover:bg-rose-700 shadow-sm",
     success:
-      "bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm",
+      "bg-[var(--ivory-green)] text-white hover:opacity-90 shadow-sm",
   } as const;
+
+  const primaryStyle = variant === "primary"
+    ? { backgroundColor: "var(--ivory-orange)" }
+    : {};
 
   return (
     <button
       {...props}
       disabled={disabled || loading}
       className={twMerge(`${base} ${sizes[size]} ${variants[variant]} ${className}`)}
+      style={primaryStyle}
     >
       {loading ? (
         <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">

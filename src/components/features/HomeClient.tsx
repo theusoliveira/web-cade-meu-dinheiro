@@ -188,7 +188,7 @@ export function HomeClient() {
 
         <div className="flex min-w-0 flex-1 flex-col">
           {/* Header */}
-          <header className="sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--surface)]/80 backdrop-blur-xl">
+          <header className="sticky top-0 z-40 border-b backdrop-blur-xl" style={{ borderColor: "var(--border)", backgroundColor: "rgba(255,255,255,0.85)" }}>
             <div
               className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8"
               style={{ paddingTop: "calc(env(safe-area-inset-top) + 14px)", paddingBottom: "14px" }}

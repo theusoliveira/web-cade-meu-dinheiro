@@ -49,7 +49,14 @@ export function UserMenu({ displayName }: Props) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="cursor-pointer flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--surface)] font-semibold text-sm text-[var(--foreground)] hover:bg-[var(--surface-raised)] transition-all"
+        className="cursor-pointer flex h-9 w-9 items-center justify-center rounded-xl border font-semibold text-sm transition-all"
+        style={{
+          borderColor: "var(--border)",
+          backgroundColor: "var(--surface)",
+          color: "var(--foreground)",
+        }}
+        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.backgroundColor = "var(--surface-raised)"; }}
+        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.backgroundColor = "var(--surface)"; }}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label="Menu do usuário"
@@ -65,18 +72,29 @@ export function UserMenu({ displayName }: Props) {
       {open && (
         <div
           role="menu"
-          className="absolute right-0 mt-2 w-60 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-2xl shadow-black/10 animate-scale-in"
+          className="absolute right-0 mt-2 w-60 overflow-hidden rounded-2xl border shadow-2xl animate-scale-in"
+          style={{
+            backgroundColor: "var(--surface)",
+            borderColor: "var(--border)",
+            boxShadow: "0 20px 40px rgba(0,61,91,0.15)",
+          }}
         >
-          <div className="flex items-center gap-3 px-4 py-4 border-b border-[var(--border)]">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--accent)]/10 font-bold text-[var(--accent)] text-sm">
+          <div
+            className="flex items-center gap-3 px-4 py-4 border-b"
+            style={{ borderColor: "var(--border)" }}
+          >
+            <div
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl font-bold text-white text-sm"
+              style={{ backgroundColor: "var(--ivory-orange)" }}
+            >
               {initials || "?"}
             </div>
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-[var(--foreground)]">
+              <p className="truncate text-sm font-semibold" style={{ color: "var(--foreground)" }}>
                 {label || "Usuário"}
               </p>
               {email && (
-                <p className="truncate text-xs text-[var(--muted)]">{email}</p>
+                <p className="truncate text-xs" style={{ color: "var(--muted)" }}>{email}</p>
               )}
             </div>
           </div>
@@ -86,7 +104,9 @@ export function UserMenu({ displayName }: Props) {
               role="menuitem"
               type="button"
               onClick={logout}
-              className="w-full flex items-center gap-2.5 cursor-pointer rounded-xl px-3 py-2.5 text-left text-sm font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
+              className="w-full flex items-center gap-2.5 cursor-pointer rounded-xl px-3 py-2.5 text-left text-sm font-medium text-rose-600 transition-colors"
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.backgroundColor = "rgba(225,29,72,0.06)"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.backgroundColor = "transparent"; }}
             >
               <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 shrink-0" aria-hidden>
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />

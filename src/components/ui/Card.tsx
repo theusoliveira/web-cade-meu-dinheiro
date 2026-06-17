@@ -35,20 +35,22 @@ export function StatCard({
   value: string;
   color?: "income" | "expense" | "investment" | "balance" | "neutral";
 }) {
+  // Ivory brand: use brand colors for stat card accents
   const colors = {
-    income: "border-l-4 border-l-emerald-500",
+    income: "border-l-4 border-l-[var(--ivory-green)]",
     expense: "border-l-4 border-l-rose-500",
-    investment: "border-l-4 border-l-sky-500",
-    balance: "border-l-4 border-l-amber-400",
+    investment: "border-l-4 border-l-[var(--ivory-blue)]",
+    balance: "border-l-4 border-l-[var(--ivory-orange)]",
     neutral: "",
   };
 
   return (
     <div
       className={`rounded-xl border p-4 border-[var(--border)] ${colors[color]}`}
+      style={{ backgroundColor: "var(--surface)" }}
     >
-      <p className="text-xs font-medium text-[var(--muted)] uppercase tracking-wider">{label}</p>
-      <p className="mt-1.5 text-xl font-bold text-[var(--foreground)] ">{value}</p>
+      <p className="text-xs font-medium uppercase tracking-wider" style={{ color: "var(--muted)" }}>{label}</p>
+      <p className="mt-1.5 text-xl font-bold" style={{ color: "var(--foreground)" }}>{value}</p>
     </div>
   );
 }
@@ -63,13 +65,20 @@ export function Badge({
   const variants = {
     income: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-300 dark:border-emerald-900/50",
     expense: "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/30 dark:text-rose-300 dark:border-rose-900/50",
-    investment: "bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/30 dark:text-sky-300 dark:border-sky-900/50",
+    investment: "text-white border-transparent",
     default: "bg-[var(--surface-raised)] text-[var(--foreground)] border-[var(--border)]",
     muted: "bg-[var(--surface-raised)] text-[var(--muted)] border-[var(--border)]",
   };
 
+  const investmentStyle = variant === "investment"
+    ? { backgroundColor: "var(--ivory-blue)", color: "var(--ivory-cream)" }
+    : {};
+
   return (
-    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${variants[variant]}`}>
+    <span
+      className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${variants[variant]}`}
+      style={investmentStyle}
+    >
       {children}
     </span>
   );

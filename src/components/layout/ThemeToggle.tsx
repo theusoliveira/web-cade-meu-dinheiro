@@ -28,7 +28,20 @@ export function ThemeToggle() {
       type="button"
       onClick={() => setTheme(isDark ? "light" : "dark")}
       aria-label={isDark ? "Ativar tema claro" : "Ativar tema escuro"}
-      className="h-9 w-9 cursor-pointer flex items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-raised)] transition-all"
+      className="h-9 w-9 cursor-pointer flex items-center justify-center rounded-xl border transition-all"
+      style={{
+        borderColor: "var(--border)",
+        backgroundColor: "var(--surface)",
+        color: "var(--muted)",
+      }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLElement).style.backgroundColor = "var(--surface-raised)";
+        (e.currentTarget as HTMLElement).style.color = "var(--foreground)";
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLElement).style.backgroundColor = "var(--surface)";
+        (e.currentTarget as HTMLElement).style.color = "var(--muted)";
+      }}
     >
       {isDark ? (
         <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden>

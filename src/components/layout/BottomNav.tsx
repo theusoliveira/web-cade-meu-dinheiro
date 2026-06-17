@@ -101,9 +101,12 @@ export function BottomNav({ active, onChange }: Props) {
   return (
     <nav
       className="fixed bottom-0 left-0 right-0 z-40 md:hidden
-        border-t border-[var(--border)]
-        bg-[var(--surface)]/95 backdrop-blur-xl
+        border-t
         pb-[env(safe-area-inset-bottom)]"
+      style={{
+        borderColor: "var(--sidebar-border)",
+        backgroundColor: "var(--sidebar-bg)",
+      }}
       aria-label="Navegação principal"
     >
       <div className="grid h-16 grid-cols-5">
@@ -119,22 +122,20 @@ export function BottomNav({ active, onChange }: Props) {
               className={[
                 "flex flex-col items-center justify-center gap-1 cursor-pointer",
                 "text-[10px] font-semibold transition-all",
-                isActive
-                  ? "text-[var(--accent)]"
-                  : "text-[var(--muted)] hover:text-[var(--foreground)]",
               ].join(" ")}
+              style={{
+                color: isActive ? "var(--sidebar-active-icon)" : "var(--sidebar-text-muted)",
+              }}
             >
               <span
-                className={[
-                  "flex items-center justify-center rounded-xl transition-all",
-                  isActive
-                    ? "bg-[var(--accent)]/10 p-1.5 -m-1.5"
-                    : "p-1.5 -m-1.5",
-                ].join(" ")}
+                className="flex items-center justify-center rounded-xl transition-all p-1.5 -m-1.5"
+                style={isActive ? { backgroundColor: "var(--sidebar-active-bg)" } : {}}
               >
                 {isActive ? item.activeIcon : item.icon}
               </span>
-              <span>{item.label}</span>
+              <span style={{ color: isActive ? "var(--ivory-cream)" : "var(--sidebar-text-muted)" }}>
+                {item.label}
+              </span>
             </button>
           );
         })}

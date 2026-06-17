@@ -20,14 +20,15 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="text-sm font-medium text-[var(--foreground)]"
+            className="text-sm font-medium"
+            style={{ color: "var(--foreground)" }}
           >
             {label}
           </label>
         )}
         <div className="relative flex items-center">
           {leftIcon && (
-            <span className="absolute left-3 text-[var(--muted)] pointer-events-none">
+            <span className="absolute left-3 pointer-events-none" style={{ color: "var(--muted)" }}>
               {leftIcon}
             </span>
           )}
@@ -35,19 +36,21 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             id={inputId}
             className={twMerge(
-              "w-full h-10 rounded-xl border bg-[var(--surface)] text-sm text-[var(--foreground)] " +
-              "placeholder:text-[var(--muted-light)] " +
+              "w-full h-10 rounded-xl border text-sm " +
               "outline-none transition-all duration-150 " +
-              "focus:ring-2 focus:ring-[var(--accent)] focus:ring-offset-0 focus:border-[var(--accent)] " +
               (error ? "border-rose-500" : "border-[var(--border)]") + " " +
               (leftIcon ? "pl-10" : "pl-3") + " " +
               (rightIcon ? "pr-10" : "pr-3"),
               className
             )}
+            style={{
+              backgroundColor: "var(--surface)",
+              color: "var(--foreground)",
+            }}
             {...props}
           />
           {rightIcon && (
-            <span className="absolute right-3 text-[var(--muted)]">
+            <span className="absolute right-3" style={{ color: "var(--muted)" }}>
               {rightIcon}
             </span>
           )}
@@ -61,7 +64,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           </p>
         )}
         {hint && !error && (
-          <p className="text-xs text-[var(--muted)]">{hint}</p>
+          <p className="text-xs" style={{ color: "var(--muted)" }}>{hint}</p>
         )}
       </div>
     );
@@ -82,19 +85,22 @@ export function Select({ label, error, className, id, children, ...props }: Sele
   return (
     <div className="grid gap-1.5">
       {label && (
-        <label htmlFor={inputId} className="text-sm font-medium text-[var(--foreground)]">
+        <label htmlFor={inputId} className="text-sm font-medium" style={{ color: "var(--foreground)" }}>
           {label}
         </label>
       )}
       <select
         id={inputId}
         className={twMerge(
-          "w-full h-10 rounded-xl border bg-[var(--surface)] pl-3 pr-8 text-sm text-[var(--foreground)] " +
+          "w-full h-10 rounded-xl border pl-3 pr-8 text-sm " +
           "outline-none transition-all duration-150 cursor-pointer " +
-          "focus:ring-2 focus:ring-[var(--accent)] focus:border-[var(--accent)] " +
           (error ? "border-rose-500" : "border-[var(--border)]"),
           className
         )}
+        style={{
+          backgroundColor: "var(--surface)",
+          color: "var(--foreground)",
+        }}
         {...props}
       >
         {children}

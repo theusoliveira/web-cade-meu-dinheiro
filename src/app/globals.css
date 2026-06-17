@@ -4,65 +4,87 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {
-  --font-sans: var(--font-sans), system-ui, sans-serif;
+  --font-sans: var(--font-poppins), system-ui, sans-serif;
 }
 
-/* ─── Design tokens ─────────────────────────────────────────────────── */
+/* ─── Design tokens — Ivory Brand 2025 ──────────────────────────────── */
 
 :root {
-  /* Brand */
-  --accent: #10b981;
-  --accent-light: #d1fae5;
-  --accent-dark: #059669;
+  /* Ivory Brand — Cores Primárias */
+  --ivory-blue:        #003D5B;
+  --ivory-cream:       #FFEEC2;
+  --ivory-orange:      #F35B04;
 
-  /* Surfaces */
-  --background: #f4f6f9;
-  --surface: #ffffff;
-  --surface-raised: #f0f3f7;
-  --border: #e2e8f0;
-  --border-strong: #cbd5e1;
+  /* Ivory Brand — Cores Secundárias */
+  --ivory-green:       #00C49A;
+  --ivory-wine:        #861657;
+
+  /* Ivory Brand — Neutras */
+  --ivory-black:       #1A1A1A;
+  --ivory-white:       #FFFFFF;
+  --ivory-gray:        #888888;
+
+  /* Accent principal = Azul Ivory */
+  --accent:            #003D5B;
+  --accent-light:      #e8f0f5;
+  --accent-dark:       #002840;
+
+  /* CTA / Destaque = Laranja */
+  --cta:               #F35B04;
+  --cta-light:         #fde8d8;
+  --cta-dark:          #c94900;
+
+  /* Surfaces — modo claro com creme Ivory */
+  --background:        #F5EDD5;
+  --surface:           #FFFFFF;
+  --surface-raised:    #FAF6EA;
+  --border:            #E8DFC4;
+  --border-strong:     #D4C89A;
 
   /* Text */
-  --foreground: #0f172a;
-  --muted: #64748b;
-  --muted-light: #94a3b8;
+  --foreground:        #1A1A1A;
+  --muted:             #5A5240;
+  --muted-light:       #9C8E72;
 
-  /* Sidebar — light, clean */
-  --sidebar-bg: #ffffff;
-  --sidebar-border: #e8edf4;
-  --sidebar-text: #374151;
-  --sidebar-text-muted: #9ca3af;
-  --sidebar-active-bg: #f0fdf4;
-  --sidebar-active-text: #059669;
-  --sidebar-active-icon: #10b981;
-  --sidebar-hover-bg: #f8fafc;
-  --sidebar-logo-bg: #10b981;
+  /* Sidebar — Azul Ivory escuro */
+  --sidebar-bg:               #003D5B;
+  --sidebar-border:            #002840;
+  --sidebar-text:              #E8F4F8;
+  --sidebar-text-muted:        #7BACC0;
+  --sidebar-active-bg:         rgba(243,91,4,0.18);
+  --sidebar-active-text:       #FFEEC2;
+  --sidebar-active-icon:       #F35B04;
+  --sidebar-hover-bg:          rgba(255,238,194,0.08);
+  --sidebar-logo-bg:           #F35B04;
 
   /* Status colors */
-  --income: #059669;
-  --expense: #e11d48;
-  --investment: #0284c7;
+  --income:            #059669;
+  --expense:           #e11d48;
+  --investment:        #0284c7;
 }
 
 .dark {
-  --background: #080f1a;
-  --surface: #0f1c2e;
-  --surface-raised: #162033;
-  --border: #1e3045;
-  --border-strong: #2a4060;
-  --foreground: #f1f5f9;
-  --muted: #8ba0b8;
-  --muted-light: #4a6580;
+  --background:        #001824;
+  --surface:           #00263A;
+  --surface-raised:    #003050;
+  --border:            #004060;
+  --border-strong:     #005070;
+  --foreground:        #FFEEC2;
+  --muted:             #7BACC0;
+  --muted-light:       #4A7A90;
 
-  --sidebar-bg: #060d18;
-  --sidebar-border: #0f1c2e;
-  --sidebar-text: #e2e8f0;
-  --sidebar-text-muted: #4a6580;
-  --sidebar-active-bg: #10b98115;
-  --sidebar-active-text: #34d399;
-  --sidebar-active-icon: #34d399;
-  --sidebar-hover-bg: #0f1c2e;
-  --sidebar-logo-bg: #10b981;
+  --sidebar-bg:               #000E17;
+  --sidebar-border:            #00263A;
+  --sidebar-text:              #FFEEC2;
+  --sidebar-text-muted:        #4A7A90;
+  --sidebar-active-bg:         rgba(243,91,4,0.20);
+  --sidebar-active-text:       #FFEEC2;
+  --sidebar-active-icon:       #F35B04;
+  --sidebar-hover-bg:          rgba(255,238,194,0.06);
+  --sidebar-logo-bg:           #F35B04;
+
+  --accent-light:      #003050;
+  --cta-light:         #3a1500;
 }
 
 /* ─── Base ─────────────────────────────────────────────────────────── */
