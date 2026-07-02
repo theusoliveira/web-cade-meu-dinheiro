@@ -22,16 +22,44 @@ async function getUserId() {
   return session.user.id;
 }
 
+/**
+ * Para alertas recorrentes, a data de vencimento é sempre recalculada a
+ * partir do dayOfMonth (nunca lida do valor persistido), garantindo que o
+ * alerta se renove automaticamente todo mês em vez de ficar "Vencida".
+ */
+function nextOccurrence(dayOfMonth: number): string {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const year = today.getFullYear();
+  const month = today.getMonth();
+
+  const maxDay = new Date(year, month + 1, 0).getDate();
+  const day = Math.min(dayOfMonth, maxDay);
+  const candidate = new Date(year, month, day);
+  if (candidate >= today) {
+    return candidate.toISOString().slice(0, 10);
+  }
+
+  const nextMonth = month + 1;
+  const nextYear = nextMonth > 11 ? year + 1 : year;
+  const nm = nextMonth > 11 ? 0 : nextMonth;
+  const maxDayNext = new Date(nextYear, nm + 1, 0).getDate();
+  const dayNext = Math.min(dayOfMonth, maxDayNext);
+  return new Date(nextYear, nm, dayNext).toISOString().slice(0, 10);
+}
+
 function mapRow(row: Record<string, unknown>): AlertRecord {
+  const recurring = Boolean(row.recurring);
+  const dayOfMonth = row.day_of_month != null ? Number(row.day_of_month) : null;
   return {
     id: row.id as string,
     name: row.name as string,
-    dueDate: (row.due_date as string) ?? "",
+    dueDate: recurring && dayOfMonth != null ? nextOccurrence(dayOfMonth) : (row.due_date as string) ?? "",
     reminderDays: Number(row.reminder_days ?? 3),
     expectedValue: row.expected_value != null ? Number(row.expected_value) : null,
     active: Boolean(row.active),
-    recurring: Boolean(row.recurring),
-    dayOfMonth: row.day_of_month != null ? Number(row.day_of_month) : null,
+    recurring,
+    dayOfMonth,
     createdAt: new Date(row.created_at as string).getTime(),
   };
 }
@@ -89,16 +117,27 @@ export async function toggleAlert(id: string, active: boolean): Promise<void> {
 export async function fetchDueAlerts(): Promise<AlertRecord[]> {
   const sql = getDb();
   const userId = await getUserId();
+  // Alertas recorrentes têm a data de vencimento recalculada em mapRow, então
+  // aqui trazemos todos os ativos (recorrentes ou com due_date futura) e
+  // aplicamos a janela de lembrete em memória, já com a data efetiva.
   const rows = await sql(
     `SELECT id, name, due_date::text, reminder_days, expected_value::float8,
             active, recurring, day_of_month, created_at
      FROM public.alerts
      WHERE user_id = $1
        AND active = true
-       AND due_date >= CURRENT_DATE
-       AND (due_date - reminder_days * INTERVAL '1 day')::date <= CURRENT_DATE
-     ORDER BY due_date ASC`,
+       AND (recurring = true OR due_date >= CURRENT_DATE)`,
     [userId],
   );
-  return (rows as Record<string, unknown>[]).map(mapRow);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  return (rows as Record<string, unknown>[])
+    .map(mapRow)
+    .filter((a) => {
+      const remindFrom = new Date(`${a.dueDate}T00:00:00`);
+      remindFrom.setDate(remindFrom.getDate() - a.reminderDays);
+      return remindFrom <= today;
+    })
+    .sort((a, b) => a.dueDate.localeCompare(b.dueDate));
 }
