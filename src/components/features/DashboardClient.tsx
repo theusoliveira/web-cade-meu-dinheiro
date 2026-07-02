@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Card } from "@/components/ui/Card";
 import { useBusy } from "@/components/features/BusyProvider";
-import { fetchMonthlyEntries, fetchOpeningBalance } from "@/actions/entries";
+import { fetchYearlyEntries, fetchOpeningBalance } from "@/actions/entries";
 import { fetchDueAlerts, type AlertRecord } from "@/actions/alerts";
 import { fetchGoals } from "@/actions/goals";
 import { formatCurrencyBRL, formatDateBR, todayAsDateInputValue } from "@/lib/finance";
@@ -18,9 +18,9 @@ function daysUntil(dueDate: string): number {
   return Math.ceil((due.getTime() - today.getTime()) / 86_400_000);
 }
 
-function monthLabel(ym: string): string {
-  const [y, m] = ym.split("-").map(Number);
-  return new Date(y, (m ?? 1) - 1, 1).toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
+function yearOptions(): number[] {
+  const current = new Date().getFullYear();
+  return Array.from({ length: 6 }, (_, i) => current - i);
 }
 
 // ─── Stat Card ────────────────────────────────────────────────────────────────
@@ -72,7 +72,7 @@ function MiniProgressBar({ value, max, color = "#10b981" }: { value: number; max
 type Totals = { income: number; expense: number; investment: number; balance: number };
 
 export function DashboardClient({ onNavigateAlerts }: { onNavigateAlerts?: () => void }) {
-  const currentMonth = todayAsDateInputValue().slice(0, 7);
+  const [year, setYear] = React.useState(() => todayAsDateInputValue().slice(0, 4));
   const [totals, setTotals] = React.useState<Totals>({ income: 0, expense: 0, investment: 0, balance: 0 });
   const [openingBalance, setOpeningBalance] = React.useState(0);
   const [dueAlerts, setDueAlerts] = React.useState<AlertRecord[]>([]);
@@ -82,11 +82,12 @@ export function DashboardClient({ onNavigateAlerts }: { onNavigateAlerts?: () =>
 
   React.useEffect(() => {
     let alive = true;
+    setLoaded(false);
     run(async () => {
       try {
         const [entries, ob, alerts, goalList] = await Promise.all([
-          fetchMonthlyEntries(currentMonth, "personal"),
-          fetchOpeningBalance(currentMonth, "personal"),
+          fetchYearlyEntries(year, "personal"),
+          fetchOpeningBalance(`${year}-01`, "personal"),
           fetchDueAlerts(),
           fetchGoals(),
         ]);
@@ -110,7 +111,7 @@ export function DashboardClient({ onNavigateAlerts }: { onNavigateAlerts?: () =>
     });
     return () => { alive = false; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentMonth]);
+  }, [year]);
 
   const savingsRate = totals.income > 0
     ? Math.max(0, ((totals.income - totals.expense) / totals.income) * 100)
@@ -136,11 +137,25 @@ export function DashboardClient({ onNavigateAlerts }: { onNavigateAlerts?: () =>
   return (
     <div className="grid gap-6 animate-fade-in">
       {/* Title */}
-      <div>
-        <h1 className="text-xl font-bold text-[var(--foreground)]">Dashboard</h1>
-        <p className="mt-1 text-sm text-[var(--muted)]">
-          Visão geral de {monthLabel(currentMonth)}
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-bold text-[var(--foreground)]">Dashboard</h1>
+          <p className="mt-1 text-sm text-[var(--muted)]">
+            Consolidado do ano de {year}
+          </p>
+        </div>
+        <label className="flex items-center gap-2 text-sm">
+          <span className="text-[var(--muted)]">Ano</span>
+          <select
+            value={year}
+            onChange={(e) => setYear(e.target.value)}
+            className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-sm font-semibold text-[var(--foreground)]"
+          >
+            {yearOptions().map((y) => (
+              <option key={y} value={String(y)}>{y}</option>
+            ))}
+          </select>
+        </label>
       </div>
 
       {/* ─── KPIs ─────────────────────────────────────────────────────────── */}
@@ -176,7 +191,7 @@ export function DashboardClient({ onNavigateAlerts }: { onNavigateAlerts?: () =>
         {/* Taxa de poupança */}
         <Card>
           <p className="mb-1 text-sm font-bold text-[var(--foreground)]">Taxa de poupança</p>
-          <p className="text-xs text-[var(--muted)] mb-4">Quanto da receita você está guardando este mês</p>
+          <p className="text-xs text-[var(--muted)] mb-4">Quanto da receita você está guardando neste ano</p>
           <div className="flex items-end justify-between mb-2">
             <span className="text-3xl font-bold text-[var(--foreground)]">{savingsRate.toFixed(1)}%</span>
             <span className="text-xs text-[var(--muted)]">
