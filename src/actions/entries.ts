@@ -36,6 +36,21 @@ export async function fetchMonthlyEntries(ym: string, scope: MonthlyEntriesScope
   return mapEntryRows(rows as never[]);
 }
 
+export async function fetchYearlyEntries(year: string, scope: MonthlyEntriesScope = "personal"): Promise<FinanceEntry[]> {
+  const sql = getDb();
+  const userId = await getUserId();
+  const table = entryTable(scope);
+  const start = `${year}-01-01`;
+  const next = `${Number(year) + 1}-01-01`;
+  const rows = await sql(
+    `SELECT id, kind, date::text, category, description, value::float8, created_at, fixed_entry_id
+     FROM public.${table} WHERE user_id = $1 AND date >= $2::date AND date < $3::date
+     ORDER BY date DESC, created_at DESC`,
+    [userId, start, next],
+  );
+  return mapEntryRows(rows as never[]);
+}
+
 export async function fetchEntriesBeforeMonth(ym: string, scope: MonthlyEntriesScope = "personal"): Promise<FinanceEntry[]> {
   const sql = getDb();
   const userId = await getUserId();
