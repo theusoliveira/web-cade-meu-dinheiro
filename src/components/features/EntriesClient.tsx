@@ -87,7 +87,7 @@ export function EntriesClient({
               variant="success"
               size="sm"
               onClick={() => openDialog("income")}
-              className="gap-1.5 bg-emerald-600 hover:bg-emerald-700"
+              className="gap-1.5"
               leftIcon={<svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4"><path fillRule="evenodd" d="M10 17a.75.75 0 01-.75-.75V5.612L5.29 9.77a.75.75 0 01-1.08-1.04l5.25-5.5a.75.75 0 011.08 0l5.25 5.5a.75.75 0 11-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0110 17z" clipRule="evenodd" /></svg>}
             >
               {isPJ ? "Entrada" : "Receita"}
@@ -104,9 +104,10 @@ export function EntriesClient({
             </Button>
             <Button
               type="button"
+              variant="info"
               size="sm"
               onClick={() => openDialog("investment")}
-              className="gap-1.5 bg-sky-600 hover:bg-sky-700"
+              className="gap-1.5"
               leftIcon={<svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4"><path fillRule="evenodd" d="M12.577 4.878a.75.75 0 01.919-.53l4.78 1.281a.75.75 0 01.531.919l-1.281 4.78a.75.75 0 01-1.449-.387l.81-3.022a19.407 19.407 0 00-5.594 5.203.75.75 0 01-1.139.093L7 10.06l-3.72 3.72a.75.75 0 11-1.06-1.061l4.25-4.25a.75.75 0 011.06 0l1.956 1.956a20.924 20.924 0 015.293-5.136l-3.023.81a.75.75 0 01-.387-1.45z" clipRule="evenodd" /></svg>}
             >
               Investimento

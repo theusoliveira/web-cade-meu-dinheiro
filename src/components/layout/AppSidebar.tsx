@@ -129,15 +129,18 @@ const NAV_ITEMS: NavItem[] = [
 function LogoMark({ collapsed }: { collapsed: boolean }) {
   return (
     <div className={`flex items-center gap-2.5 ${collapsed ? "justify-center" : ""}`}>
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500 shadow-sm">
+      <div
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg shadow-sm"
+        style={{ backgroundColor: "var(--sidebar-logo-bg)" }}
+      >
         <svg viewBox="0 0 24 24" fill="none" className="h-4.5 w-4.5" aria-hidden>
           <path d="M12 6v12M8 10c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2v.5c0 1.1-.9 2-2 2h-4c-1.1 0-2 .9-2 2v.5c0 1.1.9 2 2 2h4c1.1 0 2-.9 2-2" stroke="white" strokeWidth="1.8" strokeLinecap="round" />
         </svg>
       </div>
       {!collapsed && (
         <div className="leading-tight">
-          <p className="text-sm font-bold text-[var(--foreground)]">Cadê Meu</p>
-          <p className="text-xs font-semibold text-emerald-500">Dinheiro?</p>
+          <p className="text-sm font-bold" style={{ color: "var(--sidebar-active-text)" }}>Cadê Meu</p>
+          <p className="text-xs font-semibold" style={{ color: "var(--sidebar-logo-bg)" }}>Dinheiro?</p>
         </div>
       )}
     </div>

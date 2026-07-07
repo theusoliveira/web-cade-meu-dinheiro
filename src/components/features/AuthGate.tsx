@@ -283,7 +283,7 @@ export function AuthGate() {
           cpf: cpfDigits,
         }),
       });
-      const body = await res.json();
+      const body = await res.json().catch(() => ({}));
       if (!res.ok) {
         setError(body.error ?? "Erro ao criar conta. Tente novamente.");
         return;

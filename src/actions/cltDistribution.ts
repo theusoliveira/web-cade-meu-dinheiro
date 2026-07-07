@@ -155,8 +155,15 @@ export async function deleteCltCategory(catId: string): Promise<void> {
 
 export async function addCltItem(categoryId: string, description: string, value: number): Promise<CltDistributionItem> {
   const sql = getDb();
-  const id = newId();
+  const userId = await getUserId();
 
+  const owned = await sql(
+    `SELECT 1 FROM public.clt_distribution_categories WHERE id = $1 AND user_id = $2 LIMIT 1`,
+    [categoryId, userId],
+  );
+  if (owned.length === 0) throw new Error("Categoria não encontrada.");
+
+  const id = newId();
   const maxRow = await sql(
     `SELECT COALESCE(MAX(sort_order), -1) AS mo FROM public.clt_distribution_items WHERE category_id = $1`,
     [categoryId],
@@ -172,13 +179,23 @@ export async function addCltItem(categoryId: string, description: string, value:
 
 export async function updateCltItem(itemId: string, description: string, value: number): Promise<void> {
   const sql = getDb();
+  const userId = await getUserId();
   await sql(
-    `UPDATE public.clt_distribution_items SET description = $1, value = $2 WHERE id = $3`,
-    [description, value, itemId],
+    `UPDATE public.clt_distribution_items i
+     SET description = $1, value = $2
+     FROM public.clt_distribution_categories c
+     WHERE i.id = $3 AND i.category_id = c.id AND c.user_id = $4`,
+    [description, value, itemId, userId],
   );
 }
 
 export async function deleteCltItem(itemId: string): Promise<void> {
   const sql = getDb();
-  await sql(`DELETE FROM public.clt_distribution_items WHERE id = $1`, [itemId]);
+  const userId = await getUserId();
+  await sql(
+    `DELETE FROM public.clt_distribution_items i
+     USING public.clt_distribution_categories c
+     WHERE i.id = $1 AND i.category_id = c.id AND c.user_id = $2`,
+    [itemId, userId],
+  );
 }

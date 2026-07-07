@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Card } from "@/components/ui/Card";
+import { Card, StatCard } from "@/components/ui/Card";
 import { useBusy } from "@/components/features/BusyProvider";
 import { fetchYearlyEntries, fetchOpeningBalance } from "@/actions/entries";
 import { fetchDueAlerts, type AlertRecord } from "@/actions/alerts";
@@ -21,39 +21,6 @@ function daysUntil(dueDate: string): number {
 function yearOptions(): number[] {
   const current = new Date().getFullYear();
   return Array.from({ length: 6 }, (_, i) => current - i);
-}
-
-// ─── Stat Card ────────────────────────────────────────────────────────────────
-
-function DashStatCard({
-  label,
-  value,
-  color = "neutral",
-  icon,
-}: {
-  label: string;
-  value: string;
-  color?: "income" | "expense" | "investment" | "balance" | "neutral";
-  icon: React.ReactNode;
-}) {
-  const borderColors = {
-    income: "border-l-emerald-500",
-    expense: "border-l-rose-500",
-    investment: "border-l-sky-500",
-    balance: "border-l-amber-400",
-    neutral: "border-l-transparent",
-  };
-  return (
-    <div className={`rounded-2xl border border-[var(--border)] border-l-4 ${borderColors[color]} bg-[var(--surface)] p-5 flex items-start gap-4`}>
-      <div className="flex-1 min-w-0">
-        <p className="text-xs font-medium uppercase tracking-wider text-[var(--muted)]">{label}</p>
-        <p className="mt-1.5 text-2xl font-bold text-[var(--foreground)] truncate">{value}</p>
-      </div>
-      <div className="shrink-0 rounded-xl bg-[var(--surface-raised)] p-2.5 text-[var(--muted)]">
-        {icon}
-      </div>
-    </div>
-  );
 }
 
 // ─── Mini Bar ─────────────────────────────────────────────────────────────────
@@ -160,30 +127,10 @@ export function DashboardClient({ onNavigateAlerts }: { onNavigateAlerts?: () =>
 
       {/* ─── KPIs ─────────────────────────────────────────────────────────── */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <DashStatCard
-          label="Receitas"
-          value={formatCurrencyBRL(totals.income)}
-          color="income"
-          icon={<svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5" aria-hidden><path fillRule="evenodd" d="M10 17a.75.75 0 01-.75-.75V5.612L5.29 9.77a.75.75 0 01-1.08-1.04l5.25-5.5a.75.75 0 011.08 0l5.25 5.5a.75.75 0 11-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0110 17z" clipRule="evenodd" /></svg>}
-        />
-        <DashStatCard
-          label="Despesas"
-          value={formatCurrencyBRL(totals.expense)}
-          color="expense"
-          icon={<svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5" aria-hidden><path fillRule="evenodd" d="M10 3a.75.75 0 01.75.75v10.638l3.96-4.158a.75.75 0 111.08 1.04l-5.25 5.5a.75.75 0 01-1.08 0l-5.25-5.5a.75.75 0 111.08-1.04l3.96 4.158V3.75A.75.75 0 0110 3z" clipRule="evenodd" /></svg>}
-        />
-        <DashStatCard
-          label="Investimentos"
-          value={formatCurrencyBRL(totals.investment)}
-          color="investment"
-          icon={<svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5" aria-hidden><path fillRule="evenodd" d="M12.577 4.878a.75.75 0 01.919-.53l4.78 1.281a.75.75 0 01.531.919l-1.281 4.78a.75.75 0 01-1.449-.387l.81-3.022a19.407 19.407 0 00-5.594 5.203.75.75 0 01-1.139.093L7 10.06l-3.72 3.72a.75.75 0 11-1.06-1.061l4.25-4.25a.75.75 0 011.06 0l1.956 1.956a20.924 20.924 0 015.293-5.136l-3.023.81a.75.75 0 01-.387-1.45z" clipRule="evenodd" /></svg>}
-        />
-        <DashStatCard
-          label="Saldo disponível"
-          value={formatCurrencyBRL(totals.balance)}
-          color="balance"
-          icon={<svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5" aria-hidden><path d="M10.75 10.818v2.614A3.13 3.13 0 0011.888 13c.482-.315.612-.648.612-.875 0-.227-.13-.560-.612-.875a3.13 3.13 0 00-1.138-.432zM8.33 8.62c.053.055.115.11.184.164.208.16.46.284.736.363V6.603a2.45 2.45 0 00-.35.13c-.14.065-.27.143-.386.235-.737.576-.738 1.205-.184 1.692z" /><path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v.022a2.68 2.68 0 011.418.504c.478.317.832.803.832 1.474s-.354 1.157-.832 1.474A2.68 2.68 0 0110.75 12v.022a1 1 0 11-2 0v-.043a2.68 2.68 0 01-1.08-.476C7.192 11.157 6.75 10.596 6.75 9.875c0-.62.327-1.07.751-1.352.14-.092.293-.165.449-.22V8z" clipRule="evenodd" /></svg>}
-        />
+        <StatCard label="Receitas" value={formatCurrencyBRL(totals.income)} color="income" />
+        <StatCard label="Despesas" value={formatCurrencyBRL(totals.expense)} color="expense" />
+        <StatCard label="Investimentos" value={formatCurrencyBRL(totals.investment)} color="investment" />
+        <StatCard label="Saldo disponível" value={formatCurrencyBRL(totals.balance)} color="balance" />
       </div>
 
       {/* ─── Análise financeira ───────────────────────────────────────────── */}
