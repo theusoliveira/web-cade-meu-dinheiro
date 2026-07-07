@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
+import { Card, StatCard } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { useBusy } from "@/components/features/BusyProvider";
 import {
@@ -493,20 +493,13 @@ export function AlertsClient() {
           </div>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
-            <div className="rounded-xl border border-[var(--border)] p-4">
-              <p className="text-xs font-medium uppercase tracking-wider text-[var(--muted)]">Total</p>
-              <p className="mt-1.5 text-xl font-bold text-[var(--foreground)]">{alerts.length}</p>
-            </div>
-            <div className="rounded-xl border border-l-4 border-emerald-500 border-[var(--border)] p-4">
-              <p className="text-xs font-medium uppercase tracking-wider text-[var(--muted)]">Ativos</p>
-              <p className="mt-1.5 text-xl font-bold text-[var(--foreground)]">{activeAlerts.length}</p>
-            </div>
-            <div className={`rounded-xl border p-4 ${dueCount > 0 ? "border-l-4 border-l-amber-500 border-[var(--border)]" : "border-[var(--border)]"}`}>
-              <p className="text-xs font-medium uppercase tracking-wider text-[var(--muted)]">A vencer em breve</p>
-              <p className={`mt-1.5 text-xl font-bold ${dueCount > 0 ? "text-amber-600 dark:text-amber-400" : "text-[var(--foreground)]"}`}>
-                {dueCount}
-              </p>
-            </div>
+            <StatCard label="Total" value={String(alerts.length)} color="neutral" />
+            <StatCard label="Ativos" value={String(activeAlerts.length)} color="income" />
+            <StatCard
+              label="A vencer em breve"
+              value={String(dueCount)}
+              color={dueCount > 0 ? "warning" : "neutral"}
+            />
           </div>
         </Card>
 

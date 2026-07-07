@@ -82,7 +82,6 @@ export function CardControlClient({ entries, openDialog, onEdit, onDelete, onDel
               variant="success"
               size="sm"
               onClick={() => openDialog("income")}
-              className="bg-emerald-600 hover:bg-emerald-700"
             >
               + Receita
             </Button>

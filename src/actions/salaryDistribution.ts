@@ -220,26 +220,51 @@ export async function insertItem(data: {
   categoryId: string; description: string; value: number; sortOrder: number;
 }): Promise<DistributionItem> {
   const sql = getDb();
+  const userId = await getUserId();
   const id = newId();
-  await sql(
+  const rows = await sql(
     `INSERT INTO public.pj_distribution_items (id, category_id, description, value, item_key, sort_order)
-     VALUES ($1, $2, $3, $4, null, $5)`,
-    [id, data.categoryId, data.description, data.value, data.sortOrder],
+     SELECT $1, $2, $3, $4, null, $5
+     FROM public.pj_distribution_categories
+     WHERE id = $2 AND user_id = $6
+     RETURNING id`,
+    [id, data.categoryId, data.description, data.value, data.sortOrder, userId],
   );
+  if (rows.length === 0) throw new Error("Categoria não encontrada.");
   return { id, categoryId: data.categoryId, description: data.description, value: data.value, itemKey: null, sortOrder: data.sortOrder };
 }
 
 export async function updateItemValue(id: string, value: number): Promise<void> {
   const sql = getDb();
-  await sql(`UPDATE public.pj_distribution_items SET value = $1 WHERE id = $2`, [value, id]);
+  const userId = await getUserId();
+  await sql(
+    `UPDATE public.pj_distribution_items i
+     SET value = $1
+     FROM public.pj_distribution_categories c
+     WHERE i.id = $2 AND i.category_id = c.id AND c.user_id = $3`,
+    [value, id, userId],
+  );
 }
 
 export async function updateItemDescription(id: string, description: string): Promise<void> {
   const sql = getDb();
-  await sql(`UPDATE public.pj_distribution_items SET description = $1 WHERE id = $2`, [description, id]);
+  const userId = await getUserId();
+  await sql(
+    `UPDATE public.pj_distribution_items i
+     SET description = $1
+     FROM public.pj_distribution_categories c
+     WHERE i.id = $2 AND i.category_id = c.id AND c.user_id = $3`,
+    [description, id, userId],
+  );
 }
 
 export async function deleteItem(id: string): Promise<void> {
   const sql = getDb();
-  await sql(`DELETE FROM public.pj_distribution_items WHERE id = $1`, [id]);
+  const userId = await getUserId();
+  await sql(
+    `DELETE FROM public.pj_distribution_items i
+     USING public.pj_distribution_categories c
+     WHERE i.id = $1 AND i.category_id = c.id AND c.user_id = $2`,
+    [id, userId],
+  );
 }

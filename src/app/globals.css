@@ -4,65 +4,68 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {
-  --font-sans: var(--font-sans), system-ui, sans-serif;
+  --font-sans: var(--font-sans);
 }
 
 /* ─── Design tokens ─────────────────────────────────────────────────── */
 
 :root {
+  /* Fonte de sistema — mesma stack usada pelo painel da Kiwify */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
   /* Brand */
-  --accent: #10b981;
+  --accent: #0f9d63;
   --accent-light: #d1fae5;
-  --accent-dark: #059669;
+  --accent-dark: #0b7a4d;
 
   /* Surfaces */
-  --background: #f4f6f9;
+  --background: #f4f5f7;
   --surface: #ffffff;
-  --surface-raised: #f0f3f7;
-  --border: #e2e8f0;
-  --border-strong: #cbd5e1;
+  --surface-raised: #f7f8fa;
+  --border: #eaecef;
+  --border-strong: #dde1e6;
 
   /* Text */
-  --foreground: #0f172a;
-  --muted: #64748b;
-  --muted-light: #94a3b8;
+  --foreground: #1a1d23;
+  --muted: #6b7280;
+  --muted-light: #9aa1ab;
 
-  /* Sidebar — light, clean */
-  --sidebar-bg: #ffffff;
-  --sidebar-border: #e8edf4;
-  --sidebar-text: #374151;
-  --sidebar-text-muted: #9ca3af;
-  --sidebar-active-bg: #f0fdf4;
-  --sidebar-active-text: #059669;
-  --sidebar-active-icon: #10b981;
-  --sidebar-hover-bg: #f8fafc;
-  --sidebar-logo-bg: #10b981;
+  /* Sidebar — azul-marinho escuro, estilo painel Kiwify */
+  --sidebar-bg: #232c3d;
+  --sidebar-border: #2e3850;
+  --sidebar-text: #b6bec9;
+  --sidebar-text-muted: #7c8494;
+  --sidebar-active-bg: #171e2c;
+  --sidebar-active-text: #ffffff;
+  --sidebar-active-icon: #ffffff;
+  --sidebar-hover-bg: #2a3448;
+  --sidebar-logo-bg: #0f9d63;
 
   /* Status colors */
-  --income: #059669;
+  --income: #0b7a4d;
   --expense: #e11d48;
   --investment: #0284c7;
 }
 
 .dark {
-  --background: #080f1a;
-  --surface: #0f1c2e;
-  --surface-raised: #162033;
-  --border: #1e3045;
-  --border-strong: #2a4060;
+  --background: #0b0f16;
+  --surface: #12161f;
+  --surface-raised: #171c27;
+  --border: #232838;
+  --border-strong: #2e3548;
   --foreground: #f1f5f9;
-  --muted: #8ba0b8;
-  --muted-light: #4a6580;
+  --muted: #8b93a3;
+  --muted-light: #4a5568;
 
-  --sidebar-bg: #060d18;
-  --sidebar-border: #0f1c2e;
-  --sidebar-text: #e2e8f0;
-  --sidebar-text-muted: #4a6580;
-  --sidebar-active-bg: #10b98115;
-  --sidebar-active-text: #34d399;
+  --sidebar-bg: #171d2b;
+  --sidebar-border: #232c3d;
+  --sidebar-text: #b6bec9;
+  --sidebar-text-muted: #656e80;
+  --sidebar-active-bg: #0e1320;
+  --sidebar-active-text: #ffffff;
   --sidebar-active-icon: #34d399;
-  --sidebar-hover-bg: #0f1c2e;
-  --sidebar-logo-bg: #10b981;
+  --sidebar-hover-bg: #1e2436;
+  --sidebar-logo-bg: #0f9d63;
 }
 
 /* ─── Base ─────────────────────────────────────────────────────────── */

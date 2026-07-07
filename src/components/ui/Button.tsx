@@ -4,7 +4,7 @@ import * as React from "react";
 import { twMerge } from "tailwind-merge";
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: "primary" | "secondary" | "ghost" | "danger" | "success";
+  variant?: "primary" | "secondary" | "ghost" | "danger" | "success" | "info";
   size?: "xs" | "sm" | "md" | "lg";
   loading?: boolean;
   leftIcon?: React.ReactNode;
@@ -23,7 +23,7 @@ export function Button({
   ...props
 }: ButtonProps) {
   const base =
-    "inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl font-semibold " +
+    "inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg font-semibold " +
     "transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 " +
     "focus-visible:ring-[var(--accent)] select-none " +
     "disabled:cursor-not-allowed disabled:opacity-50 disabled:pointer-events-none " +
@@ -38,15 +38,21 @@ export function Button({
 
   const variants = {
     primary:
-      "bg-[var(--accent)] text-white hover:brightness-110 shadow-sm shadow-emerald-900/20",
+      "bg-emerald-100 text-emerald-800 border border-emerald-200 hover:bg-emerald-200 " +
+      "dark:bg-emerald-900/40 dark:text-emerald-200 dark:border-emerald-800/60 dark:hover:bg-emerald-900/60",
     secondary:
       "bg-[var(--surface-raised)] text-[var(--foreground)] hover:bg-[var(--border)] border border-[var(--border)]",
     ghost:
       "bg-transparent text-[var(--muted)] hover:bg-[var(--surface-raised)] hover:text-[var(--foreground)]",
     danger:
-      "bg-rose-600 text-white hover:bg-rose-700 shadow-sm",
+      "bg-rose-50 text-rose-600 border border-rose-100 hover:bg-rose-100 " +
+      "dark:bg-rose-950/30 dark:text-rose-300 dark:border-rose-900/50 dark:hover:bg-rose-950/50",
     success:
-      "bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm",
+      "bg-emerald-50 text-emerald-600 border border-emerald-100 hover:bg-emerald-100 " +
+      "dark:bg-emerald-950/30 dark:text-emerald-300 dark:border-emerald-900/50 dark:hover:bg-emerald-950/50",
+    info:
+      "bg-sky-50 text-sky-600 border border-sky-100 hover:bg-sky-100 " +
+      "dark:bg-sky-950/30 dark:text-sky-300 dark:border-sky-900/50 dark:hover:bg-sky-950/50",
   } as const;
 
   return (
