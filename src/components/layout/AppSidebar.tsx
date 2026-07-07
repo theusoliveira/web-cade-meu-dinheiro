@@ -10,6 +10,7 @@ export type NavKey =
   | "controle"
   | "distribuicao_pj"
   | "distribuicao_clt"
+  | "rebalanceador"
   | "alertas";
 
 type NavItem = {
@@ -99,6 +100,17 @@ const NAV_ITEMS: NavItem[] = [
         <circle cx="12" cy="12" r="5" stroke="currentColor" strokeWidth="1.8" />
         <circle cx="12" cy="12" r="1.5" fill="currentColor" />
         <path d="M12 3v2M12 19v2M3 12h2M19 12h2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
+    key: "rebalanceador",
+    label: "Rebalanceador",
+    shortLabel: "Rebalanc.",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" className="h-[18px] w-[18px]" aria-hidden>
+        <path d="M4 6h9M4 12h6M4 18h12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+        <path d="M20 6l-3-3-3 3M17 3v9M14 14l3 3 3-3M17 21v-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
   },
