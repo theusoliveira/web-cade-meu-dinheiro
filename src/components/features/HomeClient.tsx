@@ -38,6 +38,10 @@ const AlertsClient = dynamic(
   () => import("@/components/features/AlertsClient").then((m) => m.AlertsClient),
   { loading: () => <SectionFallback /> },
 );
+const RebalanceClient = dynamic(
+  () => import("@/components/features/RebalanceClient").then((m) => m.RebalanceClient),
+  { loading: () => <SectionFallback /> },
+);
 const DashboardClient = dynamic(
   () => import("@/components/features/DashboardClient").then((m) => m.DashboardClient),
   { loading: () => <SectionFallback /> },
@@ -54,6 +58,7 @@ const TAB_TITLES: Record<NavKey, string> = {
   distribuicao_clt: "Distribuição de Salário CLT",
   metas: "Metas Financeiras",
   controle: "Controle de Gastos",
+  rebalanceador: "Rebalanceador de Carteira",
   alertas: "Alertas de Contas",
 };
 
@@ -65,6 +70,7 @@ const TAB_DESCRIPTIONS: Record<NavKey, string> = {
   distribuicao_clt: "Planeje a distribuição do seu salário CLT",
   metas: "Defina e acompanhe suas metas financeiras",
   controle: "Controle os gastos do cartão de crédito",
+  rebalanceador: "Defina o percentual ideal por classe e veja onde comprar",
   alertas: "Gerencie alertas de contas a vencer",
 };
 
@@ -280,6 +286,7 @@ export function HomeClient() {
               {activeTab === "metas" && <GoalsClient addTrigger={goalAddTrigger} />}
               {activeTab === "distribuicao_pj" && <SalaryDistributionClient />}
               {activeTab === "distribuicao_clt" && <CltDistributionClient />}
+              {activeTab === "rebalanceador" && <RebalanceClient />}
               {activeTab === "alertas" && <AlertsClient />}
 
               {dialogOpen && (
