@@ -116,7 +116,7 @@ export function EntriesClient({
         </div>
 
         {/* Stat cards */}
-        <div className="mt-5 grid gap-3 grid-cols-2 sm:grid-cols-4">
+        <div className="mt-5 grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard label={incomeLabel} value={formatCurrencyBRL(totals.income)} color="income" />
           <StatCard label={expenseLabel} value={formatCurrencyBRL(totals.expense)} color="expense" />
           <StatCard label="Investimentos" value={formatCurrencyBRL(totals.investment)} color="investment" />
