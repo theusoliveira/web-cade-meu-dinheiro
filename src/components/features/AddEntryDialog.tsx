@@ -19,6 +19,7 @@ type Props = {
   onClose: () => void;
   initial?: FinanceEntry | null;
   allowFixed?: boolean;
+  excludeCategories?: Category[];
   onSubmit: (entry: FinanceEntry) => void | Promise<void>;
 };
 
@@ -34,9 +35,17 @@ const KIND_BG: Record<EntryKind, string> = {
   investment: "bg-sky-50 dark:bg-sky-950/20",
 };
 
-export function AddEntryDialog({ open, kind, onClose, initial, allowFixed = false, onSubmit }: Props) {
+export function AddEntryDialog({ open, kind, onClose, initial, allowFixed = false, excludeCategories, onSubmit }: Props) {
+  const availableCategories = React.useCallback(
+    (k: EntryKind) => {
+      const all = categoriesFor(k) as Category[];
+      if (!excludeCategories?.length) return all;
+      return all.filter((c) => !excludeCategories.includes(c));
+    },
+    [excludeCategories],
+  );
   const [date, setDate] = React.useState(() => todayAsDateInputValue());
-  const [category, setCategory] = React.useState<Category>(() => categoriesFor(kind)[0] as Category);
+  const [category, setCategory] = React.useState<Category>(() => availableCategories(kind)[0]);
   const [description, setDescription] = React.useState("");
   const [valueCents, setValueCents] = React.useState(0);
   const [valueText, setValueText] = React.useState("");
@@ -59,7 +68,7 @@ export function AddEntryDialog({ open, kind, onClose, initial, allowFixed = fals
       setIsFixedTemplate(Boolean(initial.isFixedTemplate));
     } else {
       setDate(todayAsDateInputValue());
-      setCategory(categoriesFor(kind)[0] as Category);
+      setCategory(availableCategories(kind)[0]);
       setDescription("");
       setValueCents(0);
       setValueText("");
@@ -83,9 +92,9 @@ export function AddEntryDialog({ open, kind, onClose, initial, allowFixed = fals
   }, [open, onClose, submitting]);
 
   const categoryOptions = React.useMemo<Category[]>(() => {
-    const base = [...categoriesFor(kind)] as Category[];
+    const base = availableCategories(kind);
     return category && !base.includes(category) ? [category, ...base] : base;
-  }, [kind, category]);
+  }, [kind, category, availableCategories]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();

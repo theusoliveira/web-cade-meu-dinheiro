@@ -294,6 +294,7 @@ export function HomeClient() {
                   open={dialogOpen}
                   kind={kind}
                   allowFixed={isMonthlyTab}
+                  excludeCategories={isMonthlyTab ? ["Saldo"] : undefined}
                   onClose={() => { setDialogOpen(false); setEditing(null); }}
                   initial={editing}
                   onSubmit={onSubmit}
