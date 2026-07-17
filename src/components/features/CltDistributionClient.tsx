@@ -446,6 +446,7 @@ export function CltDistributionClient() {
       </section>
 
       {/* Categories */}
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
       {categories.map((cat) => {
         const catTotal = cat.items.reduce((s, i) => s + i.value, 0);
 
@@ -537,6 +538,7 @@ export function CltDistributionClient() {
           </section>
         );
       })}
+      </div>
 
       {/* Add allocation button */}
       <Button
