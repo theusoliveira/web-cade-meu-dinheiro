@@ -538,6 +538,7 @@ export function SalaryDistributionClient() {
       </section>
 
       {/* Categories */}
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
       {categories.map((cat) => {
         const catTotal = cat.items.reduce(
           (s, i) => s + (cat.isFixed && i.itemKey === "simples_nacional" ? simplesValue : i.value),
@@ -701,6 +702,7 @@ export function SalaryDistributionClient() {
           </section>
         );
       })}
+      </div>
 
       {/* Add allocation button */}
       <Button
