@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useBusy } from "@/components/features/BusyProvider";
 import { formatBRLFromCents, newId, parseBRLCents } from "@/lib/finance";
@@ -12,11 +13,7 @@ import {
 } from "@/actions/rebalance";
 
 function IconTrash() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" aria-hidden>
-      <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
+  return <Trash2 className="h-3.5 w-3.5" aria-hidden />;
 }
 
 export function RebalanceClient() {
@@ -218,8 +215,8 @@ function RebalanceTable({
                     <span
                       className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${
                         isBuy
-                          ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-300"
-                          : "bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-300"
+                          ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300"
+                          : "bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-300"
                       }`}
                     >
                       {isBuy ? "Comprar" : "Aguardar"}

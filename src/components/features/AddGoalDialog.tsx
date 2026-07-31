@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Button } from "@/components/ui/Button";
+import { Target, X, AlertCircle } from "lucide-react";
 import { formatCurrencyBRL, newId } from "@/lib/finance";
 
 export type Goal = {
@@ -103,9 +104,9 @@ export function AddGoalDialog({ open, onClose, initial, onSubmit }: Props) {
   if (!open) return null;
 
   const inputClass =
-    "w-full h-10 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm " +
+    "w-full h-10 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 text-sm " +
     "text-[var(--foreground)] placeholder:text-[var(--muted-light)] outline-none " +
-    "focus:ring-1 focus:ring-[var(--investment)] focus:border-[var(--investment)] transition-all";
+    "focus:ring-2 focus:ring-[var(--accent)] focus:border-[var(--accent)] transition-all";
 
   return (
     <div className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center p-0 sm:p-4" role="dialog" aria-modal>
@@ -124,11 +125,7 @@ export function AddGoalDialog({ open, onClose, initial, onSubmit }: Props) {
         <div className="flex items-center justify-between gap-4 px-5 py-4 border-b border-[var(--border)]">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--accent)]/10 text-[var(--accent)]">
-              <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
-                <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8" />
-                <circle cx="12" cy="12" r="5" stroke="currentColor" strokeWidth="1.8" />
-                <circle cx="12" cy="12" r="1.5" fill="currentColor" />
-              </svg>
+              <Target className="h-5 w-5" aria-hidden />
             </div>
             <div>
               <h3 className="text-base font-bold text-[var(--foreground)]">{isEdit ? "Editar meta" : "Nova meta"}</h3>
@@ -141,9 +138,7 @@ export function AddGoalDialog({ open, onClose, initial, onSubmit }: Props) {
             disabled={submitting}
             className="cursor-pointer h-8 w-8 flex items-center justify-center rounded-xl text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-raised)] transition-colors"
           >
-            <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden>
-              <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-            </svg>
+            <X className="h-4 w-4" aria-hidden />
           </button>
         </div>
 
@@ -206,9 +201,7 @@ export function AddGoalDialog({ open, onClose, initial, onSubmit }: Props) {
 
           {error && (
             <div className="mt-4 flex items-center gap-2 rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50 dark:bg-rose-950/30 px-3 py-2.5">
-              <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4 text-rose-500 shrink-0">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
-              </svg>
+              <AlertCircle className="h-4 w-4 text-rose-500 shrink-0" />
               <p className="text-sm text-rose-700 dark:text-rose-300">{error}</p>
             </div>
           )}

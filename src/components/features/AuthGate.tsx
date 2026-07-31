@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
+import { Eye, EyeOff, AlertCircle, CheckCircle2, Receipt, Target, CreditCard, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { HomeClient } from "@/components/features/HomeClient";
@@ -24,20 +25,7 @@ function maskCPF(v: string) {
 // ─── Sub-components ────────────────────────────────────────────────────────────
 
 function EyeIcon({ open }: { open: boolean }) {
-  if (open) {
-    return (
-      <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden>
-        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" stroke="currentColor" strokeWidth="2" />
-        <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" />
-      </svg>
-    );
-  }
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden>
-      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
+  return open ? <Eye className="h-4 w-4" aria-hidden /> : <EyeOff className="h-4 w-4" aria-hidden />;
 }
 
 function PasswordField({
@@ -85,13 +73,9 @@ function AlertBanner({ type, message }: { type: "error" | "success"; message: st
 
   const icon =
     type === "error" ? (
-      <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4 shrink-0 text-rose-500">
-        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
-      </svg>
+      <AlertCircle className="h-4 w-4 shrink-0 text-rose-500" />
     ) : (
-      <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4 shrink-0 text-emerald-500">
-        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
-      </svg>
+      <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
     );
 
   return (
@@ -107,41 +91,19 @@ function AlertBanner({ type, message }: { type: "error" | "success"; message: st
 function BrandPanel() {
   const features = [
     {
-      icon: (
-        <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden>
-          <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="1.8"/>
-          <path d="M7 9h10M7 12h7M7 15h4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-        </svg>
-      ),
+      icon: <Receipt className="h-4 w-4" aria-hidden />,
       text: "Lançamentos pessoais e PJ",
     },
     {
-      icon: (
-        <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden>
-          <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8"/>
-          <circle cx="12" cy="12" r="5" stroke="currentColor" strokeWidth="1.8"/>
-          <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
-        </svg>
-      ),
+      icon: <Target className="h-4 w-4" aria-hidden />,
       text: "Metas e planejamento",
     },
     {
-      icon: (
-        <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden>
-          <rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" strokeWidth="1.8"/>
-          <path d="M2 10h20" stroke="currentColor" strokeWidth="1.8"/>
-          <path d="M6 15h3M15 15h3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-        </svg>
-      ),
+      icon: <CreditCard className="h-4 w-4" aria-hidden />,
       text: "Controle de gastos",
     },
     {
-      icon: (
-        <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden>
-          <path d="M21 21H3M21 3H3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-          <path d="M6 21V12M10 21V6M14 21V10M18 21V4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-        </svg>
-      ),
+      icon: <BarChart3 className="h-4 w-4" aria-hidden />,
       text: "Distribuição de salário",
     },
   ];
@@ -154,17 +116,17 @@ function BrandPanel() {
       {/* Decorative blobs */}
       <div
         className="absolute -top-24 -right-24 h-72 w-72 rounded-full opacity-20 blur-3xl pointer-events-none"
-        style={{ background: "radial-gradient(circle, #10b981, transparent)" }}
+        style={{ background: "radial-gradient(circle, #268c78, transparent)" }}
       />
       <div
         className="absolute bottom-0 left-0 h-56 w-56 rounded-full opacity-10 blur-3xl pointer-events-none"
-        style={{ background: "radial-gradient(circle, #3b82f6, transparent)" }}
+        style={{ background: "radial-gradient(circle, #0a584d, transparent)" }}
       />
 
       {/* Logo */}
       <div className="relative">
         <div className="flex items-center gap-3 mb-12">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500 shadow-lg shadow-emerald-500/30">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-600 shadow-lg shadow-brand-600/30">
             <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
               <path
                 d="M12 6v12M8 10c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2v.5c0 1.1-.9 2-2 2h-4c-1.1 0-2 .9-2 2v.5c0 1.1.9 2 2 2h4c1.1 0 2-.9 2-2"
@@ -176,13 +138,13 @@ function BrandPanel() {
           </div>
           <div>
             <p className="text-white font-bold text-base leading-none">Cadê meu</p>
-            <p className="text-emerald-400 font-bold text-base leading-none">dinheiro?</p>
+            <p className="text-brand-400 font-bold text-base leading-none">dinheiro?</p>
           </div>
         </div>
 
         <h2 className="text-white text-2xl font-bold leading-snug mb-3">
           Controle financeiro{" "}
-          <span className="text-emerald-400">inteligente</span>
+          <span className="text-brand-400">inteligente</span>
         </h2>
         <p className="text-white/50 text-sm leading-relaxed mb-10">
           Gerencie receitas, despesas e investimentos pessoais e PJ em um só lugar, com clareza e simplicidade.
@@ -196,7 +158,7 @@ function BrandPanel() {
               className="flex items-center gap-3 rounded-xl px-4 py-3"
               style={{ backgroundColor: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}
             >
-              <span className="text-emerald-400 shrink-0">{icon}</span>
+              <span className="text-brand-400 shrink-0">{icon}</span>
               <span className="text-white/70 text-sm">{text}</span>
             </div>
           ))}
@@ -317,7 +279,7 @@ export function AuthGate() {
 
           {/* Mobile-only logo */}
           <div className="mb-8 flex flex-col items-center text-center lg:hidden">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500 shadow-lg shadow-emerald-500/25">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-600 shadow-lg shadow-brand-600/25">
               <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6" aria-hidden>
                 <path
                   d="M12 6v12M8 10c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2v.5c0 1.1-.9 2-2 2h-4c-1.1 0-2 .9-2 2v.5c0 1.1.9 2 2 2h4c1.1 0 2-.9 2-2"
@@ -435,7 +397,7 @@ export function AuthGate() {
             <button
               type="button"
               onClick={() => switchMode(mode === "login" ? "signup" : "login")}
-              className="font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 cursor-pointer transition-colors"
+              className="font-semibold text-brand-600 hover:text-brand-700 dark:text-brand-400 cursor-pointer transition-colors"
             >
               {mode === "login" ? "Criar conta" : "Entrar"}
             </button>

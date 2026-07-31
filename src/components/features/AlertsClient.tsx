@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Edit2, Trash2, Bell, AlertTriangle, Repeat } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card, StatCard } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
@@ -15,53 +16,26 @@ import {
 import { formatCurrencyBRL, formatBRLFromCents, formatDateBR } from "@/lib/finance";
 import { newId } from "@/lib/finance/id";
 
-// ─── Ícones — mesmo estilo stroke do sistema ──────────────────────────────────
+// ─── Ícones — lucide-react, mesmo conjunto do design system ──────────────────
 
 function IconEdit() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className="h-3.5 w-3.5" aria-hidden>
-      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
-        stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
-        stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
+  return <Edit2 className="h-3.5 w-3.5" aria-hidden />;
 }
 
 function IconTrash() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className="h-3.5 w-3.5" aria-hidden>
-      <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"
-        stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
+  return <Trash2 className="h-3.5 w-3.5" aria-hidden />;
 }
 
 function IconBell() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className="h-10 w-10" aria-hidden>
-      <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-        stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
+  return <Bell className="h-10 w-10" aria-hidden strokeWidth={1.8} />;
 }
 
 function IconWarning() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden>
-      <path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
-        stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
+  return <AlertTriangle className="h-4 w-4" aria-hidden />;
 }
 
 function IconRepeat() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className="h-3 w-3" aria-hidden>
-      <path d="M17 1l4 4-4 4M3 11V9a4 4 0 014-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 01-4 4H3"
-        stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
+  return <Repeat className="h-3 w-3" aria-hidden />;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────

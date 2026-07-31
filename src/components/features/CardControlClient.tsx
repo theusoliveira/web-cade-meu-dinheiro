@@ -79,7 +79,7 @@ export function CardControlClient({ entries, openDialog, onEdit, onDelete, onDel
           <div className="hidden gap-2 sm:flex">
             <Button
               type="button"
-              variant="success"
+              // variant="success"
               size="sm"
               onClick={() => openDialog("income")}
             >

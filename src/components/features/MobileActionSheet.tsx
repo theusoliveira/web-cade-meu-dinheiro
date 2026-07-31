@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { ArrowUp, ArrowDown, Image as ImageIcon, X, Plus } from "lucide-react";
 import type { NavKey } from "@/components/layout/AppSidebar";
 import type { EntryKind } from "@/lib/finance";
 
@@ -23,34 +24,22 @@ const PERSONAL_OPTIONS: ActionOption[] = [
     kind: "income",
     label: "Receita",
     sublabel: "Dinheiro que entrou",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
-        <path d="M12 5v14M5 12l7-7 7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
-    colorClass: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/50",
+    icon: <ArrowUp className="h-5 w-5" aria-hidden />,
+    colorClass: "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/50",
   },
   {
     kind: "expense",
     label: "Despesa",
     sublabel: "Dinheiro que saiu",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
-        <path d="M12 19V5M5 12l7 7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
-    colorClass: "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800/50",
+    icon: <ArrowDown className="h-5 w-5" aria-hidden />,
+    colorClass: "bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800/50",
   },
   {
     kind: "investment",
     label: "Investimento",
     sublabel: "Aplicação financeira",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
-        <path d="M2 20h20M5 20V10l5-5 4 4 5-6v17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
-    colorClass: "bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-800/50",
+    icon: <ImageIcon className="h-5 w-5" aria-hidden />,
+    colorClass: "bg-sky-100 text-sky-700 border-sky-200 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-800/50",
   },
 ];
 
@@ -125,9 +114,7 @@ export function MobileActionSheet({ activeTab, onSelectEntry, onAddGoal }: Props
               onClick={() => setOpen(false)}
               className="cursor-pointer h-6 w-6 flex items-center justify-center rounded-full bg-[var(--surface-raised)] text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
             >
-              <svg viewBox="0 0 24 24" fill="none" className="h-3.5 w-3.5" aria-hidden>
-                <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </svg>
+              <X className="h-3.5 w-3.5" aria-hidden />
             </button>
           </div>
 
@@ -160,19 +147,16 @@ export function MobileActionSheet({ activeTab, onSelectEntry, onAddGoal }: Props
         className={`fixed right-4 z-50 md:hidden cursor-pointer
           grid h-14 w-14 place-items-center rounded-full
           bg-[var(--accent)] text-white
-          shadow-lg shadow-emerald-900/30
+          shadow-lg shadow-black/20
           transition-all active:scale-95
           hover:brightness-110`}
         style={{ bottom: "calc(env(safe-area-inset-bottom) + 76px)" }}
       >
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
+        <Plus
           className={`h-6 w-6 transition-transform duration-200 ${open ? "rotate-45" : ""}`}
           aria-hidden
-        >
-          <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-        </svg>
+          strokeWidth={2.5}
+        />
       </button>
     </>
   );

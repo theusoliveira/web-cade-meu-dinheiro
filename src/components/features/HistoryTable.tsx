@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Edit2, Trash2, Inbox } from "lucide-react";
 import { formatCurrencyBRL, formatDateBR, kindLabel, kindPrefix, type FinanceEntry } from "@/lib/finance";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Card";
@@ -23,20 +24,11 @@ const KIND_TO_BADGE: Record<FinanceEntry["kind"], "income" | "expense" | "invest
 };
 
 function IconEdit() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" aria-hidden>
-      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
+  return <Edit2 className="h-3.5 w-3.5" aria-hidden />;
 }
 
 function IconTrash() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" aria-hidden>
-      <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
+  return <Trash2 className="h-3.5 w-3.5" aria-hidden />;
 }
 
 export function HistoryTable({
@@ -88,10 +80,7 @@ export function HistoryTable({
   if (entries.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface-raised)]/50 p-10 text-center">
-        <svg viewBox="0 0 48 48" fill="none" className="mx-auto mb-3 h-10 w-10 text-[var(--muted-light)]" aria-hidden>
-          <rect x="8" y="12" width="32" height="24" rx="4" stroke="currentColor" strokeWidth="2" />
-          <path d="M8 20h32M16 28h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        </svg>
+        <Inbox className="mx-auto mb-3 h-10 w-10 text-[var(--muted-light)]" aria-hidden strokeWidth={2} />
         <p className="text-sm text-[var(--muted)]">
           {emptyMessage ?? "Nenhum lançamento ainda. Use os botões acima para adicionar."}
         </p>
@@ -119,7 +108,7 @@ export function HistoryTable({
                       checked={isSelected}
                       onChange={() => toggleOne(e.id)}
                       aria-label={`Selecionar lançamento ${e.description ?? e.category}`}
-                      className="h-4 w-4 rounded border-[var(--border)] accent-rose-500 cursor-pointer"
+                      className="h-4 w-4 rounded border-[var(--border)] accent-[var(--accent)] cursor-pointer"
                     />
                   </div>
                 )}
@@ -193,7 +182,7 @@ export function HistoryTable({
                     onChange={toggleAll}
                     disabled={selectableEntries.length === 0}
                     aria-label="Selecionar todos"
-                    className="h-4 w-4 rounded border-[var(--border)] accent-rose-500 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="h-4 w-4 rounded border-[var(--border)] accent-[var(--accent)] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                   />
                 </th>
               )}
@@ -212,7 +201,7 @@ export function HistoryTable({
               return (
                 <tr
                   key={e.id}
-                  className={`transition-colors ${isSelected ? "bg-rose-50/50 dark:bg-rose-950/10" : "hover:bg-[var(--surface-raised)]"}`}
+                  className={`transition-colors ${isSelected ? "bg-[var(--accent)]/5" : "hover:bg-[var(--surface-raised)]"}`}
                 >
                   {selectable && (
                     <td className="px-4 py-3">
@@ -222,7 +211,7 @@ export function HistoryTable({
                           checked={isSelected}
                           onChange={() => toggleOne(e.id)}
                           aria-label={`Selecionar ${e.description ?? e.category}`}
-                          className="h-4 w-4 rounded border-[var(--border)] accent-rose-500 cursor-pointer"
+                          className="h-4 w-4 rounded border-[var(--border)] accent-[var(--accent)] cursor-pointer"
                         />
                       ) : null}
                     </td>
