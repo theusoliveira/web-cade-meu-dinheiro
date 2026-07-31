@@ -3,6 +3,7 @@
 import * as React from "react";
 import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/Button";
+import { TrendingUp, TrendingDown, LineChart } from "lucide-react";
 import { Card, StatCard } from "@/components/ui/Card";
 import { HistoryTable } from "@/components/features/HistoryTable";
 import type { DonutSlice } from "@/components/features/DonutChartCard";
@@ -84,11 +85,11 @@ export function EntriesClient({
           <div className="hidden flex-wrap gap-2 sm:flex sm:items-center sm:justify-end">
             <Button
               type="button"
-              variant="success"
+              // variant="success"
               size="sm"
               onClick={() => openDialog("income")}
               className="gap-1.5"
-              leftIcon={<svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4"><path fillRule="evenodd" d="M10 17a.75.75 0 01-.75-.75V5.612L5.29 9.77a.75.75 0 01-1.08-1.04l5.25-5.5a.75.75 0 011.08 0l5.25 5.5a.75.75 0 11-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0110 17z" clipRule="evenodd" /></svg>}
+              leftIcon={<TrendingUp className="h-4 w-4" />}
             >
               {isPJ ? "Entrada" : "Receita"}
             </Button>
@@ -98,7 +99,7 @@ export function EntriesClient({
               size="sm"
               onClick={() => openDialog("expense")}
               className="gap-1.5"
-              leftIcon={<svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4"><path fillRule="evenodd" d="M10 3a.75.75 0 01.75.75v10.638l3.96-4.158a.75.75 0 111.08 1.04l-5.25 5.5a.75.75 0 01-1.08 0l-5.25-5.5a.75.75 0 111.08-1.04l3.96 4.158V3.75A.75.75 0 0110 3z" clipRule="evenodd" /></svg>}
+              leftIcon={<TrendingDown className="h-4 w-4" />}
             >
               {isPJ ? "Saída" : "Despesa"}
             </Button>
@@ -108,7 +109,7 @@ export function EntriesClient({
               size="sm"
               onClick={() => openDialog("investment")}
               className="gap-1.5"
-              leftIcon={<svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4"><path fillRule="evenodd" d="M12.577 4.878a.75.75 0 01.919-.53l4.78 1.281a.75.75 0 01.531.919l-1.281 4.78a.75.75 0 01-1.449-.387l.81-3.022a19.407 19.407 0 00-5.594 5.203.75.75 0 01-1.139.093L7 10.06l-3.72 3.72a.75.75 0 11-1.06-1.061l4.25-4.25a.75.75 0 011.06 0l1.956 1.956a20.924 20.924 0 015.293-5.136l-3.023.81a.75.75 0 01-.387-1.45z" clipRule="evenodd" /></svg>}
+              leftIcon={<LineChart className="h-4 w-4" />}
             >
               Investimento
             </Button>
@@ -157,19 +158,19 @@ export function EntriesClient({
           <DonutChartCard
             title={effectiveIncomeChartTitle}
             data={incomeByCategory}
-            colors={["#10b981", "#14b8a6", "#22c55e", "#06b6d4", "#3b82f6"]}
+            colors={["#0d6e60", "#268c78", "#47ab97", "#75c9b5", "#a8e0d1"]}
             centerLabel={incomeLabel}
           />
           <DonutChartCard
             title={effectiveExpenseChartTitle}
             data={expenseByCategory}
-            colors={["#f43f5e", "#f59e0b", "#8b5cf6", "#ef4444", "#ec4899"]}
+            colors={["#be123c", "#e11d48", "#f43f5e", "#fb7185", "#fda4af"]}
             centerLabel={expenseLabel}
           />
           <DonutChartCard
             title={investmentChartTitle}
             data={investmentByCategory}
-            colors={["#0284c7", "#6366f1", "#06b6d4", "#3b82f6", "#8b5cf6"]}
+            colors={["#0369a1", "#0284c7", "#0ea5e9", "#38bdf8", "#7dd3fc"]}
             centerLabel="Investimentos"
           />
         </div>

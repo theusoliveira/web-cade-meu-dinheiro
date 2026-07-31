@@ -7,44 +7,62 @@
   --font-sans: var(--font-sans);
 }
 
+/*
+ * Sistema de design — paleta portada do "EstoqueApp": neutros frios
+ * (slate) + um único acento de marca ("teal de livro-razão"), reservado
+ * para ações primárias, estados ativos e foco.
+ */
+@theme {
+  --color-brand-50: #eefaf7;
+  --color-brand-100: #d3f0e8;
+  --color-brand-200: #a8e0d1;
+  --color-brand-300: #75c9b5;
+  --color-brand-400: #47ab97;
+  --color-brand-500: #268c78;
+  --color-brand-600: #0d6e60;
+  --color-brand-700: #0a584d;
+  --color-brand-800: #08453c;
+  --color-brand-900: #06342d;
+}
+
 /* ─── Design tokens ─────────────────────────────────────────────────── */
 
 :root {
-  /* Fonte de sistema — mesma stack usada pelo painel da Kiwify */
+  /* Fonte de sistema */
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
   /* Brand */
-  --accent: #0f9d63;
-  --accent-light: #d1fae5;
-  --accent-dark: #0b7a4d;
+  --accent: #0d6e60;
+  --accent-light: #d3f0e8;
+  --accent-dark: #0a584d;
 
   /* Surfaces */
-  --background: #f4f5f7;
+  --background: #f8fafc;
   --surface: #ffffff;
-  --surface-raised: #f7f8fa;
-  --border: #eaecef;
-  --border-strong: #dde1e6;
+  --surface-raised: #f1f5f9;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
 
   /* Text */
-  --foreground: #1a1d23;
-  --muted: #6b7280;
-  --muted-light: #9aa1ab;
+  --foreground: #0f172a;
+  --muted: #64748b;
+  --muted-light: #94a3b8;
 
-  /* Sidebar — azul-marinho escuro, estilo painel Kiwify */
-  --sidebar-bg: #232c3d;
-  --sidebar-border: #2e3850;
-  --sidebar-text: #b6bec9;
-  --sidebar-text-muted: #7c8494;
-  --sidebar-active-bg: #171e2c;
-  --sidebar-active-text: #ffffff;
-  --sidebar-active-icon: #ffffff;
-  --sidebar-hover-bg: #2a3448;
-  --sidebar-logo-bg: #0f9d63;
+  /* Sidebar — clara, no mesmo tom neutro do resto do app, com destaque teal */
+  --sidebar-bg: #ffffff;
+  --sidebar-border: #e2e8f0;
+  --sidebar-text: #475569;
+  --sidebar-text-muted: #94a3b8;
+  --sidebar-active-bg: #eefaf7;
+  --sidebar-active-text: #0a584d;
+  --sidebar-active-icon: #0d6e60;
+  --sidebar-hover-bg: #f1f5f9;
+  --sidebar-logo-bg: #0d6e60;
 
   /* Status colors */
-  --income: #0b7a4d;
-  --expense: #e11d48;
-  --investment: #0284c7;
+  --income: #0a7a5f;
+  --expense: #be123c;
+  --investment: #0369a1;
 }
 
 .dark {
@@ -57,15 +75,23 @@
   --muted: #8b93a3;
   --muted-light: #4a5568;
 
-  --sidebar-bg: #171d2b;
-  --sidebar-border: #232c3d;
+  --accent: #47ab97;
+  --accent-light: #0a584d;
+  --accent-dark: #75c9b5;
+
+  --sidebar-bg: #12161f;
+  --sidebar-border: #232838;
   --sidebar-text: #b6bec9;
   --sidebar-text-muted: #656e80;
-  --sidebar-active-bg: #0e1320;
-  --sidebar-active-text: #ffffff;
-  --sidebar-active-icon: #34d399;
+  --sidebar-active-bg: #0a2e28;
+  --sidebar-active-text: #eefaf7;
+  --sidebar-active-icon: #47ab97;
   --sidebar-hover-bg: #1e2436;
-  --sidebar-logo-bg: #0f9d63;
+  --sidebar-logo-bg: #268c78;
+
+  --income: #34d399;
+  --expense: #fb7185;
+  --investment: #38bdf8;
 }
 
 /* ─── Base ─────────────────────────────────────────────────────────── */

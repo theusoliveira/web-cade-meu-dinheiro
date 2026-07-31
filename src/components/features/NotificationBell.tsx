@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Bell, CheckCircle2, AlertTriangle } from "lucide-react";
 import { fetchDueAlerts, type AlertRecord } from "@/actions/alerts";
 import { formatCurrencyBRL, formatDateBR } from "@/lib/finance";
 
@@ -50,15 +51,7 @@ export function NotificationBell({ onNavigateAlerts }: Props) {
         aria-label={`Notificações${count > 0 ? ` — ${count} pendente${count !== 1 ? "s" : ""}` : ""}`}
         className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] transition-colors hover:bg-[var(--surface-raised)] hover:text-[var(--foreground)]"
       >
-        <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
-          <path
-            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <Bell className="h-5 w-5" aria-hidden strokeWidth={1.8} />
         {count > 0 && (
           <span
             aria-hidden
@@ -82,9 +75,7 @@ export function NotificationBell({ onNavigateAlerts }: Props) {
 
           {count === 0 ? (
             <div className="flex flex-col items-center gap-2 px-4 py-8 text-center">
-              <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8 text-[var(--muted)]" aria-hidden>
-                <path d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+              <CheckCircle2 className="h-8 w-8 text-[var(--muted)]" aria-hidden strokeWidth={1.5} />
               <p className="text-sm font-medium text-[var(--foreground)]">Tudo em dia!</p>
               <p className="text-xs text-[var(--muted)]">Nenhuma conta a vencer nos próximos dias.</p>
             </div>
@@ -96,10 +87,7 @@ export function NotificationBell({ onNavigateAlerts }: Props) {
                   <li key={alert.id} className="px-4 py-3">
                     <div className="flex items-start gap-3">
                       <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${days === 0 ? "bg-rose-100 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400" : "bg-amber-100 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400"}`}>
-                        <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden>
-                          <path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
-                            stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
+                        <AlertTriangle className="h-4 w-4" aria-hidden strokeWidth={1.5} />
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-semibold text-[var(--foreground)]">{alert.name}</p>
