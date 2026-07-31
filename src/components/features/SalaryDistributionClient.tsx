@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Trash2, Plus, X, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useSalaryDistribution } from "@/hooks/useSalaryDistribution";
 import { formatCurrencyBRL, formatBRLFromCents } from "@/lib/finance/format";
@@ -63,7 +64,7 @@ function EditableMoneyCell({
     return (
       <input
         ref={inputRef}
-        className="w-full rounded border border-zinc-300 bg-white px-2 py-1 text-right text-sm dark:border-zinc-600 dark:bg-zinc-800"
+        className="w-full rounded border border-slate-300 bg-white px-2 py-1 text-right text-sm dark:border-slate-600 dark:bg-slate-800"
         value={formatBRLFromCents(parseInt(raw || "0", 10))}
         onChange={(e) => setRaw(e.target.value.replace(/\D/g, ""))}
         onBlur={commit}
@@ -80,7 +81,7 @@ function EditableMoneyCell({
     <button
       type="button"
       onClick={startEdit}
-      className="w-full cursor-text rounded px-2 py-1 text-right text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800"
+      className="w-full cursor-text rounded px-2 py-1 text-right text-sm hover:bg-slate-100 dark:hover:bg-slate-800"
       title="Clique para editar"
     >
       {formatCurrencyBRL(value)}
@@ -108,7 +109,7 @@ function EditableTextCell({
   if (editing) {
     return (
       <input
-        className="w-full rounded border border-zinc-300 bg-white px-2 py-1 text-sm dark:border-zinc-600 dark:bg-zinc-800"
+        className="w-full rounded border border-slate-300 bg-white px-2 py-1 text-sm dark:border-slate-600 dark:bg-slate-800"
         value={draft}
         autoFocus
         onChange={(e) => setDraft(e.target.value)}
@@ -125,7 +126,7 @@ function EditableTextCell({
     <button
       type="button"
       onClick={() => { setDraft(value); setEditing(true); }}
-      className="w-full cursor-text rounded px-2 py-1 text-left text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800"
+      className="w-full cursor-text rounded px-2 py-1 text-left text-sm hover:bg-slate-100 dark:hover:bg-slate-800"
       title="Clique para editar"
     >
       {value}
@@ -146,16 +147,14 @@ function ConfirmDeleteModal({
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
-      <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-zinc-900">
+      <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-slate-900">
         <div className="mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
-          <svg viewBox="0 0 24 24" className="h-5 w-5 text-red-600 dark:text-red-400" fill="none" aria-hidden>
-            <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          <Trash2 className="h-5 w-5 text-red-600 dark:text-red-400" aria-hidden />
         </div>
         <h2 className="mt-3 text-base font-semibold">Excluir categoria</h2>
-        <p className="mt-1.5 text-sm text-zinc-500 dark:text-zinc-400">
+        <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400">
           Tem certeza que deseja excluir{" "}
-          <span className="font-medium text-zinc-700 dark:text-zinc-200">"{categoryName}"</span>?
+          <span className="font-medium text-slate-700 dark:text-slate-200">"{categoryName}"</span>?
           Todos os itens desta categoria também serão removidos. Esta ação não pode ser desfeita.
         </p>
         <div className="mt-6 flex gap-2">
@@ -198,16 +197,16 @@ function AddCategoryModal({
   }
 
   const inputBase =
-    "w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm outline-none focus:border-zinc-400 dark:border-zinc-700 dark:bg-zinc-800 dark:focus:border-zinc-500";
+    "w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-slate-400 dark:border-slate-700 dark:bg-slate-800 dark:focus:border-slate-500";
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
-      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl dark:bg-zinc-900">
+      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl dark:bg-slate-900">
         <h2 className="mb-4 text-base font-semibold">Adicionar alocação</h2>
 
         <div className="space-y-4">
           <div>
-            <label className="mb-1 block text-xs font-medium text-zinc-600 dark:text-zinc-400">
+            <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">
               Categoria
             </label>
             <input
@@ -220,7 +219,7 @@ function AddCategoryModal({
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-zinc-600 dark:text-zinc-400">
+            <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">
               Descrição
             </label>
             <input
@@ -232,7 +231,7 @@ function AddCategoryModal({
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-zinc-600 dark:text-zinc-400">
+            <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">
               Valor
             </label>
             <input
@@ -287,17 +286,17 @@ function AddItemModal({
   }
 
   const inputBase =
-    "w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm outline-none focus:border-zinc-400 dark:border-zinc-700 dark:bg-zinc-800 dark:focus:border-zinc-500";
+    "w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-slate-400 dark:border-slate-700 dark:bg-slate-800 dark:focus:border-slate-500";
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
-      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl dark:bg-zinc-900">
+      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl dark:bg-slate-900">
         <h2 className="mb-1 text-base font-semibold">Adicionar item</h2>
-        <p className="mb-4 text-xs text-zinc-500 dark:text-zinc-400">{categoryName}</p>
+        <p className="mb-4 text-xs text-slate-500 dark:text-slate-400">{categoryName}</p>
 
         <div className="space-y-4">
           <div>
-            <label className="mb-1 block text-xs font-medium text-zinc-600 dark:text-zinc-400">
+            <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">
               Descrição
             </label>
             <input
@@ -310,7 +309,7 @@ function AddItemModal({
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-zinc-600 dark:text-zinc-400">
+            <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">
               Valor
             </label>
             <input
@@ -463,29 +462,29 @@ export function SalaryDistributionClient() {
   // ── Render ─────────────────────────────────────────────────────────────────
 
   const inputBase =
-    "w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm outline-none focus:border-zinc-400 dark:border-zinc-700 dark:bg-zinc-800 dark:focus:border-zinc-500";
+    "w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-slate-400 dark:border-slate-700 dark:bg-slate-800 dark:focus:border-slate-500";
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-lg font-semibold">Distribuição de Salário PJ</h1>
-        <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
+        <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
           Planeje como distribuir o seu faturamento.
         </p>
       </div>
 
       {loading && (
-        <p className="text-xs text-zinc-400 dark:text-zinc-500">Carregando…</p>
+        <p className="text-xs text-slate-400 dark:text-slate-500">Carregando…</p>
       )}
 
       {/* Billing inputs */}
-      <section className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950">
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-950">
         <h2 className="mb-4 text-sm font-semibold">Faturamento</h2>
 
         <div className="grid gap-4 sm:grid-cols-3">
           <div>
-            <label className="mb-1 block text-xs font-medium text-zinc-600 dark:text-zinc-400">
+            <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">
               Horas trabalhadas
             </label>
             <input
@@ -501,7 +500,7 @@ export function SalaryDistributionClient() {
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-zinc-600 dark:text-zinc-400">
+            <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">
               Valor por hora
             </label>
             <input
@@ -514,7 +513,7 @@ export function SalaryDistributionClient() {
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-zinc-600 dark:text-zinc-400">
+            <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">
               Comissão
             </label>
             <input
@@ -527,11 +526,11 @@ export function SalaryDistributionClient() {
           </div>
         </div>
 
-        <div className="mt-4 flex items-center justify-between rounded-xl bg-zinc-50 px-4 py-3 dark:bg-zinc-900">
-          <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+        <div className="mt-4 flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3 dark:bg-slate-900">
+          <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
             Total do faturamento
           </span>
-          <span className="text-base font-bold text-zinc-900 dark:text-zinc-50">
+          <span className="text-base font-bold text-slate-900 dark:text-slate-50">
             {formatCurrencyBRL(faturamento)}
           </span>
         </div>
@@ -548,10 +547,10 @@ export function SalaryDistributionClient() {
         return (
           <section
             key={cat.id}
-            className="rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950"
+            className="rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950"
           >
             {/* Category header */}
-            <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-3 dark:border-zinc-800">
+            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3 dark:border-slate-800">
               <h2 className="text-sm font-semibold">
                 {cat.name}
                 {cat.isFixed && (
@@ -567,9 +566,7 @@ export function SalaryDistributionClient() {
                   onClick={() => setAddItemTarget({ id: cat.id, name: cat.name })}
                   className="h-8 gap-1.5 px-2 text-xs"
                 >
-                  <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" aria-hidden>
-                    <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  </svg>
+                  <Plus className="h-3.5 w-3.5" aria-hidden />
                   Adicionar item
                 </Button>
 
@@ -577,21 +574,19 @@ export function SalaryDistributionClient() {
                   <button
                     type="button"
                     onClick={() => setDeleteTarget({ id: cat.id, name: cat.name })}
-                    className="ml-1 rounded p-1.5 text-zinc-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+                    className="ml-1 rounded p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
                     title="Excluir categoria"
                   >
-                    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" aria-hidden>
-                      <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
+                    <Trash2 className="h-4 w-4" aria-hidden />
                   </button>
                 )}
               </div>
             </div>
 
             {/* Items */}
-            <div className="divide-y divide-zinc-50 dark:divide-zinc-800/50">
+            <div className="divide-y divide-slate-50 dark:divide-slate-800/50">
               {cat.items.length === 0 ? (
-                <p className="px-5 py-4 text-xs text-zinc-400 dark:text-zinc-600">
+                <p className="px-5 py-4 text-xs text-slate-400 dark:text-slate-600">
                   Nenhum item ainda.
                 </p>
               ) : (
@@ -604,10 +599,10 @@ export function SalaryDistributionClient() {
                       {/* Description */}
                       <div className="min-w-0 flex-1">
                         {cat.isFixed ? (
-                          <span className="px-2 py-1 text-sm text-zinc-700 dark:text-zinc-300">
+                          <span className="px-2 py-1 text-sm text-slate-700 dark:text-slate-300">
                             {item.description}
                             {isSimples && simplesAuto && (
-                              <span className="ml-2 text-xs text-zinc-400 dark:text-zinc-500">
+                              <span className="ml-2 text-xs text-slate-400 dark:text-slate-500">
                                 (6% automático)
                               </span>
                             )}
@@ -641,7 +636,7 @@ export function SalaryDistributionClient() {
                               <button
                                 type="button"
                                 title="Voltar ao cálculo automático (6%)"
-                                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-6 p-1 text-zinc-400 hover:text-blue-500 dark:hover:text-blue-400"
+                                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-6 p-1 text-slate-400 hover:text-blue-500 dark:hover:text-blue-400"
                                 onClick={() => {
                                   const newVal = faturamento * 0.06;
                                   const fixedCat = categories.find((c) => c.isFixed)!;
@@ -654,9 +649,7 @@ export function SalaryDistributionClient() {
                                   });
                                 }}
                               >
-                                <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" aria-hidden>
-                                  <path d="M3 12a9 9 0 0 1 9-9 9 9 0 0 1 6.36 2.64L21 8M21 3v5h-5M21 12a9 9 0 0 1-9 9 9 9 0 0 1-6.36-2.64L3 16M3 21v-5h5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                                </svg>
+                                <RefreshCw className="h-3.5 w-3.5" aria-hidden />
                               </button>
                             )}
                           </div>
@@ -673,12 +666,10 @@ export function SalaryDistributionClient() {
                         <button
                           type="button"
                           onClick={() => handleDeleteItem(item.id, cat.id, item.description)}
-                          className="shrink-0 rounded p-1.5 text-zinc-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+                          className="shrink-0 rounded p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
                           title="Excluir item"
                         >
-                          <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" aria-hidden>
-                            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                          </svg>
+                          <X className="h-3.5 w-3.5" aria-hidden />
                         </button>
                       ) : (
                         <div className="w-7 shrink-0" />
@@ -690,11 +681,11 @@ export function SalaryDistributionClient() {
             </div>
 
             {/* Subtotal + percentual */}
-            <div className="flex items-center justify-between border-t border-zinc-100 px-5 py-2.5 dark:border-zinc-800">
-              <span className="text-sm text-zinc-400">Subtotal</span>
+            <div className="flex items-center justify-between border-t border-slate-100 px-5 py-2.5 dark:border-slate-800">
+              <span className="text-sm text-slate-400">Subtotal</span>
               <div className="flex items-center gap-2">
-                <span className="text-sm text-zinc-400">{pct(catTotal)}</span>
-                <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+                <span className="text-sm text-slate-400">{pct(catTotal)}</span>
+                <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                   {formatCurrencyBRL(catTotal)}
                 </span>
               </div>
@@ -710,38 +701,36 @@ export function SalaryDistributionClient() {
         className="w-full gap-2"
         onClick={() => setAddCategoryOpen(true)}
       >
-        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" aria-hidden>
-          <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        </svg>
+        <Plus className="h-4 w-4" aria-hidden />
         Adicionar alocação
       </Button>
 
       {/* Gasto livre */}
-      <section className="rounded-2xl border-2 border-dashed border-zinc-300 bg-white p-5 dark:border-zinc-700 dark:bg-zinc-950">
+      <section className="rounded-2xl border-2 border-dashed border-slate-300 bg-white p-5 dark:border-slate-700 dark:bg-slate-950">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Gasto livre</p>
-            <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-500">
+            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">Gasto livre</p>
+            <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-500">
               Faturamento após todas as alocações
             </p>
           </div>
           <div className="text-right">
-            <p className="text-base font-bold text-zinc-900 dark:text-zinc-50">
+            <p className="text-base font-bold text-slate-900 dark:text-slate-50">
               {formatCurrencyBRL(gastoLivre)}
             </p>
-            <p className="text-xs text-zinc-400">{pct(gastoLivre)}</p>
+            <p className="text-xs text-slate-400">{pct(gastoLivre)}</p>
           </div>
         </div>
 
         {faturamento > 0 && (
           <div className="mt-4 space-y-1">
-            <div className="flex justify-between text-[11px] text-zinc-500">
+            <div className="flex justify-between text-[11px] text-slate-500">
               <span>Alocado: {formatCurrencyBRL(totalAllocated)}</span>
               <span>{pct(totalAllocated)} do faturamento</span>
             </div>
-            <div className="h-2 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+            <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
               <div
-                className="h-full rounded-full bg-zinc-900 transition-all dark:bg-zinc-100"
+                className="h-full rounded-full bg-slate-900 transition-all dark:bg-slate-100"
                 style={{ width: `${Math.min(100, (totalAllocated / faturamento) * 100)}%` }}
               />
             </div>

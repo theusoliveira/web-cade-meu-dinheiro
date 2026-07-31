@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Button } from "@/components/ui/Button";
+import { TrendingUp, TrendingDown, LineChart, X, AlertCircle } from "lucide-react";
 import {
   categoriesFor,
   formatCurrencyBRL,
@@ -150,9 +151,9 @@ export function AddEntryDialog({ open, kind, onClose, initial, allowFixed = fals
   if (!open) return null;
 
   const inputClass =
-    "w-full h-10 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm " +
+    "w-full h-10 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 text-sm " +
     "text-[var(--foreground)] placeholder:text-[var(--muted-light)] outline-none " +
-    "focus:ring-1 focus:ring-[var(--investment)] focus:border-[var(--investment)] transition-all";
+    "focus:ring-2 focus:ring-[var(--accent)] focus:border-[var(--accent)] transition-all";
 
   return (
     <div
@@ -180,21 +181,9 @@ export function AddEntryDialog({ open, kind, onClose, initial, allowFixed = fals
         <div className={`flex items-center justify-between gap-4 px-5 py-4 border-b border-[var(--border)] ${KIND_BG[kind]} rounded-t-3xl sm:rounded-t-2xl`}>
           <div className="flex items-center gap-3">
             <div className={`flex h-9 w-9 items-center justify-center rounded-xl bg-white/80 dark:bg-black/30 ${KIND_COLORS[kind]}`}>
-              {kind === "income" && (
-                <svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5">
-                  <path fillRule="evenodd" d="M10 17a.75.75 0 01-.75-.75V5.612L5.29 9.77a.75.75 0 01-1.08-1.04l5.25-5.5a.75.75 0 011.08 0l5.25 5.5a.75.75 0 11-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0110 17z" clipRule="evenodd" />
-                </svg>
-              )}
-              {kind === "expense" && (
-                <svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5">
-                  <path fillRule="evenodd" d="M10 3a.75.75 0 01.75.75v10.638l3.96-4.158a.75.75 0 111.08 1.04l-5.25 5.5a.75.75 0 01-1.08 0l-5.25-5.5a.75.75 0 111.08-1.04l3.96 4.158V3.75A.75.75 0 0110 3z" clipRule="evenodd" />
-                </svg>
-              )}
-              {kind === "investment" && (
-                <svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5">
-                  <path fillRule="evenodd" d="M12.577 4.878a.75.75 0 01.919-.53l4.78 1.281a.75.75 0 01.531.919l-1.281 4.78a.75.75 0 01-1.449-.387l.81-3.022a19.407 19.407 0 00-5.594 5.203.75.75 0 01-1.139.093L7 10.06l-3.72 3.72a.75.75 0 11-1.06-1.061l4.25-4.25a.75.75 0 011.06 0l1.956 1.956a20.924 20.924 0 015.293-5.136l-3.023.81a.75.75 0 01-.387-1.45z" clipRule="evenodd" />
-                </svg>
-              )}
+              {kind === "income" && <TrendingUp className="h-5 w-5" />}
+              {kind === "expense" && <TrendingDown className="h-5 w-5" />}
+              {kind === "investment" && <LineChart className="h-5 w-5" />}
             </div>
             <div>
               <h2 className={`text-base font-bold ${KIND_COLORS[kind]}`}>
@@ -212,9 +201,7 @@ export function AddEntryDialog({ open, kind, onClose, initial, allowFixed = fals
             className="cursor-pointer h-8 w-8 flex items-center justify-center rounded-xl text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-raised)] transition-colors"
             aria-label="Fechar"
           >
-            <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden>
-              <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-            </svg>
+            <X className="h-4 w-4" aria-hidden />
           </button>
         </div>
 
@@ -286,9 +273,7 @@ export function AddEntryDialog({ open, kind, onClose, initial, allowFixed = fals
 
           {error && (
             <div className="mt-4 flex items-center gap-2 rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50 dark:bg-rose-950/30 px-3 py-2.5">
-              <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4 text-rose-500 shrink-0">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
-              </svg>
+              <AlertCircle className="h-4 w-4 text-rose-500 shrink-0" />
               <p className="text-sm text-rose-700 dark:text-rose-300">{error}</p>
             </div>
           )}

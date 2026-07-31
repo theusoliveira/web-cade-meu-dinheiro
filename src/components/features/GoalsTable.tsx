@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Edit2, Trash2, Target } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { formatCurrencyBRL, monthShortLabel } from "@/lib/finance";
 import type { Goal } from "@/components/features/AddGoalDialog";
@@ -11,7 +12,7 @@ function percent(current: number, target: number): number {
 }
 
 function ProgressBar({ value }: { value: number }) {
-  const color = value >= 100 ? "bg-emerald-500" : "bg-zinc-400";
+  const color = value >= 100 ? "bg-brand-600" : "bg-slate-400";
   return (
     <div className="h-2 w-full rounded-full bg-[var(--surface-raised)]">
       <div
@@ -23,20 +24,11 @@ function ProgressBar({ value }: { value: number }) {
 }
 
 function IconEdit() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" aria-hidden>
-      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
+  return <Edit2 className="h-3.5 w-3.5" aria-hidden />;
 }
 
 function IconTrash() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" aria-hidden>
-      <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
+  return <Trash2 className="h-3.5 w-3.5" aria-hidden />;
 }
 
 export function GoalsTable({
@@ -51,11 +43,7 @@ export function GoalsTable({
   if (!goals.length) {
     return (
       <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface-raised)]/50 p-10 text-center">
-        <svg viewBox="0 0 48 48" fill="none" className="mx-auto mb-3 h-10 w-10 text-[var(--muted-light)]" aria-hidden>
-          <circle cx="24" cy="24" r="18" stroke="currentColor" strokeWidth="2" />
-          <circle cx="24" cy="24" r="10" stroke="currentColor" strokeWidth="2" />
-          <circle cx="24" cy="24" r="3" fill="currentColor" />
-        </svg>
+        <Target className="mx-auto mb-3 h-10 w-10 text-[var(--muted-light)]" aria-hidden strokeWidth={2} />
         <p className="text-sm text-[var(--muted)]">Nenhuma meta cadastrada ainda.</p>
         <p className="mt-1 text-xs text-[var(--muted-light)]">Use o botão acima para criar sua primeira meta.</p>
       </div>
@@ -72,7 +60,7 @@ export function GoalsTable({
             <div key={g.id} className="p-4">
               <div className="flex items-start justify-between gap-3">
                 <p className="min-w-0 text-sm font-semibold text-[var(--foreground)] break-words">{g.description}</p>
-                <span className={`shrink-0 text-xs font-bold ${p >= 100 ? "text-emerald-500" : "text-zinc-500"}`}>
+                <span className={`shrink-0 text-xs font-bold ${p >= 100 ? "text-brand-600" : "text-slate-500"}`}>
                   {Math.round(p)}%
                 </span>
               </div>
@@ -139,7 +127,7 @@ export function GoalsTable({
                       <div className="w-32">
                         <ProgressBar value={p} />
                       </div>
-                      <span className={`text-xs font-bold w-10 ${p >= 100 ? "text-emerald-500" : "text-zinc-500"}`}>
+                      <span className={`text-xs font-bold w-10 ${p >= 100 ? "text-brand-600" : "text-slate-500"}`}>
                         {Math.round(p)}%
                       </span>
                     </div>

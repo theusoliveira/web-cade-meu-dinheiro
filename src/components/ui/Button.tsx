@@ -37,22 +37,19 @@ export function Button({
   } as const;
 
   const variants = {
-    primary:
-      "bg-emerald-100 text-emerald-800 border border-emerald-200 hover:bg-emerald-200 " +
-      "dark:bg-emerald-900/40 dark:text-emerald-200 dark:border-emerald-800/60 dark:hover:bg-emerald-900/60",
+    primary: "bg-brand-600 text-white hover:bg-brand-700",
     secondary:
       "bg-[var(--surface-raised)] text-[var(--foreground)] hover:bg-[var(--border)] border border-[var(--border)]",
     ghost:
       "bg-transparent text-[var(--muted)] hover:bg-[var(--surface-raised)] hover:text-[var(--foreground)]",
-    danger:
-      "bg-rose-50 text-rose-600 border border-rose-100 hover:bg-rose-100 " +
-      "dark:bg-rose-950/30 dark:text-rose-300 dark:border-rose-900/50 dark:hover:bg-rose-950/50",
+    danger: "bg-red-700 text-white hover:bg-red-700",
     success:
-      "bg-emerald-50 text-emerald-600 border border-emerald-100 hover:bg-emerald-100 " +
+      "bg-emerald-50 text-emerald-700 border border-emerald-100 hover:bg-emerald-100 " +
       "dark:bg-emerald-950/30 dark:text-emerald-300 dark:border-emerald-900/50 dark:hover:bg-emerald-950/50",
-    info:
-      "bg-sky-50 text-sky-600 border border-sky-100 hover:bg-sky-100 " +
-      "dark:bg-sky-950/30 dark:text-sky-300 dark:border-sky-900/50 dark:hover:bg-sky-950/50",
+    // info:
+    //   "bg-sky-50 text-sky-700 border border-sky-100 hover:bg-sky-100 " +
+    //   "dark:bg-sky-950/30 dark:text-sky-300 dark:border-sky-900/50 dark:hover:bg-sky-950/50",
+    info: "bg-sky-700 text-white hover:bg-blue-700",
   } as const;
 
   return (

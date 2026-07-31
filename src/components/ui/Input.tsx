@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { twMerge } from "tailwind-merge";
+import { AlertCircle } from "lucide-react";
 
 type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   label?: string;
@@ -35,7 +36,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             id={inputId}
             className={twMerge(
-              "w-full h-10 rounded-xl border bg-[var(--surface)] text-sm text-[var(--foreground)] " +
+              "w-full h-10 rounded-lg border bg-[var(--surface)] text-sm text-[var(--foreground)] " +
               "placeholder:text-[var(--muted-light)] " +
               "outline-none transition-all duration-150 " +
               "focus:ring-2 focus:ring-[var(--accent)] focus:ring-offset-0 focus:border-[var(--accent)] " +
@@ -54,9 +55,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         </div>
         {error && (
           <p className="text-xs text-rose-500 flex items-center gap-1">
-            <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5 shrink-0">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
-            </svg>
+            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
             {error}
           </p>
         )}
@@ -89,7 +88,7 @@ export function Select({ label, error, className, id, children, ...props }: Sele
       <select
         id={inputId}
         className={twMerge(
-          "w-full h-10 rounded-xl border bg-[var(--surface)] pl-3 pr-8 text-sm text-[var(--foreground)] " +
+          "w-full h-10 rounded-lg border bg-[var(--surface)] pl-3 pr-8 text-sm text-[var(--foreground)] " +
           "outline-none transition-all duration-150 cursor-pointer " +
           "focus:ring-2 focus:ring-[var(--accent)] focus:border-[var(--accent)] " +
           (error ? "border-rose-500" : "border-[var(--border)]"),

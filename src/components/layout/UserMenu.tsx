@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { signOut, useSession } from "next-auth/react";
+import { User, LogOut } from "lucide-react";
 import { useBusy } from "@/components/features/BusyProvider";
 
 type Props = { displayName?: string };
@@ -54,12 +55,7 @@ export function UserMenu({ displayName }: Props) {
         aria-expanded={open}
         aria-label="Menu do usuário"
       >
-        {initials || (
-          <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden>
-            <path d="M20 21a8 8 0 0 0-16 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-            <circle cx="12" cy="9" r="4" stroke="currentColor" strokeWidth="1.8" />
-          </svg>
-        )}
+        {initials || <User className="h-4 w-4" aria-hidden />}
       </button>
 
       {open && (
@@ -88,11 +84,7 @@ export function UserMenu({ displayName }: Props) {
               onClick={logout}
               className="w-full flex items-center gap-2.5 cursor-pointer rounded-xl px-3 py-2.5 text-left text-sm font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
             >
-              <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 shrink-0" aria-hidden>
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                <polyline points="16 17 21 12 16 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </svg>
+              <LogOut className="h-4 w-4 shrink-0" aria-hidden />
               Sair da conta
             </button>
           </div>

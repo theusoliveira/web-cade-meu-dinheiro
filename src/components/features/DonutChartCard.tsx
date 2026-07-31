@@ -107,8 +107,8 @@ export function BudgetDonutCard({ title, data, income }: BudgetDonutCardProps) {
     ? [{ name: "Gastos", value: totalExpense }, { name: "Restante", value: remaining }]
     : [{ name: "Gastos", value: totalExpense }];
 
-  const usedColor = isOverBudget ? "#ef4444" : "#22c55e";
-  const remainingColor = "#bbf7d0";
+  const usedColor = isOverBudget ? "#be123c" : "#0d6e60";
+  const remainingColor = "#d3f0e8";
 
   return (
     <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">

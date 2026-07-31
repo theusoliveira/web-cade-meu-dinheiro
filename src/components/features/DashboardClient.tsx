@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { CheckCircle2, AlertTriangle, Target } from "lucide-react";
 import { Card, StatCard } from "@/components/ui/Card";
 import { useBusy } from "@/components/features/BusyProvider";
 import { fetchYearlyEntries, fetchOpeningBalance } from "@/actions/entries";
@@ -25,7 +26,7 @@ function yearOptions(): number[] {
 
 // ─── Mini Bar ─────────────────────────────────────────────────────────────────
 
-function MiniProgressBar({ value, max, color = "#10b981" }: { value: number; max: number; color?: string }) {
+function MiniProgressBar({ value, max, color = "#0d6e60" }: { value: number; max: number; color?: string }) {
   const pct = max > 0 ? Math.min(100, (value / max) * 100) : 0;
   return (
     <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--border)]">
@@ -145,7 +146,7 @@ export function DashboardClient({ onNavigateAlerts }: { onNavigateAlerts?: () =>
               {savingsRate >= 20 ? "✅ Ótimo!" : savingsRate >= 10 ? "⚠️ Pode melhorar" : "🔴 Atenção"}
             </span>
           </div>
-          <MiniProgressBar value={savingsRate} max={100} color={savingsRate >= 20 ? "#10b981" : savingsRate >= 10 ? "#f59e0b" : "#e11d48"} />
+          <MiniProgressBar value={savingsRate} max={100} color={savingsRate >= 20 ? "#0d6e60" : savingsRate >= 10 ? "#f59e0b" : "#be123c"} />
         </Card>
 
         {/* Comprometimento de renda */}
@@ -158,7 +159,7 @@ export function DashboardClient({ onNavigateAlerts }: { onNavigateAlerts?: () =>
               {expenseRate <= 70 ? "✅ Controlado" : expenseRate <= 90 ? "⚠️ Elevado" : "🔴 Crítico"}
             </span>
           </div>
-          <MiniProgressBar value={expenseRate} max={100} color={expenseRate <= 70 ? "#10b981" : expenseRate <= 90 ? "#f59e0b" : "#e11d48"} />
+          <MiniProgressBar value={expenseRate} max={100} color={expenseRate <= 70 ? "#0d6e60" : expenseRate <= 90 ? "#f59e0b" : "#be123c"} />
         </Card>
       </div>
 
@@ -180,9 +181,7 @@ export function DashboardClient({ onNavigateAlerts }: { onNavigateAlerts?: () =>
           </div>
           {dueAlerts.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-6 text-center">
-              <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8 text-[var(--muted)]" aria-hidden>
-                <path d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+              <CheckCircle2 className="h-8 w-8 text-[var(--muted)]" aria-hidden strokeWidth={1.5} />
               <p className="text-sm text-[var(--muted)]">Nenhuma conta a vencer</p>
             </div>
           ) : (
@@ -192,9 +191,7 @@ export function DashboardClient({ onNavigateAlerts }: { onNavigateAlerts?: () =>
                 return (
                   <li key={a.id} className="flex items-center gap-3 rounded-xl bg-[var(--surface-raised)] px-3 py-2.5">
                     <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${days === 0 ? "bg-rose-100 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400" : "bg-amber-100 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400"}`}>
-                      <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden>
-                        <path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
-                      </svg>
+                      <AlertTriangle className="h-4 w-4" aria-hidden />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-[var(--foreground)] truncate">{a.name}</p>
@@ -220,11 +217,7 @@ export function DashboardClient({ onNavigateAlerts }: { onNavigateAlerts?: () =>
           <p className="mb-4 text-sm font-bold text-[var(--foreground)]">Progresso das metas</p>
           {goals.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-6 text-center">
-              <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8 text-[var(--muted)]" aria-hidden>
-                <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8" />
-                <circle cx="12" cy="12" r="5" stroke="currentColor" strokeWidth="1.8" />
-                <circle cx="12" cy="12" r="1.5" fill="currentColor" />
-              </svg>
+              <Target className="h-8 w-8 text-[var(--muted)]" aria-hidden strokeWidth={1.8} />
               <p className="text-sm text-[var(--muted)]">Nenhuma meta cadastrada</p>
             </div>
           ) : (
@@ -237,7 +230,7 @@ export function DashboardClient({ onNavigateAlerts }: { onNavigateAlerts?: () =>
                       <p className="text-xs font-semibold text-[var(--foreground)] truncate">{g.description || "Meta"}</p>
                       <span className="text-xs text-[var(--muted)] shrink-0 ml-2">{pct.toFixed(0)}%</span>
                     </div>
-                    <MiniProgressBar value={pct} max={100} color={pct >= 100 ? "#10b981" : "#0284c7"} />
+                    <MiniProgressBar value={pct} max={100} color={pct >= 100 ? "#0d6e60" : "#0369a1"} />
                     <div className="mt-1 flex justify-between text-[10px] text-[var(--muted)]">
                       <span>{formatCurrencyBRL(g.currentValue)}</span>
                       <span>{formatCurrencyBRL(g.targetValue)}</span>
