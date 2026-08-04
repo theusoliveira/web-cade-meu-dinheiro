@@ -46,10 +46,7 @@ export function Button({
     success:
       "bg-emerald-50 text-emerald-700 border border-emerald-100 hover:bg-emerald-100 " +
       "dark:bg-emerald-950/30 dark:text-emerald-300 dark:border-emerald-900/50 dark:hover:bg-emerald-950/50",
-    // info:
-    //   "bg-sky-50 text-sky-700 border border-sky-100 hover:bg-sky-100 " +
-    //   "dark:bg-sky-950/30 dark:text-sky-300 dark:border-sky-900/50 dark:hover:bg-sky-950/50",
-    info: "bg-sky-700 text-white hover:bg-blue-700",
+    info: "bg-sky-700 text-white hover:bg-sky-800",
   } as const;
 
   return (
