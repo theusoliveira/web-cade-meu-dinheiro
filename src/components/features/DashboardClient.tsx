@@ -4,7 +4,7 @@ import * as React from "react";
 import { CheckCircle2, AlertTriangle, Target } from "lucide-react";
 import { Card, StatCard } from "@/components/ui/Card";
 import { useBusy } from "@/components/features/BusyProvider";
-import { fetchYearlyEntries, fetchOpeningBalance } from "@/actions/entries";
+import { fetchYearlyEntries, fetchMonthlyEntries, fetchOpeningBalance } from "@/actions/entries";
 import { fetchDueAlerts, type AlertRecord } from "@/actions/alerts";
 import { fetchGoals } from "@/actions/goals";
 import { formatCurrencyBRL, formatDateBR, todayAsDateInputValue } from "@/lib/finance";
@@ -43,6 +43,7 @@ export function DashboardClient({ onNavigateAlerts }: { onNavigateAlerts?: () =>
   const [year, setYear] = React.useState(() => todayAsDateInputValue().slice(0, 4));
   const [totals, setTotals] = React.useState<Totals>({ income: 0, expense: 0, investment: 0, balance: 0 });
   const [openingBalance, setOpeningBalance] = React.useState(0);
+  const [availableBalance, setAvailableBalance] = React.useState(0);
   const [dueAlerts, setDueAlerts] = React.useState<AlertRecord[]>([]);
   const [goals, setGoals] = React.useState<GoalRecord[]>([]);
   const [loaded, setLoaded] = React.useState(false);
@@ -53,9 +54,14 @@ export function DashboardClient({ onNavigateAlerts }: { onNavigateAlerts?: () =>
     setLoaded(false);
     run(async () => {
       try {
-        const [entries, ob, alerts, goalList] = await Promise.all([
+        const today = todayAsDateInputValue();
+        const currentYm = today.slice(0, 7);
+
+        const [entries, ob, currentMonthEntries, currentMonthOpeningBalance, alerts, goalList] = await Promise.all([
           fetchYearlyEntries(year, "personal"),
           fetchOpeningBalance(`${year}-01`, "personal"),
+          fetchMonthlyEntries(currentYm, "personal"),
+          fetchOpeningBalance(currentYm, "personal"),
           fetchDueAlerts(),
           fetchGoals(),
         ]);
@@ -70,6 +76,17 @@ export function DashboardClient({ onNavigateAlerts }: { onNavigateAlerts?: () =>
         }
         setTotals({ income, expense, investment, balance: ob + income - expense - investment });
         setOpeningBalance(ob);
+
+        // Saldo disponível: saldo real "até agora" no mês atual (não a soma do ano).
+        let netToDate = 0;
+        for (const e of currentMonthEntries) {
+          if (e.date > today) continue;
+          if (e.kind === "income") netToDate += e.value;
+          else if (e.kind === "expense") netToDate -= e.value;
+          else netToDate -= e.value;
+        }
+        setAvailableBalance(currentMonthOpeningBalance + netToDate);
+
         setDueAlerts(alerts);
         setGoals(goalList);
         setLoaded(true);
@@ -131,7 +148,7 @@ export function DashboardClient({ onNavigateAlerts }: { onNavigateAlerts?: () =>
         <StatCard label="Receitas" value={formatCurrencyBRL(totals.income)} color="income" />
         <StatCard label="Despesas" value={formatCurrencyBRL(totals.expense)} color="expense" />
         <StatCard label="Investimentos" value={formatCurrencyBRL(totals.investment)} color="investment" />
-        <StatCard label="Saldo disponível" value={formatCurrencyBRL(totals.balance)} color="balance" />
+        <StatCard label="Saldo disponível" value={formatCurrencyBRL(availableBalance)} color="balance" />
       </div>
 
       {/* ─── Análise financeira ───────────────────────────────────────────── */}
