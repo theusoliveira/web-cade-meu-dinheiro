@@ -154,7 +154,7 @@ export function EntriesClient({
         </div>
 
         {/* Charts */}
-        <div className="grid gap-3 md:grid-cols-3">
+        {/* <div className="grid gap-3 md:grid-cols-3">
           <DonutChartCard
             title={effectiveIncomeChartTitle}
             data={incomeByCategory}
@@ -173,7 +173,7 @@ export function EntriesClient({
             colors={["#0369a1", "#0284c7", "#0ea5e9", "#38bdf8", "#7dd3fc"]}
             centerLabel="Investimentos"
           />
-        </div>
+        </div> */}
       </div>
 
       {/* Entry lists */}
