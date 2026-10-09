@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { ServiceWorkerRegister } from "@/components/features/ServiceWorkerRegister";
 import { BusyProvider } from "@/components/features/BusyProvider";
-import { SessionProvider } from "next-auth/react";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -66,9 +65,7 @@ export default function RootLayout({
       <body className="antialiased">
         <ThemeInitScript />
         <ServiceWorkerRegister />
-        <SessionProvider>
-          <BusyProvider>{children}</BusyProvider>
-        </SessionProvider>
+        <BusyProvider>{children}</BusyProvider>
       </body>
     </html>
   );

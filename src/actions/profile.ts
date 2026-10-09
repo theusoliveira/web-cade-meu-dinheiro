@@ -7,8 +7,7 @@ export async function fetchCurrentProfileDisplayName(): Promise<string> {
   const session = await auth();
   const userId = session?.user?.id;
   if (!userId) return "";
-  const sql = getDb();
-  const rows = await sql(
+  const rows = await getDb()(
     `SELECT display_name, full_name FROM public.users WHERE id = $1 LIMIT 1`,
     [userId],
   );

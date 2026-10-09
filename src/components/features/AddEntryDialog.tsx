@@ -166,12 +166,12 @@ export function AddEntryDialog({ open, kind, onClose, initial, allowFixed = fals
       <button
         type="button"
         aria-label="Fechar"
-        className="absolute inset-0 bg-black/50 backdrop-blur-[2px] cursor-pointer"
+        className="absolute inset-0 bg-black/50 cursor-pointer"
         onClick={() => { if (!submitting) onClose(); }}
       />
 
       {/* Dialog */}
-      <div className="relative w-full max-w-lg rounded-t-3xl sm:rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-2xl animate-slide-up sm:animate-scale-in">
+      <div className="relative w-full max-w-lg rounded-t-3xl sm:rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-lg animate-slide-up sm:animate-scale-in">
         {/* Drag handle (mobile) */}
         <div className="flex justify-center pt-3 pb-0 sm:hidden">
           <div className="h-1 w-10 rounded-full bg-[var(--border)]" />

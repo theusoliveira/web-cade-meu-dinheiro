@@ -1,20 +1,13 @@
 "use server";
 
-import { auth } from "@/lib/auth";
 import { getDb } from "@/lib/db/client";
 import { mapEntryRows } from "@/lib/db/mappers";
 import type { FinanceEntry } from "@/lib/finance";
-
-async function getUserId() {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Não autenticado");
-  return session.user.id;
-}
+import { requireUserId, vDate, vEnum, vId, vIds, vMoney, vObject, vText } from "@/lib/server/guard";
 
 export async function fetchCardEntries(): Promise<FinanceEntry[]> {
-  const sql = getDb();
-  const userId = await getUserId();
-  const rows = await sql(
+  const userId = await requireUserId();
+  const rows = await getDb()(
     `SELECT id, kind, date::text, category, description, value::float8, created_at
      FROM public.card_entries WHERE user_id = $1
      ORDER BY date DESC, created_at DESC`,
@@ -24,39 +17,41 @@ export async function fetchCardEntries(): Promise<FinanceEntry[]> {
 }
 
 export async function upsertCardEntry(entry: FinanceEntry) {
-  if (entry.kind === "investment") throw new Error("No Controle de gastos, só é permitido Receita ou Despesa.");
-  const sql = getDb();
-  const userId = await getUserId();
-  await sql(
-    `INSERT INTO public.card_entries (id, user_id, kind, date, category, description, value)
+  const userId = await requireUserId();
+  const e = vObject(entry, "lançamento");
+  const kind = vEnum(e.kind, ["income", "expense"] as const, "tipo");
+  await getDb()(
+    `INSERT INTO public.card_entries AS t (id, user_id, kind, date, category, description, value)
      VALUES ($1, $2, $3, $4::date, $5, $6, $7)
      ON CONFLICT (id) DO UPDATE SET
        kind = EXCLUDED.kind, date = EXCLUDED.date, category = EXCLUDED.category,
-       description = EXCLUDED.description, value = EXCLUDED.value`,
-    [entry.id, userId, entry.kind, entry.date, entry.category, entry.description ?? null, entry.value],
+       description = EXCLUDED.description, value = EXCLUDED.value
+     WHERE t.user_id = EXCLUDED.user_id`,
+    [
+      vId(e.id), userId, kind, vDate(e.date),
+      vText(e.category, "categoria", { max: 80, required: true }),
+      vText(e.description, "descrição", { max: 200 }) || null,
+      vMoney(e.value),
+    ],
   );
 }
 
 export async function deleteCardEntry(id: string) {
-  const sql = getDb();
-  const userId = await getUserId();
-  await sql(`DELETE FROM public.card_entries WHERE id = $1 AND user_id = $2`, [id, userId]);
+  const userId = await requireUserId();
+  await getDb()(`DELETE FROM public.card_entries WHERE id = $1 AND user_id = $2`, [vId(id), userId]);
 }
 
 export async function deleteCardEntries(ids: string[]) {
-  if (ids.length === 0) return;
-  const sql = getDb();
-  const userId = await getUserId();
-  // Cria placeholders: $1 = userId, $2..$N = ids
-  const placeholders = ids.map((_, i) => `$${i + 2}`).join(", ");
-  await sql(
-    `DELETE FROM public.card_entries WHERE user_id = $1 AND id IN (${placeholders})`,
-    [userId, ...ids],
+  const list = vIds(ids);
+  if (list.length === 0) return;
+  const userId = await requireUserId();
+  await getDb()(
+    `DELETE FROM public.card_entries WHERE user_id = $1 AND id = ANY($2::text[])`,
+    [userId, list],
   );
 }
 
 export async function deleteAllCardEntries() {
-  const sql = getDb();
-  const userId = await getUserId();
-  await sql(`DELETE FROM public.card_entries WHERE user_id = $1`, [userId]);
+  const userId = await requireUserId();
+  await getDb()(`DELETE FROM public.card_entries WHERE user_id = $1`, [userId]);
 }

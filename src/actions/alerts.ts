@@ -1,8 +1,8 @@
 "use server";
 
-import { auth } from "@/lib/auth";
 import { getDb } from "@/lib/db/client";
 import { newId } from "@/lib/finance/id";
+import { requireUserId, vBool, vDate, vId, vInt, vObject, vOptionalMoney, vText } from "@/lib/server/guard";
 
 export type AlertRecord = {
   id: string;
@@ -15,12 +15,6 @@ export type AlertRecord = {
   dayOfMonth: number | null; // 1–31, usado quando recurring = true
   createdAt: number;
 };
-
-async function getUserId() {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Não autenticado");
-  return session.user.id;
-}
 
 /**
  * Para alertas recorrentes, a data de vencimento é sempre recalculada a
@@ -54,8 +48,8 @@ function mapRow(row: Record<string, unknown>): AlertRecord {
   return {
     id: row.id as string,
     name: row.name as string,
-    dueDate: recurring && dayOfMonth != null ? nextOccurrence(dayOfMonth) : (row.due_date as string) ?? "",
-    reminderDays: Number(row.reminder_days ?? 3),
+    dueDate: recurring && dayOfMonth ? nextOccurrence(dayOfMonth) : (row.due_date as string),
+    reminderDays: Number(row.reminder_days),
     expectedValue: row.expected_value != null ? Number(row.expected_value) : null,
     active: Boolean(row.active),
     recurring,
@@ -64,25 +58,27 @@ function mapRow(row: Record<string, unknown>): AlertRecord {
   };
 }
 
+const ALERT_COLUMNS = `id, name, due_date::text, reminder_days, expected_value::float8,
+            active, recurring, day_of_month, created_at`;
+
 export async function fetchAlerts(): Promise<AlertRecord[]> {
-  const sql = getDb();
-  const userId = await getUserId();
-  const rows = await sql(
-    `SELECT id, name, due_date::text, reminder_days, expected_value::float8,
-            active, recurring, day_of_month, created_at
+  const userId = await requireUserId();
+  const rows = await getDb()(
+    `SELECT ${ALERT_COLUMNS}
      FROM public.alerts WHERE user_id = $1
      ORDER BY due_date ASC, created_at DESC`,
     [userId],
   );
-  return (rows as Record<string, unknown>[]).map(mapRow);
+  return rows.map(mapRow);
 }
 
 export async function upsertAlert(alert: AlertRecord): Promise<void> {
-  const sql = getDb();
-  const userId = await getUserId();
-  const id = alert.id || newId();
-  await sql(
-    `INSERT INTO public.alerts
+  const userId = await requireUserId();
+  const a = vObject(alert, "alerta");
+  const id = a.id ? vId(a.id) : newId();
+  const recurring = vBool(a.recurring, "recorrente");
+  await getDb()(
+    `INSERT INTO public.alerts AS t
        (id, user_id, name, due_date, reminder_days, expected_value, active, recurring, day_of_month)
      VALUES ($1, $2, $3, $4::date, $5, $6, $7, $8, $9)
      ON CONFLICT (id) DO UPDATE SET
@@ -92,37 +88,42 @@ export async function upsertAlert(alert: AlertRecord): Promise<void> {
        expected_value = EXCLUDED.expected_value,
        active         = EXCLUDED.active,
        recurring      = EXCLUDED.recurring,
-       day_of_month   = EXCLUDED.day_of_month`,
-    [id, userId, alert.name, alert.dueDate, alert.reminderDays,
-     alert.expectedValue, alert.active, alert.recurring, alert.dayOfMonth],
+       day_of_month   = EXCLUDED.day_of_month
+     WHERE t.user_id = EXCLUDED.user_id`,
+    [
+      id, userId,
+      vText(a.name, "nome", { max: 120, required: true }),
+      vDate(a.dueDate, "vencimento"),
+      vInt(a.reminderDays, "dias de lembrete", 0, 365),
+      vOptionalMoney(a.expectedValue, "valor previsto"),
+      vBool(a.active, "ativo"),
+      recurring,
+      recurring ? vInt(a.dayOfMonth, "dia do mês", 1, 31) : null,
+    ],
   );
 }
 
 export async function deleteAlert(id: string): Promise<void> {
-  const sql = getDb();
-  const userId = await getUserId();
-  await sql(`DELETE FROM public.alerts WHERE id = $1 AND user_id = $2`, [id, userId]);
+  const userId = await requireUserId();
+  await getDb()(`DELETE FROM public.alerts WHERE id = $1 AND user_id = $2`, [vId(id), userId]);
 }
 
 export async function toggleAlert(id: string, active: boolean): Promise<void> {
-  const sql = getDb();
-  const userId = await getUserId();
-  await sql(
+  const userId = await requireUserId();
+  await getDb()(
     `UPDATE public.alerts SET active = $1 WHERE id = $2 AND user_id = $3`,
-    [active, id, userId],
+    [vBool(active, "ativo"), vId(id), userId],
   );
 }
 
 /** Retorna alertas cujo lembrete está ativo hoje */
 export async function fetchDueAlerts(): Promise<AlertRecord[]> {
-  const sql = getDb();
-  const userId = await getUserId();
+  const userId = await requireUserId();
   // Alertas recorrentes têm a data de vencimento recalculada em mapRow, então
   // aqui trazemos todos os ativos (recorrentes ou com due_date futura) e
   // aplicamos a janela de lembrete em memória, já com a data efetiva.
-  const rows = await sql(
-    `SELECT id, name, due_date::text, reminder_days, expected_value::float8,
-            active, recurring, day_of_month, created_at
+  const rows = await getDb()(
+    `SELECT ${ALERT_COLUMNS}
      FROM public.alerts
      WHERE user_id = $1
        AND active = true
@@ -132,7 +133,7 @@ export async function fetchDueAlerts(): Promise<AlertRecord[]> {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  return (rows as Record<string, unknown>[])
+  return rows
     .map(mapRow)
     .filter((a) => {
       const remindFrom = new Date(`${a.dueDate}T00:00:00`);

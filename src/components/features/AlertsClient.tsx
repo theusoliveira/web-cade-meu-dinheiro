@@ -178,8 +178,8 @@ function AlertDialog({ open, initial, onClose, onSubmit }: AlertDialogProps) {
       aria-modal="true"
       aria-label={initial ? "Editar alerta" : "Novo alerta"}
     >
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative z-10 w-full max-w-md rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-2xl">
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+      <div className="relative z-10 w-full max-w-md rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-lg">
         <h2 className="mb-5 text-lg font-bold text-[var(--foreground)]">
           {initial ? "Editar alerta" : "Novo alerta de conta"}
         </h2>

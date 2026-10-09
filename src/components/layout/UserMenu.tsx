@@ -41,7 +41,8 @@ export function UserMenu({ displayName }: Props) {
   async function logout() {
     setOpen(false);
     await busy.run(async () => {
-      await signOut({ redirect: false });
+      // Recarrega a página: limpa todo o estado em memória do cliente.
+      await signOut({ redirectTo: "/" });
     });
   }
 
@@ -61,7 +62,7 @@ export function UserMenu({ displayName }: Props) {
       {open && (
         <div
           role="menu"
-          className="absolute right-0 mt-2 w-60 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-2xl shadow-black/10 animate-scale-in"
+          className="absolute right-0 mt-2 w-60 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-lg shadow-black/10 animate-scale-in"
         >
           <div className="flex items-center gap-3 px-4 py-4 border-b border-[var(--border)]">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--accent)]/10 font-bold text-[var(--accent)] text-sm">
