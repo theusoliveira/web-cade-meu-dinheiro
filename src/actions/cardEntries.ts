@@ -2,8 +2,8 @@
 
 import { getDb } from "@/lib/db/client";
 import { mapEntryRows } from "@/lib/db/mappers";
-import type { FinanceEntry } from "@/lib/finance";
-import { requireUserId, vDate, vEnum, vId, vIds, vMoney, vObject, vText } from "@/lib/server/guard";
+import { nextMonthStart, type FinanceEntry } from "@/lib/finance";
+import { requireUserId, vDate, vEnum, vId, vIds, vMoney, vObject, vText, vYm } from "@/lib/server/guard";
 
 export async function fetchCardEntries(): Promise<FinanceEntry[]> {
   const userId = await requireUserId();
@@ -14,6 +14,22 @@ export async function fetchCardEntries(): Promise<FinanceEntry[]> {
     [userId],
   );
   return mapEntryRows(rows as never[]);
+}
+
+/** Totais do cartão em um mês, agregados no banco (só números trafegam). */
+export async function fetchCardMonthTotals(ym: string): Promise<{ expense: number; income: number; count: number }> {
+  const userId = await requireUserId();
+  const rows = await getDb()(
+    `SELECT
+       COALESCE(SUM(value) FILTER (WHERE kind = 'expense'), 0)::float8 AS expense,
+       COALESCE(SUM(value) FILTER (WHERE kind = 'income'), 0)::float8 AS income,
+       COUNT(*)::int AS count
+     FROM public.card_entries
+     WHERE user_id = $1 AND date >= $2::date AND date < $3::date`,
+    [userId, `${vYm(ym)}-01`, nextMonthStart(ym)],
+  );
+  const r = rows[0] ?? {};
+  return { expense: Number(r.expense ?? 0), income: Number(r.income ?? 0), count: Number(r.count ?? 0) };
 }
 
 export async function upsertCardEntry(entry: FinanceEntry) {
