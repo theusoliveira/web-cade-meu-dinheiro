@@ -1,8 +1,8 @@
 "use server";
 
 import { getDb } from "@/lib/db/client";
-import { auth } from "@/lib/auth";
 import { newId } from "@/lib/finance/id";
+import { requireUserId, vId, vMoney, vText, vYm } from "@/lib/server/guard";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -28,15 +28,12 @@ export type CltDistributionMonth = {
   salary: number;
 };
 
-async function getUserId(): Promise<string> {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Não autenticado");
-  return session.user.id;
-}
+const getUserId = requireUserId;
 
 // ─── Fetch ───────────────────────────────────────────────────────────────────
 
 export async function fetchCltDistributionMonth(month: string): Promise<CltDistributionMonth | null> {
+  month = vYm(month);
   const sql = getDb();
   const userId = await getUserId();
   const rows = await sql(
@@ -56,6 +53,7 @@ export async function fetchCltDistributionMonth(month: string): Promise<CltDistr
 }
 
 export async function fetchCltDistributionCategories(month: string): Promise<CltDistributionCategory[]> {
+  month = vYm(month);
   const sql = getDb();
   const userId = await getUserId();
 
@@ -101,6 +99,8 @@ export async function fetchCltDistributionCategories(month: string): Promise<Clt
 // ─── Upsert month ─────────────────────────────────────────────────────────────
 
 export async function upsertCltDistributionMonth(month: string, salary: number): Promise<CltDistributionMonth> {
+  month = vYm(month);
+  salary = vMoney(salary, "salário");
   const sql = getDb();
   const userId = await getUserId();
   const existing = await fetchCltDistributionMonth(month);
@@ -118,6 +118,8 @@ export async function upsertCltDistributionMonth(month: string, salary: number):
 // ─── Category CRUD ────────────────────────────────────────────────────────────
 
 export async function addCltCategory(month: string, name: string): Promise<CltDistributionCategory> {
+  month = vYm(month);
+  name = vText(name, "nome", { max: 80, required: true });
   const sql = getDb();
   const userId = await getUserId();
   const id = newId();
@@ -136,6 +138,8 @@ export async function addCltCategory(month: string, name: string): Promise<CltDi
 }
 
 export async function renameCltCategory(catId: string, name: string): Promise<void> {
+  catId = vId(catId);
+  name = vText(name, "nome", { max: 80, required: true });
   const sql = getDb();
   const userId = await getUserId();
   await sql(
@@ -145,6 +149,7 @@ export async function renameCltCategory(catId: string, name: string): Promise<vo
 }
 
 export async function deleteCltCategory(catId: string): Promise<void> {
+  catId = vId(catId);
   const sql = getDb();
   const userId = await getUserId();
   // Items cascade via FK
@@ -154,6 +159,9 @@ export async function deleteCltCategory(catId: string): Promise<void> {
 // ─── Item CRUD ────────────────────────────────────────────────────────────────
 
 export async function addCltItem(categoryId: string, description: string, value: number): Promise<CltDistributionItem> {
+  categoryId = vId(categoryId);
+  description = vText(description, "descrição", { max: 200 });
+  value = vMoney(value);
   const sql = getDb();
   const userId = await getUserId();
 
@@ -178,6 +186,9 @@ export async function addCltItem(categoryId: string, description: string, value:
 }
 
 export async function updateCltItem(itemId: string, description: string, value: number): Promise<void> {
+  itemId = vId(itemId);
+  description = vText(description, "descrição", { max: 200 });
+  value = vMoney(value);
   const sql = getDb();
   const userId = await getUserId();
   await sql(
@@ -190,6 +201,7 @@ export async function updateCltItem(itemId: string, description: string, value: 
 }
 
 export async function deleteCltItem(itemId: string): Promise<void> {
+  itemId = vId(itemId);
   const sql = getDb();
   const userId = await getUserId();
   await sql(

@@ -172,6 +172,13 @@ input[type="number"] { -moz-appearance: textfield; }
   100% { background-position:  200% 0; }
 }
 
+@keyframes busyBar {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(300%); }
+}
+
+.busy-bar { animation: busyBar 1s ease-in-out infinite; }
+
 .animate-fade-in  { animation: fadeIn  0.25s ease forwards; }
 .animate-slide-up { animation: slideUp 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
 .animate-scale-in { animation: scaleIn 0.18s ease forwards; }
@@ -188,4 +195,14 @@ input[type="number"] { -moz-appearance: textfield; }
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 12px;
+}
+
+/* ─── Movimento reduzido ────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

@@ -10,7 +10,6 @@ import { NotificationBell } from "@/components/features/NotificationBell";
 import { todayAsDateInputValue, type EntryKind, type FinanceEntry } from "@/lib/finance";
 import { useCardEntries } from "@/hooks/useCardEntries";
 import { useMonthlyEntries } from "@/hooks/useMonthlyEntries";
-import { useProfile } from "@/hooks/useProfile";
 
 const EntriesClient = dynamic(
   () => import("@/components/features/EntriesClient").then((m) => m.EntriesClient),
@@ -84,7 +83,7 @@ function SectionFallback() {
   );
 }
 
-export function HomeClient() {
+export function HomeClient({ displayName }: { displayName: string }) {
   const [month, setMonth] = React.useState(() => todayAsDateInputValue().slice(0, 7));
   const [activeTab, setActiveTab] = React.useState<NavKey>("dashboard");
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
@@ -93,8 +92,6 @@ export function HomeClient() {
   const [kind, setKind] = React.useState<EntryKind>("income");
   const [editing, setEditing] = React.useState<FinanceEntry | null>(null);
   const [goalAddTrigger, setGoalAddTrigger] = React.useState(0);
-
-  const { displayName } = useProfile();
 
   const isBusinessTab = activeTab === "lancamentos_pj";
   const isMonthlyTab = activeTab === "lancamentos" || isBusinessTab;
@@ -125,12 +122,6 @@ export function HomeClient() {
     });
   }, []);
 
-  React.useEffect(() => {
-    setDialogOpen(false);
-    setEditing(null);
-    setGoalAddTrigger(0);
-    setMobileMenuOpen(false);
-  }, [activeTab]);
 
   // Close mobile menu on outside click
   React.useEffect(() => {
@@ -154,6 +145,11 @@ export function HomeClient() {
   }
 
   function handleTabChange(tab: NavKey) {
+    if (tab !== activeTab) {
+      setDialogOpen(false);
+      setEditing(null);
+      setGoalAddTrigger(0);
+    }
     setActiveTab(tab);
     setMobileMenuOpen(false);
   }
@@ -175,7 +171,7 @@ export function HomeClient() {
         {mobileMenuOpen && (
           <>
             <div
-              className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm md:hidden"
+              className="fixed inset-0 z-40 bg-black/40 md:hidden"
               onClick={() => setMobileMenuOpen(false)}
               aria-hidden
             />
@@ -195,7 +191,7 @@ export function HomeClient() {
 
         <div className="flex min-w-0 flex-1 flex-col">
           {/* Header */}
-          <header className="sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--surface)]/80 backdrop-blur-xl">
+          <header className="sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--surface)]">
             <div
               className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8"
               style={{ paddingTop: "calc(env(safe-area-inset-top) + 14px)", paddingBottom: "14px" }}
@@ -223,7 +219,7 @@ export function HomeClient() {
               </div>
 
               <div className="flex items-center gap-2">
-                <NotificationBell onNavigateAlerts={() => setActiveTab("alertas")} />
+                <NotificationBell onNavigateAlerts={() => handleTabChange("alertas")} />
                 <ThemeToggle />
                 <UserMenu displayName={displayName} />
               </div>
@@ -237,7 +233,7 @@ export function HomeClient() {
           >
             <div className="mx-auto w-full max-w-7xl">
               {activeTab === "dashboard" && (
-                <DashboardClient onNavigateAlerts={() => setActiveTab("alertas")} />
+                <DashboardClient onNavigateAlerts={() => handleTabChange("alertas")} />
               )}
 
               {isMonthlyTab && (

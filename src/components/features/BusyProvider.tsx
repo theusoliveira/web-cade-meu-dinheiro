@@ -54,19 +54,16 @@ export function useBusy() {
   return ctx;
 }
 
+/** Barra fina no topo: indica atividade sem bloquear nem escurecer a tela. */
 function LoadingOverlay() {
   return (
     <div
-      className="fixed inset-0 z-[9999] grid place-items-center bg-black/25 backdrop-blur-[2px]"
+      className="fixed inset-x-0 top-0 z-[9999] h-0.5 overflow-hidden bg-[var(--accent)]/15"
+      role="progressbar"
+      aria-label="Carregando"
       aria-busy="true"
-      aria-live="polite"
     >
-      <div className="flex items-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface)]/90 backdrop-blur-sm px-5 py-4 shadow-2xl">
-        <div className="relative h-5 w-5">
-          <div className="absolute inset-0 h-5 w-5 animate-spin rounded-full border-2 border-[var(--accent)]/20 border-t-[var(--accent)]" />
-        </div>
-        <p className="text-sm font-semibold text-[var(--foreground)]">Carregando…</p>
-      </div>
+      <div className="busy-bar h-full w-1/3 bg-[var(--accent)]" />
     </div>
   );
 }

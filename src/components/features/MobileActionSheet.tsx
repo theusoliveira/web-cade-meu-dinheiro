@@ -89,7 +89,7 @@ export function MobileActionSheet({ activeTab, onSelectEntry, onAddGoal }: Props
       {/* Backdrop */}
       {open && (
         <div
-          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[2px] md:hidden"
+          className="fixed inset-0 z-40 bg-black/40 md:hidden"
           onClick={() => setOpen(false)}
           aria-hidden
         />
@@ -104,7 +104,7 @@ export function MobileActionSheet({ activeTab, onSelectEntry, onAddGoal }: Props
         aria-label="Escolha o tipo de lançamento"
         aria-modal
       >
-        <div className="mx-4 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-2xl shadow-black/20">
+        <div className="mx-4 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-lg shadow-black/20">
           <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-3">
             <p className="text-xs font-bold uppercase tracking-widest text-[var(--muted)]">
               Adicionar lançamento

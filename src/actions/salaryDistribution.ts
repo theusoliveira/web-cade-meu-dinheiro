@@ -1,8 +1,8 @@
 "use server";
 
 import { getDb } from "@/lib/db/client";
-import { auth } from "@/lib/auth";
 import { newId } from "@/lib/finance/id";
+import { requireUserId, vBool, vId, vInt, vMoney, vNumber, vObject, vText, vYm } from "@/lib/server/guard";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -33,15 +33,12 @@ export type DistributionMonth = {
   simplesAuto: boolean;
 };
 
-async function getUserId(): Promise<string> {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Não autenticado");
-  return session.user.id;
-}
+const getUserId = requireUserId;
 
 // ─── Fetch ───────────────────────────────────────────────────────────────────
 
 export async function fetchDistributionMonth(month: string): Promise<DistributionMonth | null> {
+  month = vYm(month);
   const sql = getDb();
   const userId = await getUserId();
   const rows = await sql(
@@ -64,6 +61,7 @@ export async function fetchDistributionMonth(month: string): Promise<Distributio
 }
 
 export async function fetchDistributionCategories(month: string): Promise<DistributionCategory[]> {
+  month = vYm(month);
   const sql = getDb();
   const userId = await getUserId();
 
@@ -113,6 +111,7 @@ export async function fetchDistributionCategories(month: string): Promise<Distri
 // ─── Init fixed category (idempotent — uses INSERT ... ON CONFLICT DO NOTHING) ─
 
 export async function ensureFixedCategory(month: string): Promise<DistributionCategory | null> {
+  month = vYm(month);
   const sql = getDb();
   const userId = await getUserId();
 
@@ -140,13 +139,17 @@ export async function ensureFixedCategory(month: string): Promise<DistributionCa
     { id: newId(), description: "INSS",             itemKey: "inss",             sortOrder: 2 },
   ];
 
-  for (const item of itemsToInsert) {
-    await sql(
-      `INSERT INTO public.pj_distribution_items (id, category_id, description, value, item_key, sort_order)
-       VALUES ($1, $2, $3, 0, $4, $5)`,
-      [item.id, catId, item.description, item.itemKey, item.sortOrder],
-    );
-  }
+  // Um único INSERT multi-linha em vez de 3 round-trips ao banco.
+  await sql(
+    `INSERT INTO public.pj_distribution_items (id, category_id, description, value, item_key, sort_order)
+     VALUES ($1, $4, $5, 0, $6, 0), ($2, $4, $7, 0, $8, 1), ($3, $4, $9, 0, $10, 2)`,
+    [
+      itemsToInsert[0].id, itemsToInsert[1].id, itemsToInsert[2].id, catId,
+      itemsToInsert[0].description, itemsToInsert[0].itemKey,
+      itemsToInsert[1].description, itemsToInsert[1].itemKey,
+      itemsToInsert[2].description, itemsToInsert[2].itemKey,
+    ],
+  );
 
   return {
     id: catId, month, name: "Despesas PJ", isFixed: true, sortOrder: 0,
@@ -166,6 +169,14 @@ export async function upsertDistributionMonth(data: {
   commission: number;
   simplesAuto: boolean;
 }): Promise<DistributionMonth> {
+  const raw = vObject(data);
+  data = {
+    month: vYm(raw.month),
+    hours: vNumber(raw.hours, "horas", 0, 744),
+    hourlyRate: vMoney(raw.hourlyRate, "valor hora"),
+    commission: vMoney(raw.commission, "comissão"),
+    simplesAuto: vBool(raw.simplesAuto, "simples automático"),
+  };
   const sql = getDb();
   const userId = await getUserId();
 
@@ -193,6 +204,12 @@ export async function upsertDistributionMonth(data: {
 export async function insertCategory(data: {
   month: string; name: string; sortOrder: number;
 }): Promise<DistributionCategory> {
+  const raw = vObject(data);
+  data = {
+    month: vYm(raw.month),
+    name: vText(raw.name, "nome", { max: 80, required: true }),
+    sortOrder: vInt(raw.sortOrder, "ordem", 0, 10_000),
+  };
   const sql = getDb();
   const userId = await getUserId();
   const id = newId();
@@ -205,6 +222,7 @@ export async function insertCategory(data: {
 }
 
 export async function deleteCategory(id: string): Promise<void> {
+  id = vId(id);
   const sql = getDb();
   const userId = await getUserId();
   // Items are deleted via ON DELETE CASCADE in the schema
@@ -219,6 +237,13 @@ export async function deleteCategory(id: string): Promise<void> {
 export async function insertItem(data: {
   categoryId: string; description: string; value: number; sortOrder: number;
 }): Promise<DistributionItem> {
+  const raw = vObject(data);
+  data = {
+    categoryId: vId(raw.categoryId),
+    description: vText(raw.description, "descrição", { max: 200 }),
+    value: vMoney(raw.value),
+    sortOrder: vInt(raw.sortOrder, "ordem", 0, 10_000),
+  };
   const sql = getDb();
   const userId = await getUserId();
   const id = newId();
@@ -235,6 +260,8 @@ export async function insertItem(data: {
 }
 
 export async function updateItemValue(id: string, value: number): Promise<void> {
+  id = vId(id);
+  value = vMoney(value);
   const sql = getDb();
   const userId = await getUserId();
   await sql(
@@ -247,6 +274,8 @@ export async function updateItemValue(id: string, value: number): Promise<void> 
 }
 
 export async function updateItemDescription(id: string, description: string): Promise<void> {
+  id = vId(id);
+  description = vText(description, "descrição", { max: 200 });
   const sql = getDb();
   const userId = await getUserId();
   await sql(
@@ -259,6 +288,7 @@ export async function updateItemDescription(id: string, description: string): Pr
 }
 
 export async function deleteItem(id: string): Promise<void> {
+  id = vId(id);
   const sql = getDb();
   const userId = await getUserId();
   await sql(

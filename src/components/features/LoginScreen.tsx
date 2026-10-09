@@ -1,11 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { signIn, signOut, useSession } from "next-auth/react";
-import { Eye, EyeOff, AlertCircle, CheckCircle2, Receipt, Target, CreditCard, BarChart3 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
+import { Eye, EyeOff, AlertCircle, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { HomeClient } from "@/components/features/HomeClient";
 import { useBusy } from "@/components/features/BusyProvider";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -86,96 +86,10 @@ function AlertBanner({ type, message }: { type: "error" | "success"; message: st
   );
 }
 
-// ─── Brand panel (left side) ──────────────────────────────────────────────────
+// ─── LoginScreen ─────────────────────────────────────────────────────────────────
 
-function BrandPanel() {
-  const features = [
-    {
-      icon: <Receipt className="h-4 w-4" aria-hidden />,
-      text: "Lançamentos pessoais e PJ",
-    },
-    {
-      icon: <Target className="h-4 w-4" aria-hidden />,
-      text: "Metas e planejamento",
-    },
-    {
-      icon: <CreditCard className="h-4 w-4" aria-hidden />,
-      text: "Controle de gastos",
-    },
-    {
-      icon: <BarChart3 className="h-4 w-4" aria-hidden />,
-      text: "Distribuição de salário",
-    },
-  ];
-
-  return (
-    <div
-      className="hidden lg:flex flex-col justify-between p-10 w-[400px] shrink-0 relative overflow-hidden"
-      style={{ backgroundColor: "#0f172a" }}
-    >
-      {/* Decorative blobs */}
-      <div
-        className="absolute -top-24 -right-24 h-72 w-72 rounded-full opacity-20 blur-3xl pointer-events-none"
-        style={{ background: "radial-gradient(circle, #268c78, transparent)" }}
-      />
-      <div
-        className="absolute bottom-0 left-0 h-56 w-56 rounded-full opacity-10 blur-3xl pointer-events-none"
-        style={{ background: "radial-gradient(circle, #0a584d, transparent)" }}
-      />
-
-      {/* Logo */}
-      <div className="relative">
-        <div className="flex items-center gap-3 mb-12">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-600 shadow-lg shadow-brand-600/30">
-            <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden>
-              <path
-                d="M12 6v12M8 10c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2v.5c0 1.1-.9 2-2 2h-4c-1.1 0-2 .9-2 2v.5c0 1.1.9 2 2 2h4c1.1 0 2-.9 2-2"
-                stroke="white"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-              />
-            </svg>
-          </div>
-          <div>
-            <p className="text-white font-bold text-base leading-none">Cadê meu</p>
-            <p className="text-brand-400 font-bold text-base leading-none">dinheiro?</p>
-          </div>
-        </div>
-
-        <h2 className="text-white text-2xl font-bold leading-snug mb-3">
-          Controle financeiro{" "}
-          <span className="text-brand-400">inteligente</span>
-        </h2>
-        <p className="text-white/50 text-sm leading-relaxed mb-10">
-          Gerencie receitas, despesas e investimentos pessoais e PJ em um só lugar, com clareza e simplicidade.
-        </p>
-
-        {/* Feature pills */}
-        <div className="grid gap-3">
-          {features.map(({ icon, text }) => (
-            <div
-              key={text}
-              className="flex items-center gap-3 rounded-xl px-4 py-3"
-              style={{ backgroundColor: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}
-            >
-              <span className="text-brand-400 shrink-0">{icon}</span>
-              <span className="text-white/70 text-sm">{text}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <p className="text-white/25 text-xs relative">© {new Date().getFullYear()} Cadê Meu Dinheiro?</p>
-    </div>
-  );
-}
-
-// ─── AuthGate ─────────────────────────────────────────────────────────────────
-
-export function AuthGate() {
-  const { status } = useSession();
-  const checking = status === "loading";
-  const signedIn = status === "authenticated";
+export function LoginScreen() {
+  const router = useRouter();
 
   const [mode, setMode] = React.useState<"login" | "signup">("login");
 
@@ -217,6 +131,7 @@ export function AuthGate() {
     await run(async () => {
       const result = await signIn("credentials", { email: email.trim(), password, redirect: false });
       if (result?.error) setError("E-mail ou senha incorretos.");
+      else router.refresh();
     });
   }
 
@@ -230,7 +145,7 @@ export function AuthGate() {
     if (!displayName.trim()) return setError("Informe como quer ser chamado.");
     if (!email.trim()) return setError("Informe seu e-mail.");
     if (cpfDigits.length !== 11) return setError("CPF inválido (precisa ter 11 dígitos).");
-    if (!password || password.length < 6) return setError("A senha precisa ter pelo menos 6 caracteres.");
+    if (!password || password.length < 8) return setError("A senha precisa ter pelo menos 8 caracteres.");
     if (password !== confirmPassword) return setError("As senhas não conferem.");
 
     await run(async () => {
@@ -254,32 +169,14 @@ export function AuthGate() {
     });
   }
 
-  // Loading state
-  if (checking) {
-    return (
-      <div className="min-h-[100dvh] flex items-center justify-center bg-[var(--background)]">
-        <div className="flex flex-col items-center gap-4">
-          <div className="h-10 w-10 rounded-full border-2 border-[var(--accent)]/20 border-t-[var(--accent)] animate-spin" />
-          <p className="text-sm text-[var(--muted)]">Carregando…</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (signedIn) return <HomeClient />;
-
   return (
-    <div className="min-h-[100dvh] flex" style={{ backgroundColor: "var(--background)" }}>
-      {/* Left brand panel */}
-      <BrandPanel />
-
-      {/* Right auth panel */}
+    <div className="min-h-[100dvh] flex bg-[var(--background)]">
       <div className="flex flex-1 items-center justify-center px-4 py-10 sm:px-8">
-        <div className="w-full max-w-[380px] animate-fade-in">
+        <div className="w-full max-w-[380px]">
 
-          {/* Mobile-only logo */}
-          <div className="mb-8 flex flex-col items-center text-center lg:hidden">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-600 shadow-lg shadow-brand-600/25">
+          {/* Logo */}
+          <div className="mb-8 flex flex-col items-center text-center">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-600">
               <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6" aria-hidden>
                 <path
                   d="M12 6v12M8 10c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2v.5c0 1.1-.9 2-2 2h-4c-1.1 0-2 .9-2 2v.5c0 1.1.9 2 2 2h4c1.1 0 2-.9 2-2"
@@ -288,12 +185,11 @@ export function AuthGate() {
               </svg>
             </div>
             <h1 className="text-xl font-bold text-[var(--foreground)]">Cadê meu dinheiro?</h1>
-            <p className="mt-1 text-sm text-[var(--muted)]">Controle financeiro inteligente</p>
           </div>
 
           {/* Heading */}
-          <div className="mb-6 lg:block">
-            <h2 className="text-2xl font-bold text-[var(--foreground)]">
+          <div className="mb-5 text-center">
+            <h2 className="text-lg font-semibold text-[var(--foreground)]">
               {mode === "login" ? "Bem-vindo de volta" : "Criar conta"}
             </h2>
             <p className="mt-1 text-sm text-[var(--muted)]">
@@ -304,7 +200,7 @@ export function AuthGate() {
           </div>
 
           {/* Card */}
-          <div className="rounded-2xl bg-[var(--surface)] border border-[var(--border)] shadow-sm overflow-hidden">
+          <div className="rounded-2xl bg-[var(--surface)] border border-[var(--border)]">
             <div className="p-6">
               {mode === "login" ? (
                 <form onSubmit={handleSignIn} className="grid gap-4">
@@ -370,7 +266,7 @@ export function AuthGate() {
                     label="Senha"
                     value={password}
                     onChange={setPassword}
-                    placeholder="Mínimo 6 caracteres"
+                    placeholder="Mínimo 8 caracteres"
                     autoComplete="new-password"
                   />
                   <PasswordField
