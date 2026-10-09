@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import {
-  CheckCircle2, AlertTriangle, Target, TrendingUp, TrendingDown, Sparkles,
+  CheckCircle2, AlertTriangle, Target, Sparkles,
   Wallet, Briefcase, PiggyBank, CreditCard, ArrowUpRight, ArrowDownRight,
 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
@@ -12,7 +12,7 @@ import { fetchDueAlerts, type AlertRecord } from "@/actions/alerts";
 import { fetchGoals, type GoalRecord } from "@/actions/goals";
 import { fetchCardMonthTotals } from "@/actions/cardEntries";
 import { fetchRebalanceClasses } from "@/actions/rebalance";
-import { formatCurrencyBRL, formatDateBR, isSaldoEntry, todayAsDateInputValue, type FinanceEntry } from "@/lib/finance";
+import { buildEntriesWithVirtuals, formatCurrencyBRL, formatDateBR, isSaldoEntry, todayAsDateInputValue, type FinanceEntry } from "@/lib/finance";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -88,24 +88,34 @@ function summarize(entries: FinanceEntry[]): Summary {
   return { income, expense, investment, months, topExpenses };
 }
 
-type MonthNow = { available: number; projected: number; income: number; expense: number; upcoming: number };
+type MonthNow = { available: number; income: number; expense: number; investment: number; upcoming: number };
 
-function summarizeCurrentMonth(entries: FinanceEntry[], opening: number, today: string): MonthNow {
-  let toDate = 0, future = 0, income = 0, expense = 0, upcoming = 0;
+/**
+ * Mesmo cálculo da aba "Lançamentos": lançamentos do mês inteiro + saldo
+ * trazido do mês anterior (substituído pelo lançamento manual "Saldo", se houver).
+ */
+function monthBalance(ym: string, entries: FinanceEntry[], opening: number): number {
+  return buildEntriesWithVirtuals({ month: ym, entries, fixedEntries: [], openingBalance: opening })
+    .reduce((t, e) => t + (e.kind === "income" ? e.value : -e.value), 0);
+}
+
+function summarizeCurrentMonth(ym: string, entries: FinanceEntry[], opening: number, today: string): MonthNow {
+  let income = 0, expense = 0, investment = 0, upcoming = 0;
   for (const e of entries) {
-    const signed = e.kind === "income" ? e.value : -e.value;
-    if (e.date > today) {
-      future += signed;
-      if (e.kind !== "income") upcoming += e.value;
-      continue;
-    }
-    toDate += signed;
     if (isSaldoEntry(e)) continue;
     if (e.kind === "income") income += e.value;
     else if (e.kind === "expense") expense += e.value;
+    else investment += e.value;
+    if (e.date > today && e.kind !== "income") upcoming += e.value;
   }
-  const available = opening + toDate;
-  return { available, projected: available + future, income, expense, upcoming };
+  return { available: monthBalance(ym, entries, opening), income, expense, investment, upcoming };
+}
+
+/** Saldo que abriu o ano: o lançamento "Saldo" de janeiro ou, se não houver, o saldo trazido de dezembro. */
+function yearStartBalance(year: string, entries: FinanceEntry[], janOpening: number): number {
+  const janSaldo = entries.filter((e) => e.date.startsWith(`${year}-01`) && isSaldoEntry(e));
+  if (janSaldo.length === 0) return janOpening;
+  return janSaldo.reduce((t, e) => t + (e.kind === "income" ? e.value : -e.value), 0);
 }
 
 function prevYm(ym: string): string {
@@ -142,23 +152,16 @@ function compareMonths(cur: FinanceEntry[], prev: FinanceEntry[], today: string)
   return { current, previousSamePeriod, risers };
 }
 
-function netToDate(entries: FinanceEntry[], opening: number, today: string): number {
-  let n = opening;
-  for (const e of entries) if (e.date <= today) n += e.kind === "income" ? e.value : -e.value;
-  return n;
-}
-
 // ─── Componentes visuais ─────────────────────────────────────────────────────
 
 function HeroBalance({ now, displayName }: { now: MonthNow; displayName?: string }) {
-  const positive = now.projected >= now.available;
   return (
     <Card className="relative h-full overflow-hidden p-6">
       <div className="absolute inset-y-0 left-0 w-1 bg-[var(--accent)]" aria-hidden />
       <p className="text-sm text-[var(--muted)]">
         {greeting()}{displayName ? `, ${displayName.split(" ")[0]}` : ""} 👋
       </p>
-      <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Saldo disponível hoje</p>
+      <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Saldo disponível</p>
       <p className={`mt-1 text-3xl sm:text-4xl font-bold tabular-nums ${now.available < 0 ? "text-[var(--expense)]" : "text-[var(--foreground)]"}`}>
         {formatCurrencyBRL(now.available)}
       </p>
@@ -173,25 +176,20 @@ function HeroBalance({ now, displayName }: { now: MonthNow; displayName?: string
           <p className="text-sm font-semibold tabular-nums text-[var(--expense)]">− {formatCurrencyBRL(now.expense)}</p>
         </div>
         <div className="col-span-2 sm:col-span-1">
-          <p className="text-xs text-[var(--muted)]">Previsão fim do mês</p>
-          <p className="flex items-center gap-1 text-sm font-semibold tabular-nums text-[var(--foreground)]">
-            {positive
-              ? <TrendingUp className="h-3.5 w-3.5 text-[var(--income)]" aria-hidden />
-              : <TrendingDown className="h-3.5 w-3.5 text-[var(--expense)]" aria-hidden />}
-            {formatCurrencyBRL(now.projected)}
-          </p>
+          <p className="text-xs text-[var(--muted)]">Investido no mês</p>
+          <p className="text-sm font-semibold tabular-nums text-[var(--investment)]">{formatCurrencyBRL(now.investment)}</p>
         </div>
       </div>
       {now.upcoming > 0 && (
         <p className="mt-4 rounded-lg bg-[var(--surface-raised)] px-3 py-2 text-xs text-[var(--muted)]">
-          Ainda há <strong className="text-[var(--foreground)]">{formatCurrencyBRL(now.upcoming)}</strong> em saídas lançadas para os próximos dias deste mês.
+          Ainda há <strong className="text-[var(--foreground)]">{formatCurrencyBRL(now.upcoming)}</strong> em saídas com data nos próximos dias deste mês (já descontadas do saldo).
         </p>
       )}
     </Card>
   );
 }
 
-function Kpi({ label, value, color }: { label: string; value: number; color: string }) {
+function Kpi({ label, value, color, hint }: { label: string; value: number; color: string; hint?: string }) {
   return (
     <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3">
       <div className="flex items-center gap-2">
@@ -199,6 +197,7 @@ function Kpi({ label, value, color }: { label: string; value: number; color: str
         <p className="text-xs text-[var(--muted)]">{label}</p>
       </div>
       <p className="mt-1 text-lg font-bold tabular-nums text-[var(--foreground)]">{formatCurrencyBRL(value)}</p>
+      {hint && <p className="mt-0.5 truncate text-[10px] text-[var(--muted)]">{hint}</p>}
     </div>
   );
 }
@@ -211,20 +210,12 @@ function MonthlyChart({ months, year, currentYm }: { months: Month[]; year: stri
   const fm = months[focus];
 
   return (
-    <Card>
-      <div className="mb-4 flex flex-wrap items-start justify-between gap-2">
-        <div>
-          <p className="text-sm font-bold text-[var(--foreground)]">Fluxo mensal</p>
-          <p className="text-xs text-[var(--muted)]">Receitas × despesas em {year}</p>
-        </div>
-        <div className="text-right text-xs">
-          <p className="font-semibold capitalize text-[var(--foreground)]">{MONTHS[focus]}</p>
-          <p className="tabular-nums text-[var(--income)]">+ {formatCurrencyBRL(fm.income)}</p>
-          <p className="tabular-nums text-[var(--expense)]">− {formatCurrencyBRL(fm.expense)}</p>
-        </div>
-      </div>
+    <Card className="flex w-full flex-col">
+      {/* Cabeçalho com a mesma estrutura do card "Saúde financeira" para alinhar. */}
+      <p className="text-sm font-bold text-[var(--foreground)]">Fluxo mensal</p>
+      <p className="mb-4 text-xs text-[var(--muted)]">Receitas × despesas em {year}</p>
 
-      <div className="flex h-40 items-end gap-1 sm:gap-2" onMouseLeave={() => setHover(null)}>
+      <div className="flex min-h-40 flex-1 items-end gap-1 sm:gap-2" onMouseLeave={() => setHover(null)}>
         {months.map((m, i) => {
           const active = i === focus;
           return (
@@ -246,7 +237,12 @@ function MonthlyChart({ months, year, currentYm }: { months: Month[]; year: stri
           );
         })}
       </div>
-      <p className="mt-2 text-right text-[10px] text-[var(--muted)]">Escala máx.: {compactBRL(max)}</p>
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-lg bg-[var(--surface-raised)] px-3 py-2 text-xs">
+        <span className="font-semibold capitalize text-[var(--foreground)]">{MONTHS[focus]}/{year}</span>
+        <span className="tabular-nums text-[var(--income)]">+ {formatCurrencyBRL(fm.income)}</span>
+        <span className="tabular-nums text-[var(--expense)]">− {formatCurrencyBRL(fm.expense)}</span>
+        <span className="text-[10px] text-[var(--muted)]">escala: {compactBRL(max)}</span>
+      </div>
     </Card>
   );
 }
@@ -276,10 +272,10 @@ function HealthCard({ income, expense, investment }: { income: number; expense: 
   }
 
   return (
-    <Card>
+    <Card className="flex h-full flex-col">
       <p className="text-sm font-bold text-[var(--foreground)]">Saúde financeira</p>
       <p className="mb-4 text-xs text-[var(--muted)]">Indicadores do ano</p>
-      <ul className="grid gap-4">
+      <ul className="mb-4 grid gap-4">
         {rows.map((r) => (
           <li key={r.label}>
             <div className="mb-1.5 flex items-baseline justify-between">
@@ -291,7 +287,7 @@ function HealthCard({ income, expense, investment }: { income: number; expense: 
           </li>
         ))}
       </ul>
-      <p className="mt-4 flex gap-2 rounded-lg bg-[var(--surface-raised)] px-3 py-2 text-xs text-[var(--muted)]">
+      <p className="mt-auto flex gap-2 rounded-lg bg-[var(--surface-raised)] px-3 py-2 text-xs text-[var(--muted)]">
         <Sparkles className="h-3.5 w-3.5 shrink-0 text-[var(--accent)]" aria-hidden />
         {tip}
       </p>
@@ -413,7 +409,7 @@ function MonthCompare({ c, card }: { c: Comparison; card: CardTotals | null }) {
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 
 type Data = {
-  summary: Summary; now: MonthNow; alerts: AlertRecord[]; goals: GoalRecord[];
+  summary: Summary; yearStart: number; now: MonthNow; alerts: AlertRecord[]; goals: GoalRecord[];
   wealth: Wealth; compare: Comparison; card: CardTotals | null;
 };
 
@@ -441,6 +437,7 @@ export function DashboardClient({ onNavigateAlerts, displayName }: { onNavigateA
             fetchOpeningBalance(currentYm, "personal"),
             fetchDueAlerts(),
             fetchGoals(),
+            fetchOpeningBalance(`${year}-01`, "personal"),
           ]),
           Promise.allSettled([
             fetchMonthlyEntries(prevYm(currentYm), "personal"),
@@ -451,21 +448,22 @@ export function DashboardClient({ onNavigateAlerts, displayName }: { onNavigateA
           ]),
         ]);
         if (!alive) return;
-        const [entries, monthEntries, monthOpening, alerts, goals] = core;
+        const [entries, monthEntries, monthOpening, alerts, goals, janOpening] = core;
         const prev = ok(extra[0]), pjEntries = ok(extra[1]), pjOpening = ok(extra[2]);
         const card = ok(extra[3]), classes = ok(extra[4]);
 
-        const now = summarizeCurrentMonth(monthEntries, monthOpening, today);
+        const now = summarizeCurrentMonth(currentYm, monthEntries, monthOpening, today);
         const hasPj = pjEntries !== null && pjOpening !== null && (pjEntries.length > 0 || pjOpening !== 0);
         setError(false);
         setData({
           summary: summarize(entries),
+          yearStart: yearStartBalance(year, entries, janOpening),
           now,
           alerts,
           goals,
           wealth: {
             personal: now.available,
-            business: hasPj ? netToDate(pjEntries, pjOpening, today) : null,
+            business: hasPj ? monthBalance(currentYm, pjEntries, pjOpening) : null,
             portfolio: classes && classes.length > 0 ? classes.reduce((t, c) => t + c.currentValue, 0) : null,
           },
           compare: compareMonths(monthEntries, prev ?? [], today),
@@ -496,8 +494,8 @@ export function DashboardClient({ onNavigateAlerts, displayName }: { onNavigateA
     );
   }
 
-  const { summary: s, now, alerts, goals, wealth, compare, card } = data;
-  const yearNet = s.income - s.expense - s.investment;
+  const { summary: s, yearStart, now, alerts, goals, wealth, compare, card } = data;
+  const yearNet = yearStart + s.income - s.expense - s.investment;
 
   return (
     <div className="grid gap-4">
@@ -524,11 +522,11 @@ export function DashboardClient({ onNavigateAlerts, displayName }: { onNavigateA
         <Kpi label="Receitas" value={s.income} color="var(--income)" />
         <Kpi label="Despesas" value={s.expense} color="var(--expense)" />
         <Kpi label="Investimentos" value={s.investment} color="var(--investment)" />
-        <Kpi label="Resultado do ano" value={yearNet} color={yearNet >= 0 ? "var(--accent)" : "var(--expense)"} />
+        <Kpi label="Resultado do ano" value={yearNet} color={yearNet >= 0 ? "var(--accent)" : "var(--expense)"} hint={`inclui saldo inicial de ${formatCurrencyBRL(yearStart)}`} />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
-        <div className="lg:col-span-2"><MonthlyChart months={s.months} year={year} currentYm={currentYm} /></div>
+        <div className="flex lg:col-span-2"><MonthlyChart months={s.months} year={year} currentYm={currentYm} /></div>
         <HealthCard income={s.income} expense={s.expense} investment={s.investment} />
       </div>
 
