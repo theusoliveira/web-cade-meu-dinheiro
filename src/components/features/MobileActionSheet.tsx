@@ -8,7 +8,6 @@ import type { EntryKind } from "@/lib/finance";
 type Props = {
   activeTab: NavKey;
   onSelectEntry: (kind: EntryKind) => void;
-  onAddGoal: () => void;
 };
 
 type ActionOption = {
@@ -54,7 +53,7 @@ const CARD_OPTIONS: ActionOption[] = [
   { ...PERSONAL_OPTIONS[1], label: "Despesa", sublabel: "Gasto no cartão" },
 ];
 
-export function MobileActionSheet({ activeTab, onSelectEntry, onAddGoal }: Props) {
+export function MobileActionSheet({ activeTab, onSelectEntry }: Props) {
   const [open, setOpen] = React.useState(false);
 
   React.useEffect(() => {
@@ -65,10 +64,6 @@ export function MobileActionSheet({ activeTab, onSelectEntry, onAddGoal }: Props
   }, [open]);
 
   function handleFABClick() {
-    if (activeTab === "metas") {
-      onAddGoal();
-      return;
-    }
     setOpen((v) => !v);
   }
 
