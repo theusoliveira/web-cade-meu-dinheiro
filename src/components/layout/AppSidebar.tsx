@@ -7,7 +7,7 @@ import {
   Building2,
   BarChart3,
   Briefcase,
-  Target,
+  TrendingUp,
   Shuffle,
   CreditCard,
   Bell,
@@ -19,7 +19,7 @@ export type NavKey =
   | "dashboard"
   | "lancamentos"
   | "lancamentos_pj"
-  | "metas"
+  | "objetivos"
   | "controle"
   | "distribuicao_pj"
   | "distribuicao_clt"
@@ -76,10 +76,10 @@ const NAV_ITEMS: NavItem[] = [
     icon: <Briefcase className="h-[18px] w-[18px]" aria-hidden />,
   },
   {
-    key: "metas",
-    label: "Metas",
-    shortLabel: "Metas",
-    icon: <Target className="h-[18px] w-[18px]" aria-hidden />,
+    key: "objetivos",
+    label: "Objetivos",
+    shortLabel: "Objetivos",
+    icon: <TrendingUp className="h-[18px] w-[18px]" aria-hidden />,
   },
   {
     key: "rebalanceador",

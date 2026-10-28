@@ -9,10 +9,6 @@ CREATE INDEX IF NOT EXISTS pj_dist_categories_user_month_idx
 CREATE INDEX IF NOT EXISTS pj_dist_items_category_idx
   ON public.pj_distribution_items (category_id, sort_order);
 
--- Índice de metas por usuário
-CREATE INDEX IF NOT EXISTS goals_user_forecast_idx
-  ON public.goals (user_id, forecast ASC);
-
 -- CONSTRAINT: garante no máximo uma categoria "fixa" por usuário/mês
 -- Isso previne o bug de duplicidade de "Despesas PJ" no banco de dados
 CREATE UNIQUE INDEX IF NOT EXISTS pj_dist_categories_one_fixed_per_month_idx

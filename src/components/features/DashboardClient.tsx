@@ -9,7 +9,8 @@ import { Card } from "@/components/ui/Card";
 import { useBusy } from "@/components/features/BusyProvider";
 import { fetchYearlyEntries, fetchMonthlyEntries, fetchOpeningBalance } from "@/actions/entries";
 import { fetchDueAlerts, type AlertRecord } from "@/actions/alerts";
-import { fetchGoals, type GoalRecord } from "@/actions/goals";
+import { fetchObjectives, type ObjectiveRecord } from "@/actions/objectives";
+import { completionMonth, monthLabel } from "@/lib/finance/objectives";
 import { fetchCardMonthTotals } from "@/actions/cardEntries";
 import { fetchRebalanceClasses } from "@/actions/rebalance";
 import { buildEntriesWithVirtuals, formatCurrencyBRL, formatDateBR, isSaldoEntry, todayAsDateInputValue, type FinanceEntry } from "@/lib/finance";
@@ -409,7 +410,7 @@ function MonthCompare({ c, card }: { c: Comparison; card: CardTotals | null }) {
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 
 type Data = {
-  summary: Summary; yearStart: number; now: MonthNow; alerts: AlertRecord[]; goals: GoalRecord[];
+  summary: Summary; yearStart: number; now: MonthNow; alerts: AlertRecord[]; objectives: ObjectiveRecord[];
   wealth: Wealth; compare: Comparison; card: CardTotals | null;
 };
 
@@ -436,7 +437,7 @@ export function DashboardClient({ onNavigateAlerts, displayName }: { onNavigateA
             fetchMonthlyEntries(currentYm, "personal"),
             fetchOpeningBalance(currentYm, "personal"),
             fetchDueAlerts(),
-            fetchGoals(),
+            fetchObjectives(),
             fetchOpeningBalance(`${year}-01`, "personal"),
           ]),
           Promise.allSettled([
@@ -448,7 +449,7 @@ export function DashboardClient({ onNavigateAlerts, displayName }: { onNavigateA
           ]),
         ]);
         if (!alive) return;
-        const [entries, monthEntries, monthOpening, alerts, goals, janOpening] = core;
+        const [entries, monthEntries, monthOpening, alerts, objectives, janOpening] = core;
         const prev = ok(extra[0]), pjEntries = ok(extra[1]), pjOpening = ok(extra[2]);
         const card = ok(extra[3]), classes = ok(extra[4]);
 
@@ -460,7 +461,7 @@ export function DashboardClient({ onNavigateAlerts, displayName }: { onNavigateA
           yearStart: yearStartBalance(year, entries, janOpening),
           now,
           alerts,
-          goals,
+          objectives,
           wealth: {
             personal: now.available,
             business: hasPj ? monthBalance(currentYm, pjEntries, pjOpening) : null,
@@ -494,7 +495,7 @@ export function DashboardClient({ onNavigateAlerts, displayName }: { onNavigateA
     );
   }
 
-  const { summary: s, yearStart, now, alerts, goals, wealth, compare, card } = data;
+  const { summary: s, yearStart, now, alerts, objectives, wealth, compare, card } = data;
   const yearNet = yearStart + s.income - s.expense - s.investment;
 
   return (
@@ -570,33 +571,34 @@ export function DashboardClient({ onNavigateAlerts, displayName }: { onNavigateA
           )}
         </Card>
 
-        {/* Metas */}
+        {/* Objetivos */}
         <Card>
-          <p className="mb-4 text-sm font-bold text-[var(--foreground)]">Progresso das metas</p>
-          {goals.length === 0 ? (
+          <p className="mb-4 text-sm font-bold text-[var(--foreground)]">Objetivos</p>
+          {objectives.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-6 text-center">
               <Target className="h-8 w-8 text-[var(--muted)]" aria-hidden strokeWidth={1.5} />
-              <p className="text-sm text-[var(--muted)]">Nenhuma meta cadastrada</p>
+              <p className="text-sm text-[var(--muted)]">Nenhum objetivo cadastrado</p>
             </div>
           ) : (
             <ul className="grid gap-3">
-              {goals.slice(0, 4).map((g) => {
-                const pct = g.targetValue > 0 ? Math.min(100, (g.currentValue / g.targetValue) * 100) : 0;
+              {objectives.slice(0, 4).map((o) => {
+                const pct = o.targetValue > 0 ? Math.min(100, (o.initialValue / o.targetValue) * 100) : 0;
+                const done = completionMonth(o, currentYm);
                 return (
-                  <li key={g.id}>
+                  <li key={o.id}>
                     <div className="mb-1 flex items-center justify-between">
-                      <p className="truncate text-xs font-semibold text-[var(--foreground)]">{g.description || "Meta"}</p>
+                      <p className="truncate text-xs font-semibold text-[var(--foreground)]">{o.name}</p>
                       <span className="ml-2 shrink-0 text-xs text-[var(--muted)]">{pct.toFixed(0)}%</span>
                     </div>
                     <ProgressBar pct={pct} color={pct >= 100 ? "var(--income)" : "var(--investment)"} />
                     <div className="mt-1 flex justify-between text-[10px] tabular-nums text-[var(--muted)]">
-                      <span>{formatCurrencyBRL(g.currentValue)}</span>
-                      <span>{formatCurrencyBRL(g.targetValue)}</span>
+                      <span>{formatCurrencyBRL(o.initialValue)} de {formatCurrencyBRL(o.targetValue)}</span>
+                      <span className="font-semibold">{done ? monthLabel(done.month) : "Não atinge"}</span>
                     </div>
                   </li>
                 );
               })}
-              {goals.length > 4 && <li className="text-center text-xs text-[var(--muted)]">+{goals.length - 4} outras metas</li>}
+              {objectives.length > 4 && <li className="text-center text-xs text-[var(--muted)]">+{objectives.length - 4} outros objetivos</li>}
             </ul>
           )}
         </Card>

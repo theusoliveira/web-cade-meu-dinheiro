@@ -19,10 +19,6 @@ const CardControlClient = dynamic(
   () => import("@/components/features/CardControlClient").then((m) => m.CardControlClient),
   { loading: () => <SectionFallback /> },
 );
-const GoalsClient = dynamic(
-  () => import("@/components/features/GoalsClient").then((m) => m.GoalsClient),
-  { loading: () => <SectionFallback /> },
-);
 const AddEntryDialog = dynamic(
   () => import("@/components/features/AddEntryDialog").then((m) => m.AddEntryDialog),
 );
@@ -42,6 +38,10 @@ const RebalanceClient = dynamic(
   () => import("@/components/features/RebalanceClient").then((m) => m.RebalanceClient),
   { loading: () => <SectionFallback /> },
 );
+const ObjectivesClient = dynamic(
+  () => import("@/components/features/ObjectivesClient").then((m) => m.ObjectivesClient),
+  { loading: () => <SectionFallback /> },
+);
 const DashboardClient = dynamic(
   () => import("@/components/features/DashboardClient").then((m) => m.DashboardClient),
   { loading: () => <SectionFallback /> },
@@ -56,8 +56,8 @@ const TAB_TITLES: Record<NavKey, string> = {
   lancamentos_pj: "Lançamentos PJ",
   distribuicao_pj: "Distribuição de Salário PJ",
   distribuicao_clt: "Distribuição de Salário CLT",
-  metas: "Metas Financeiras",
   controle: "Controle de Gastos",
+  objetivos: "Objetivos",
   rebalanceador: "Rebalanceador de Carteira",
   alertas: "Alertas de Contas",
 };
@@ -68,8 +68,8 @@ const TAB_DESCRIPTIONS: Record<NavKey, string> = {
   lancamentos_pj: "Gerencie as finanças da sua empresa",
   distribuicao_pj: "Planeje a distribuição do seu faturamento",
   distribuicao_clt: "Planeje a distribuição do seu salário CLT",
-  metas: "Defina e acompanhe suas metas financeiras",
   controle: "Controle os gastos do cartão de crédito",
+  objetivos: "Veja quando cada objetivo será concluído com base em aporte e taxa",
   rebalanceador: "Defina o percentual ideal por classe e veja onde comprar",
   alertas: "Gerencie alertas de contas a vencer",
 };
@@ -91,14 +91,10 @@ export function HomeClient({ displayName }: { displayName: string }) {
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [kind, setKind] = React.useState<EntryKind>("income");
   const [editing, setEditing] = React.useState<FinanceEntry | null>(null);
-  const [goalAddTrigger, setGoalAddTrigger] = React.useState(0);
 
   const isBusinessTab = activeTab === "lancamentos_pj";
   const isMonthlyTab = activeTab === "lancamentos" || isBusinessTab;
-  const showFAB =
-    activeTab !== "metas" && activeTab !== "distribuicao_pj" && activeTab !== "distribuicao_clt" && activeTab !== "alertas" && activeTab !== "dashboard"
-      ? isMonthlyTab || activeTab === "controle"
-      : activeTab === "metas";
+  const showFAB = isMonthlyTab || activeTab === "controle";
 
   const personalMonthlyEntries = useMonthlyEntries(month, activeTab === "lancamentos", "personal");
   const businessMonthlyEntries = useMonthlyEntries(month, isBusinessTab, "business");
@@ -148,7 +144,6 @@ export function HomeClient({ displayName }: { displayName: string }) {
     if (tab !== activeTab) {
       setDialogOpen(false);
       setEditing(null);
-      setGoalAddTrigger(0);
     }
     setActiveTab(tab);
     setMobileMenuOpen(false);
@@ -278,9 +273,9 @@ export function HomeClient({ displayName }: { displayName: string }) {
                 />
               )}
 
-              {activeTab === "metas" && <GoalsClient addTrigger={goalAddTrigger} />}
               {activeTab === "distribuicao_pj" && <SalaryDistributionClient />}
               {activeTab === "distribuicao_clt" && <CltDistributionClient />}
+              {activeTab === "objetivos" && <ObjectivesClient />}
               {activeTab === "rebalanceador" && <RebalanceClient />}
               {activeTab === "alertas" && <AlertsClient />}
 
@@ -305,7 +300,6 @@ export function HomeClient({ displayName }: { displayName: string }) {
         <MobileActionSheet
           activeTab={activeTab}
           onSelectEntry={openDialog}
-          onAddGoal={() => setGoalAddTrigger((v) => v + 1)}
         />
       )}
     </div>

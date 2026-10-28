@@ -22,7 +22,7 @@ src/
 ├── actions/           # Server Actions por domínio
 │   ├── entries.ts
 │   ├── cardEntries.ts
-│   ├── goals.ts
+│   ├── objectives.ts
 │   ├── profile.ts
 │   └── salaryDistribution.ts
 ├── components/
