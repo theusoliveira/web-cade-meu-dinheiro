@@ -228,7 +228,11 @@ export function HomeClient({ displayName }: { displayName: string }) {
           >
             <div className="mx-auto w-full max-w-7xl">
               {activeTab === "dashboard" && (
-                <DashboardClient displayName={displayName} onNavigateAlerts={() => handleTabChange("alertas")} />
+                <DashboardClient
+                  displayName={displayName}
+                  onNavigateAlerts={() => handleTabChange("alertas")}
+                  onNavigateObjectives={() => handleTabChange("objetivos")}
+                />
               )}
 
               {isMonthlyTab && (

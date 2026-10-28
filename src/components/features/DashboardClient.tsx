@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import {
-  CheckCircle2, AlertTriangle, Target, Sparkles,
-  Wallet, Briefcase, PiggyBank, CreditCard, ArrowUpRight, ArrowDownRight,
+  CheckCircle2, CalendarClock, Target, Sparkles,
+  Wallet, Briefcase, PiggyBank, CreditCard, ArrowUpRight, ArrowDownRight, ChevronRight,
 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { useBusy } from "@/components/features/BusyProvider";
@@ -13,7 +13,7 @@ import { fetchObjectives, type ObjectiveRecord } from "@/actions/objectives";
 import { completionMonth, monthLabel } from "@/lib/finance/objectives";
 import { fetchCardMonthTotals } from "@/actions/cardEntries";
 import { fetchRebalanceClasses } from "@/actions/rebalance";
-import { buildEntriesWithVirtuals, formatCurrencyBRL, formatDateBR, isSaldoEntry, todayAsDateInputValue, type FinanceEntry } from "@/lib/finance";
+import { buildEntriesWithVirtuals, formatCurrencyBRL, isSaldoEntry, todayAsDateInputValue, type FinanceEntry } from "@/lib/finance";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -31,7 +31,7 @@ function yearOptions(): number[] {
   return Array.from({ length: 6 }, (_, i) => current - i);
 }
 
-/** Valor compacto para eixos/rótulos: R$ 1,2 mil, R$ 3,4 mi. */
+/** Valor compacto para rótulos: R$ 1,2 mil, R$ 3,4 mi. */
 function compactBRL(v: number): string {
   return new Intl.NumberFormat("pt-BR", {
     style: "currency", currency: "BRL", notation: "compact", maximumFractionDigits: 1,
@@ -43,10 +43,51 @@ function greeting(): string {
   return h < 12 ? "Bom dia" : h < 18 ? "Boa tarde" : "Boa noite";
 }
 
-function ProgressBar({ pct, color }: { pct: number; color: string }) {
+/**
+ * Paleta do dashboard: a cor da marca (--accent) é a única cor "decorativa".
+ * Verde/vermelho aparecem só onde carregam significado (sobra/falta, alta/queda, vencimento).
+ */
+function ProgressBar({ pct, opacity = 1 }: { pct: number; opacity?: number }) {
   return (
-    <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--border)]">
-      <div className="h-full rounded-full transition-[width] duration-500" style={{ width: `${Math.max(0, Math.min(100, pct))}%`, backgroundColor: color }} />
+    <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--surface-raised)]">
+      <div
+        className="h-full rounded-full bg-[var(--accent)] transition-[width] duration-500"
+        style={{ width: `${Math.max(0, Math.min(100, pct))}%`, opacity }}
+      />
+    </div>
+  );
+}
+
+function CardHeader({ title, subtitle, action }: { title: string; subtitle?: string; action?: React.ReactNode }) {
+  return (
+    <div className="mb-4 flex items-start justify-between gap-3">
+      <div className="min-w-0">
+        <p className="text-sm font-bold text-[var(--foreground)]">{title}</p>
+        {subtitle && <p className="text-xs text-[var(--muted)]">{subtitle}</p>}
+      </div>
+      {action}
+    </div>
+  );
+}
+
+function LinkButton({ onClick, children }: { onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex shrink-0 items-center gap-0.5 text-xs font-semibold text-[var(--accent)] hover:text-[var(--accent-dark)]"
+    >
+      {children}
+      <ChevronRight className="h-3.5 w-3.5" aria-hidden />
+    </button>
+  );
+}
+
+function EmptyState({ icon: Icon, text }: { icon: React.ComponentType<{ className?: string; strokeWidth?: number }>; text: string }) {
+  return (
+    <div className="flex flex-1 flex-col items-center justify-center gap-2 py-6 text-center">
+      <Icon className="h-7 w-7 text-[var(--muted-light)]" strokeWidth={1.5} />
+      <p className="text-sm text-[var(--muted)]">{text}</p>
     </div>
   );
 }
@@ -84,7 +125,7 @@ function summarize(entries: FinanceEntry[]): Summary {
   const topExpenses = [...byCategory.entries()]
     .map(([category, value]) => ({ category, value }))
     .sort((a, b) => b.value - a.value)
-    .slice(0, 5);
+    .slice(0, 6);
 
   return { income, expense, investment, months, topExpenses };
 }
@@ -155,51 +196,244 @@ function compareMonths(cur: FinanceEntry[], prev: FinanceEntry[], today: string)
 
 // ─── Componentes visuais ─────────────────────────────────────────────────────
 
-function HeroBalance({ now, displayName }: { now: MonthNow; displayName?: string }) {
-  return (
-    <Card className="relative h-full overflow-hidden p-6">
-      <div className="absolute inset-y-0 left-0 w-1 bg-[var(--accent)]" aria-hidden />
-      <p className="text-sm text-[var(--muted)]">
-        {greeting()}{displayName ? `, ${displayName.split(" ")[0]}` : ""} 👋
-      </p>
-      <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Saldo disponível</p>
-      <p className={`mt-1 text-3xl sm:text-4xl font-bold tabular-nums ${now.available < 0 ? "text-[var(--expense)]" : "text-[var(--foreground)]"}`}>
-        {formatCurrencyBRL(now.available)}
-      </p>
+type Wealth = { personal: number; business: number | null; portfolio: number | null };
+type CardTotals = { expense: number; count: number };
 
-      <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
-        <div>
-          <p className="text-xs text-[var(--muted)]">Entrou no mês</p>
-          <p className="text-sm font-semibold tabular-nums text-[var(--income)]">+ {formatCurrencyBRL(now.income)}</p>
+/** Destaque do topo: saldo do mês + patrimônio, num bloco na cor da marca. */
+function Hero({ now, wealth, displayName }: { now: MonthNow; wealth: Wealth; displayName?: string }) {
+  const accounts = [
+    { label: "Conta pessoal", value: wealth.personal, icon: Wallet },
+    ...(wealth.business !== null ? [{ label: "Conta PJ", value: wealth.business, icon: Briefcase }] : []),
+    ...(wealth.portfolio !== null ? [{ label: "Carteira", value: wealth.portfolio, icon: PiggyBank }] : []),
+  ];
+  const total = accounts.reduce((t, a) => t + a.value, 0);
+  const flows = [
+    { label: "Entrou", value: now.income, sign: "+" },
+    { label: "Saiu", value: now.expense, sign: "−" },
+    { label: "Investido", value: now.investment, sign: "" },
+  ];
+
+  return (
+    <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-600 via-brand-700 to-brand-900 p-6 text-white shadow-sm sm:p-7">
+      <div className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-white/5" aria-hidden />
+      <div className="pointer-events-none absolute -bottom-28 right-28 h-56 w-56 rounded-full bg-white/5" aria-hidden />
+
+      <div className="relative grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
+        <div className="min-w-0">
+          <p className="text-sm text-white/70">
+            {greeting()}{displayName ? `, ${displayName.split(" ")[0]}` : ""}
+          </p>
+          <p className="mt-4 text-xs font-semibold uppercase tracking-wider text-white/60">Saldo disponível</p>
+          <p className={`mt-1 text-4xl font-bold tabular-nums tracking-tight sm:text-5xl ${now.available < 0 ? "text-rose-200" : ""}`}>
+            {formatCurrencyBRL(now.available)}
+          </p>
+
+          <div className="mt-6 flex flex-wrap gap-x-8 gap-y-3">
+            {flows.map((f) => (
+              <div key={f.label}>
+                <p className="text-[11px] uppercase tracking-wider text-white/60">{f.label} no mês</p>
+                <p className="text-base font-semibold tabular-nums">
+                  {f.sign && <span className="mr-0.5 text-white/60">{f.sign}</span>}
+                  {formatCurrencyBRL(f.value)}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {now.upcoming > 0 && (
+            <p className="mt-5 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs text-white/80">
+              <CalendarClock className="h-3.5 w-3.5 shrink-0" aria-hidden />
+              {formatCurrencyBRL(now.upcoming)} em saídas agendadas até o fim do mês (já descontadas)
+            </p>
+          )}
         </div>
-        <div>
-          <p className="text-xs text-[var(--muted)]">Saiu no mês</p>
-          <p className="text-sm font-semibold tabular-nums text-[var(--expense)]">− {formatCurrencyBRL(now.expense)}</p>
-        </div>
-        <div className="col-span-2 sm:col-span-1">
-          <p className="text-xs text-[var(--muted)]">Investido no mês</p>
-          <p className="text-sm font-semibold tabular-nums text-[var(--investment)]">{formatCurrencyBRL(now.investment)}</p>
-        </div>
+
+        {accounts.length > 1 && (
+          <div className="rounded-xl bg-white/10 p-4 lg:min-w-64">
+            <p className="text-[11px] uppercase tracking-wider text-white/60">Patrimônio total</p>
+            <p className="text-xl font-bold tabular-nums">{formatCurrencyBRL(total)}</p>
+            <ul className="mt-3 grid gap-2 border-t border-white/10 pt-3">
+              {accounts.map(({ label, value, icon: Icon }) => (
+                <li key={label} className="flex items-center justify-between gap-4 text-sm">
+                  <span className="flex items-center gap-2 text-white/75">
+                    <Icon className="h-3.5 w-3.5" aria-hidden />
+                    {label}
+                  </span>
+                  <span className="font-semibold tabular-nums">{formatCurrencyBRL(value)}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
-      {now.upcoming > 0 && (
-        <p className="mt-4 rounded-lg bg-[var(--surface-raised)] px-3 py-2 text-xs text-[var(--muted)]">
-          Ainda há <strong className="text-[var(--foreground)]">{formatCurrencyBRL(now.upcoming)}</strong> em saídas com data nos próximos dias deste mês (já descontadas do saldo).
+    </section>
+  );
+}
+
+function MonthCompare({ c, card }: { c: Comparison; card: CardTotals | null }) {
+  const base = c.previousSamePeriod;
+  const diffPct = base > 0 ? ((c.current - base) / base) * 100 : null;
+  const up = diffPct !== null && diffPct > 0;
+  return (
+    <Card className="flex h-full flex-col">
+      <CardHeader title="Gastos do mês" subtitle="Até hoje × mesmo período do mês passado" />
+      <div className="flex items-end justify-between gap-2">
+        <div>
+          <p className="text-2xl font-bold tabular-nums text-[var(--foreground)]">{formatCurrencyBRL(c.current)}</p>
+          <p className="text-xs text-[var(--muted)]">mês passado: {formatCurrencyBRL(base)}</p>
+        </div>
+        {diffPct !== null && (
+          <span
+            className="flex items-center gap-0.5 rounded-full bg-[var(--surface-raised)] px-2 py-1 text-xs font-bold"
+            style={{ color: up ? "var(--expense)" : "var(--income)" }}
+          >
+            {up ? <ArrowUpRight className="h-3.5 w-3.5" aria-hidden /> : <ArrowDownRight className="h-3.5 w-3.5" aria-hidden />}
+            {Math.abs(diffPct).toFixed(0)}%
+          </span>
+        )}
+      </div>
+
+      {c.risers.length > 0 && (
+        <div className="mt-5">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-[var(--muted)]">Subiu mais</p>
+          <ul className="grid gap-1.5">
+            {c.risers.map((r) => (
+              <li key={r.category} className="flex justify-between gap-2 text-xs">
+                <span className="truncate text-[var(--foreground)]">{r.category}</span>
+                <span className="shrink-0 tabular-nums text-[var(--muted)]">+ {formatCurrencyBRL(r.delta)}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {card && card.count > 0 && (
+        <p className="mt-auto flex items-center gap-2 pt-5 text-xs text-[var(--muted)]">
+          <CreditCard className="h-3.5 w-3.5 shrink-0 text-[var(--accent)]" aria-hidden />
+          Cartão no mês: <strong className="tabular-nums text-[var(--foreground)]">{formatCurrencyBRL(card.expense)}</strong>
         </p>
       )}
     </Card>
   );
 }
 
-function Kpi({ label, value, color, hint }: { label: string; value: number; color: string; hint?: string }) {
+function AlertsCard({ alerts, onNavigate }: { alerts: AlertRecord[]; onNavigate?: () => void }) {
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3">
-      <div className="flex items-center gap-2">
-        <span className="h-2 w-2 rounded-full" style={{ backgroundColor: color }} aria-hidden />
-        <p className="text-xs text-[var(--muted)]">{label}</p>
+    <Card className="flex h-full flex-col">
+      <CardHeader
+        title="Contas a vencer"
+        subtitle={alerts.length ? `${alerts.length} pendente${alerts.length !== 1 ? "s" : ""}` : undefined}
+        action={onNavigate && <LinkButton onClick={onNavigate}>Ver todas</LinkButton>}
+      />
+      {alerts.length === 0 ? (
+        <EmptyState icon={CheckCircle2} text="Tudo em dia" />
+      ) : (
+        <ul className="grid gap-1">
+          {alerts.slice(0, 4).map((a) => {
+            const days = daysUntil(a.dueDate);
+            const urgent = days <= 0;
+            return (
+              <li key={a.id} className="flex items-center gap-3 py-1.5">
+                <div
+                  className={`flex h-10 w-10 shrink-0 flex-col items-center justify-center rounded-lg leading-none ${
+                    urgent ? "bg-rose-500/10" : "bg-[var(--surface-raised)]"
+                  }`}
+                  style={{ color: urgent ? "var(--expense)" : "var(--foreground)" }}
+                >
+                  <span className="text-sm font-bold">{a.dueDate.slice(8, 10)}</span>
+                  <span className="mt-0.5 text-[9px] uppercase">{MONTHS[Number(a.dueDate.slice(5, 7)) - 1]}</span>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold text-[var(--foreground)]">{a.name}</p>
+                  <p className="text-xs" style={{ color: urgent ? "var(--expense)" : "var(--muted)" }}>
+                    {days < 0 ? "Vencida" : days === 0 ? "Vence hoje" : `Em ${days} dia${days !== 1 ? "s" : ""}`}
+                  </p>
+                </div>
+                {a.expectedValue != null && (
+                  <span className="shrink-0 text-sm font-semibold tabular-nums text-[var(--foreground)]">
+                    {formatCurrencyBRL(a.expectedValue)}
+                  </span>
+                )}
+              </li>
+            );
+          })}
+          {alerts.length > 4 && <li className="pt-1 text-center text-xs text-[var(--muted)]">+{alerts.length - 4} outras contas</li>}
+        </ul>
+      )}
+    </Card>
+  );
+}
+
+function ObjectivesCard({
+  objectives,
+  currentYm,
+  onNavigate,
+}: {
+  objectives: ObjectiveRecord[];
+  currentYm: string;
+  onNavigate?: () => void;
+}) {
+  return (
+    <Card className="flex h-full flex-col">
+      <CardHeader
+        title="Objetivos"
+        subtitle={objectives.length ? "Progresso e conclusão prevista" : undefined}
+        action={onNavigate && <LinkButton onClick={onNavigate}>Ver todos</LinkButton>}
+      />
+      {objectives.length === 0 ? (
+        <EmptyState icon={Target} text="Nenhum objetivo cadastrado" />
+      ) : (
+        <ul className="grid gap-4">
+          {objectives.slice(0, 4).map((o) => {
+            const pct = o.targetValue > 0 ? Math.min(100, (o.initialValue / o.targetValue) * 100) : 0;
+            const done = completionMonth(o, currentYm);
+            return (
+              <li key={o.id}>
+                <div className="mb-1.5 flex items-baseline justify-between gap-2">
+                  <p className="truncate text-sm font-semibold text-[var(--foreground)]">{o.name}</p>
+                  <span className="shrink-0 text-xs font-bold tabular-nums text-[var(--accent)]">{pct.toFixed(0)}%</span>
+                </div>
+                <ProgressBar pct={pct} />
+                <div className="mt-1 flex justify-between gap-2 text-[11px] tabular-nums text-[var(--muted)]">
+                  <span>{compactBRL(o.initialValue)} de {compactBRL(o.targetValue)}</span>
+                  <span>{done ? monthLabel(done.month) : "Não atinge"}</span>
+                </div>
+              </li>
+            );
+          })}
+          {objectives.length > 4 && <li className="text-center text-xs text-[var(--muted)]">+{objectives.length - 4} outros objetivos</li>}
+        </ul>
+      )}
+    </Card>
+  );
+}
+
+/** Números do ano numa única faixa, separados por divisórias. */
+function YearStrip({ s, yearStart, yearNet }: { s: Summary; yearStart: number; yearNet: number }) {
+  const items = [
+    { label: "Receitas", value: s.income },
+    { label: "Despesas", value: s.expense },
+    { label: "Investimentos", value: s.investment },
+  ];
+  return (
+    <Card className="grid grid-cols-2 overflow-hidden p-0 lg:grid-cols-4">
+      {items.map((i, idx) => (
+        <div
+          key={i.label}
+          className={`border-[var(--border)] px-5 py-4 ${idx === 1 ? "border-l" : ""} ${idx === 2 ? "border-t lg:border-l lg:border-t-0" : ""}`}
+        >
+          <p className="text-xs text-[var(--muted)]">{i.label}</p>
+          <p className="mt-1 text-lg font-bold tabular-nums text-[var(--foreground)]">{formatCurrencyBRL(i.value)}</p>
+        </div>
+      ))}
+      <div className="border-l border-t border-[var(--border)] bg-[var(--accent)]/5 px-5 py-4 lg:border-t-0">
+        <p className="text-xs font-semibold text-[var(--accent)]">Resultado do ano</p>
+        <p className="mt-1 text-lg font-bold tabular-nums" style={{ color: yearNet < 0 ? "var(--expense)" : "var(--foreground)" }}>
+          {formatCurrencyBRL(yearNet)}
+        </p>
+        <p className="truncate text-[10px] text-[var(--muted)]">com saldo inicial de {formatCurrencyBRL(yearStart)}</p>
       </div>
-      <p className="mt-1 text-lg font-bold tabular-nums text-[var(--foreground)]">{formatCurrencyBRL(value)}</p>
-      {hint && <p className="mt-0.5 truncate text-[10px] text-[var(--muted)]">{hint}</p>}
-    </div>
+    </Card>
   );
 }
 
@@ -209,14 +443,25 @@ function MonthlyChart({ months, year, currentYm }: { months: Month[]; year: stri
   const [hover, setHover] = React.useState<number | null>(null);
   const focus = hover ?? (currentYm.startsWith(year) ? Number(currentYm.slice(5)) - 1 : 11);
   const fm = months[focus];
+  const net = fm.income - fm.expense;
 
   return (
     <Card className="flex w-full flex-col">
-      {/* Cabeçalho com a mesma estrutura do card "Saúde financeira" para alinhar. */}
-      <p className="text-sm font-bold text-[var(--foreground)]">Fluxo mensal</p>
-      <p className="mb-4 text-xs text-[var(--muted)]">Receitas × despesas em {year}</p>
+      <CardHeader
+        title="Fluxo mensal"
+        subtitle={`Receitas × despesas em ${year}`}
+        action={
+          <div className="flex shrink-0 items-center gap-3 text-[11px] text-[var(--muted)]">
+            <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-[var(--accent)]" />Receitas</span>
+            <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-[var(--border-strong)]" />Despesas</span>
+          </div>
+        }
+      />
 
-      <div className="flex min-h-40 flex-1 items-end gap-1 sm:gap-2" onMouseLeave={() => setHover(null)}>
+      <div className="relative flex min-h-44 flex-1 items-end gap-1 sm:gap-2" onMouseLeave={() => setHover(null)}>
+        <div className="pointer-events-none absolute inset-x-0 bottom-5 top-2 flex flex-col justify-between" aria-hidden>
+          {[0, 1, 2, 3].map((i) => <div key={i} className="border-t border-dashed border-[var(--border)]" />)}
+        </div>
         {months.map((m, i) => {
           const active = i === focus;
           return (
@@ -226,43 +471,52 @@ function MonthlyChart({ months, year, currentYm }: { months: Month[]; year: stri
               onMouseEnter={() => setHover(i)}
               onFocus={() => setHover(i)}
               onClick={() => setHover(i)}
-              className="flex h-full flex-1 flex-col items-center justify-end gap-1 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+              className={`relative flex h-full flex-1 flex-col items-center justify-end gap-1 rounded-md outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[var(--accent)] ${active ? "bg-[var(--surface-raised)]" : ""}`}
               aria-label={`${MONTHS[i]}: receitas ${formatCurrencyBRL(m.income)}, despesas ${formatCurrencyBRL(m.expense)}`}
             >
-              <div className={`flex h-full w-full items-end justify-center gap-0.5 transition-opacity ${active ? "opacity-100" : "opacity-60"}`}>
-                <div className="w-1/2 max-w-3 rounded-t bg-[var(--income)]" style={{ height: `${(m.income / max) * 100}%` }} />
-                <div className="w-1/2 max-w-3 rounded-t bg-[var(--expense)]" style={{ height: `${(m.expense / max) * 100}%` }} />
+              <div className={`flex h-full w-full items-end justify-center gap-0.5 pt-2 transition-opacity ${active ? "opacity-100" : "opacity-70"}`}>
+                <div className="w-1/2 max-w-3.5 rounded-t-sm bg-[var(--accent)]" style={{ height: `${(m.income / max) * 100}%` }} />
+                <div className="w-1/2 max-w-3.5 rounded-t-sm bg-[var(--border-strong)]" style={{ height: `${(m.expense / max) * 100}%` }} />
               </div>
               <span className={`text-[10px] ${active ? "font-bold text-[var(--foreground)]" : "text-[var(--muted)]"}`}>{MONTHS[i]}</span>
             </button>
           );
         })}
       </div>
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-lg bg-[var(--surface-raised)] px-3 py-2 text-xs">
-        <span className="font-semibold capitalize text-[var(--foreground)]">{MONTHS[focus]}/{year}</span>
-        <span className="tabular-nums text-[var(--income)]">+ {formatCurrencyBRL(fm.income)}</span>
-        <span className="tabular-nums text-[var(--expense)]">− {formatCurrencyBRL(fm.expense)}</span>
-        <span className="text-[10px] text-[var(--muted)]">escala: {compactBRL(max)}</span>
+
+      <div className="mt-4 grid grid-cols-3 gap-2 border-t border-[var(--border)] pt-3 text-xs">
+        <div>
+          <p className="text-[var(--muted)]">Receitas · {MONTHS[focus]}</p>
+          <p className="font-semibold tabular-nums text-[var(--foreground)]">{formatCurrencyBRL(fm.income)}</p>
+        </div>
+        <div>
+          <p className="text-[var(--muted)]">Despesas · {MONTHS[focus]}</p>
+          <p className="font-semibold tabular-nums text-[var(--foreground)]">{formatCurrencyBRL(fm.expense)}</p>
+        </div>
+        <div>
+          <p className="text-[var(--muted)]">Sobra</p>
+          <p className="font-semibold tabular-nums" style={{ color: net < 0 ? "var(--expense)" : "var(--income)" }}>
+            {formatCurrencyBRL(net)}
+          </p>
+        </div>
       </div>
     </Card>
   );
 }
+
+type HealthStatus = "good" | "warn" | "bad";
+const HEALTH_LABEL: Record<HealthStatus, string> = { good: "Ótimo", warn: "Atenção", bad: "Alto" };
+const HEALTH_COLOR: Record<HealthStatus, string> = { good: "var(--income)", warn: "#d97706", bad: "var(--expense)" };
 
 function HealthCard({ income, expense, investment }: { income: number; expense: number; investment: number }) {
   const savings = income > 0 ? ((income - expense) / income) * 100 : 0;
   const commitment = income > 0 ? (expense / income) * 100 : 0;
   const invested = income > 0 ? (investment / income) * 100 : 0;
 
-  const rows = [
-    {
-      label: "Taxa de poupança", hint: "da receita não foi gasta", pct: savings,
-      color: savings >= 20 ? "var(--income)" : savings >= 10 ? "#f59e0b" : "var(--expense)",
-    },
-    {
-      label: "Comprometimento", hint: "da receita virou despesa", pct: commitment,
-      color: commitment <= 70 ? "var(--income)" : commitment <= 90 ? "#f59e0b" : "var(--expense)",
-    },
-    { label: "Investido", hint: "da receita foi investida", pct: invested, color: "var(--investment)" },
+  const rows: { label: string; hint: string; pct: number; status: HealthStatus | null }[] = [
+    { label: "Taxa de poupança", hint: "da receita não foi gasta", pct: savings, status: savings >= 20 ? "good" : savings >= 10 ? "warn" : "bad" },
+    { label: "Comprometimento", hint: "da receita virou despesa", pct: commitment, status: commitment <= 70 ? "good" : commitment <= 90 ? "warn" : "bad" },
+    { label: "Investido", hint: "da receita foi investida", pct: invested, status: null },
   ];
 
   let tip = "Lance suas receitas para ver sua saúde financeira.";
@@ -274,21 +528,28 @@ function HealthCard({ income, expense, investment }: { income: number; expense: 
 
   return (
     <Card className="flex h-full flex-col">
-      <p className="text-sm font-bold text-[var(--foreground)]">Saúde financeira</p>
-      <p className="mb-4 text-xs text-[var(--muted)]">Indicadores do ano</p>
+      <CardHeader title="Saúde financeira" subtitle="Indicadores do ano" />
       <ul className="mb-4 grid gap-4">
         {rows.map((r) => (
           <li key={r.label}>
-            <div className="mb-1.5 flex items-baseline justify-between">
+            <div className="mb-1.5 flex items-baseline justify-between gap-2">
               <span className="text-xs font-semibold text-[var(--foreground)]">{r.label}</span>
-              <span className="text-sm font-bold tabular-nums" style={{ color: r.color }}>{r.pct.toFixed(1)}%</span>
+              <span className="flex items-baseline gap-2">
+                {income > 0 && r.status && (
+                  <span className="flex items-center gap-1 text-[10px] font-semibold" style={{ color: HEALTH_COLOR[r.status] }}>
+                    <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: HEALTH_COLOR[r.status] }} />
+                    {HEALTH_LABEL[r.status]}
+                  </span>
+                )}
+                <span className="text-sm font-bold tabular-nums text-[var(--foreground)]">{r.pct.toFixed(1)}%</span>
+              </span>
             </div>
-            <ProgressBar pct={r.pct} color={r.color} />
+            <ProgressBar pct={r.pct} />
             <p className="mt-1 text-[10px] text-[var(--muted)]">{r.hint}</p>
           </li>
         ))}
       </ul>
-      <p className="mt-auto flex gap-2 rounded-lg bg-[var(--surface-raised)] px-3 py-2 text-xs text-[var(--muted)]">
+      <p className="mt-auto flex gap-2 rounded-lg bg-[var(--accent)]/5 px-3 py-2.5 text-xs text-[var(--foreground)]">
         <Sparkles className="h-3.5 w-3.5 shrink-0 text-[var(--accent)]" aria-hidden />
         {tip}
       </p>
@@ -299,109 +560,29 @@ function HealthCard({ income, expense, investment }: { income: number; expense: 
 function TopExpenses({ items, total }: { items: Summary["topExpenses"]; total: number }) {
   return (
     <Card>
-      <p className="text-sm font-bold text-[var(--foreground)]">Para onde vai o dinheiro</p>
-      <p className="mb-4 text-xs text-[var(--muted)]">Maiores categorias de despesa no ano</p>
+      <CardHeader title="Para onde vai o dinheiro" subtitle="Maiores categorias de despesa no ano" />
       {items.length === 0 ? (
-        <p className="py-6 text-center text-sm text-[var(--muted)]">Nenhuma despesa no período</p>
+        <EmptyState icon={Wallet} text="Nenhuma despesa no período" />
       ) : (
-        <ul className="grid gap-3">
+        <ul className="grid gap-x-8 gap-y-3 md:grid-cols-2">
           {items.map((c, i) => {
             const pct = total > 0 ? (c.value / total) * 100 : 0;
             return (
               <li key={c.category}>
                 <div className="mb-1 flex items-baseline justify-between gap-2 text-xs">
                   <span className="truncate font-semibold text-[var(--foreground)]">
-                    <span className="mr-1.5 text-[var(--muted)]">{i + 1}.</span>{c.category}
+                    <span className="mr-1.5 tabular-nums text-[var(--muted)]">{i + 1}</span>{c.category}
                   </span>
                   <span className="shrink-0 tabular-nums text-[var(--muted)]">
-                    {formatCurrencyBRL(c.value)} · {pct.toFixed(0)}%
+                    {formatCurrencyBRL(c.value)} · <strong className="text-[var(--foreground)]">{pct.toFixed(0)}%</strong>
                   </span>
                 </div>
-                <ProgressBar pct={pct} color="var(--expense)" />
+                {/* Mesma cor, intensidade decrescente pelo ranking */}
+                <ProgressBar pct={pct} opacity={1 - i * 0.13} />
               </li>
             );
           })}
         </ul>
-      )}
-    </Card>
-  );
-}
-
-type Wealth = { personal: number; business: number | null; portfolio: number | null };
-type CardTotals = { expense: number; count: number };
-
-function WealthStrip({ w }: { w: Wealth }) {
-  const items = [
-    { label: "Conta pessoal", value: w.personal, icon: Wallet },
-    ...(w.business !== null ? [{ label: "Conta PJ", value: w.business, icon: Briefcase }] : []),
-    ...(w.portfolio !== null ? [{ label: "Carteira investida", value: w.portfolio, icon: PiggyBank }] : []),
-  ];
-  const total = items.reduce((t, i) => t + i.value, 0);
-  return (
-    <Card className="p-4">
-      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Patrimônio total</p>
-          <p className="text-xl font-bold tabular-nums text-[var(--foreground)]">{formatCurrencyBRL(total)}</p>
-        </div>
-        <ul className="flex flex-wrap gap-x-6 gap-y-2">
-          {items.map(({ label, value, icon: Icon }) => (
-            <li key={label} className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--surface-raised)] text-[var(--accent)]">
-                <Icon className="h-4 w-4" aria-hidden />
-              </span>
-              <div>
-                <p className="text-[11px] text-[var(--muted)]">{label}</p>
-                <p className="text-sm font-semibold tabular-nums text-[var(--foreground)]">{formatCurrencyBRL(value)}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </Card>
-  );
-}
-
-function MonthCompare({ c, card }: { c: Comparison; card: CardTotals | null }) {
-  const base = c.previousSamePeriod;
-  const diffPct = base > 0 ? ((c.current - base) / base) * 100 : null;
-  const up = diffPct !== null && diffPct > 0;
-  return (
-    <Card className="h-full">
-      <p className="text-sm font-bold text-[var(--foreground)]">Este mês × mês passado</p>
-      <p className="mb-4 text-xs text-[var(--muted)]">Despesas até hoje, comparadas ao mesmo período</p>
-      <div className="flex items-end justify-between gap-2">
-        <div>
-          <p className="text-2xl font-bold tabular-nums text-[var(--foreground)]">{formatCurrencyBRL(c.current)}</p>
-          <p className="text-xs text-[var(--muted)]">mês passado: {formatCurrencyBRL(base)}</p>
-        </div>
-        {diffPct !== null && (
-          <span className={`flex items-center gap-0.5 rounded-full px-2 py-1 text-xs font-bold ${up ? "bg-rose-500/10 text-[var(--expense)]" : "bg-emerald-500/10 text-[var(--income)]"}`}>
-            {up ? <ArrowUpRight className="h-3.5 w-3.5" aria-hidden /> : <ArrowDownRight className="h-3.5 w-3.5" aria-hidden />}
-            {Math.abs(diffPct).toFixed(0)}%
-          </span>
-        )}
-      </div>
-
-      {c.risers.length > 0 && (
-        <div className="mt-4">
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--muted)]">Gastando mais em</p>
-          <ul className="grid gap-1.5">
-            {c.risers.map((r) => (
-              <li key={r.category} className="flex justify-between gap-2 text-xs">
-                <span className="truncate text-[var(--foreground)]">{r.category}</span>
-                <span className="shrink-0 tabular-nums text-[var(--expense)]">+ {formatCurrencyBRL(r.delta)}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {card && card.count > 0 && (
-        <p className="mt-4 flex items-center gap-2 rounded-lg bg-[var(--surface-raised)] px-3 py-2 text-xs text-[var(--muted)]">
-          <CreditCard className="h-3.5 w-3.5 shrink-0 text-[var(--accent)]" aria-hidden />
-          Cartão no mês: <strong className="tabular-nums text-[var(--foreground)]">{formatCurrencyBRL(card.expense)}</strong>
-        </p>
       )}
     </Card>
   );
@@ -416,7 +597,15 @@ type Data = {
 
 const ok = <T,>(r: PromiseSettledResult<T>): T | null => (r.status === "fulfilled" ? r.value : null);
 
-export function DashboardClient({ onNavigateAlerts, displayName }: { onNavigateAlerts?: () => void; displayName?: string }) {
+export function DashboardClient({
+  onNavigateAlerts,
+  onNavigateObjectives,
+  displayName,
+}: {
+  onNavigateAlerts?: () => void;
+  onNavigateObjectives?: () => void;
+  displayName?: string;
+}) {
   const today = todayAsDateInputValue();
   const currentYm = today.slice(0, 7);
   const [year, setYear] = React.useState(() => today.slice(0, 4));
@@ -428,7 +617,6 @@ export function DashboardClient({ onNavigateAlerts, displayName }: { onNavigateA
     let alive = true;
     run(async () => {
       try {
-        // Mesmas consultas de antes, em paralelo; toda a análise é feita no cliente.
         // Essenciais + complementares, todos em paralelo. Os complementares usam
         // allSettled: se algum falhar, o restante do dashboard aparece mesmo assim.
         const [core, extra] = await Promise.all([
@@ -486,11 +674,12 @@ export function DashboardClient({ onNavigateAlerts, displayName }: { onNavigateA
   if (!data) {
     return (
       <div className="grid gap-4">
-        <div className="skeleton h-48 rounded-xl" />
-        <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => <div key={i} className="skeleton h-20 rounded-xl" />)}
+        <div className="skeleton h-56 rounded-2xl" />
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, i) => <div key={i} className="skeleton h-52 rounded-xl" />)}
         </div>
-        <div className="skeleton h-56 rounded-xl" />
+        <div className="skeleton h-24 rounded-xl" />
+        <div className="skeleton h-64 rounded-xl" />
       </div>
     );
   }
@@ -499,110 +688,40 @@ export function DashboardClient({ onNavigateAlerts, displayName }: { onNavigateA
   const yearNet = yearStart + s.income - s.expense - s.investment;
 
   return (
-    <div className="grid gap-4">
-      <div className="grid gap-4 lg:grid-cols-3">
-        <div className="lg:col-span-2"><HeroBalance now={now} displayName={displayName} /></div>
+    <div className="grid gap-4 animate-fade-in">
+      <Hero now={now} wealth={wealth} displayName={displayName} />
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         <MonthCompare c={compare} card={card} />
+        <AlertsCard alerts={alerts} onNavigate={onNavigateAlerts} />
+        <div className="md:col-span-2 xl:col-span-1">
+          <ObjectivesCard objectives={objectives} currentYm={currentYm} onNavigate={onNavigateObjectives} />
+        </div>
       </div>
 
-      {(wealth.business !== null || wealth.portfolio !== null) && <WealthStrip w={wealth} />}
-
-      <div className="flex items-center justify-between gap-3 pt-2">
-        <p className="text-sm font-bold text-[var(--foreground)]">Resumo de {year}</p>
+      <div className="flex items-end justify-between gap-3 pt-4">
+        <div>
+          <p className="text-base font-bold text-[var(--foreground)]">Resumo do ano</p>
+          <p className="text-xs text-[var(--muted)]">Como {year} está se desenhando</p>
+        </div>
         <select
           value={year}
           onChange={(e) => setYear(e.target.value)}
           aria-label="Ano"
-          className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-sm font-semibold text-[var(--foreground)]"
+          className="h-9 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 text-sm font-semibold text-[var(--foreground)]"
         >
           {yearOptions().map((y) => <option key={y} value={String(y)}>{y}</option>)}
         </select>
       </div>
 
-      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-        <Kpi label="Receitas" value={s.income} color="var(--income)" />
-        <Kpi label="Despesas" value={s.expense} color="var(--expense)" />
-        <Kpi label="Investimentos" value={s.investment} color="var(--investment)" />
-        <Kpi label="Resultado do ano" value={yearNet} color={yearNet >= 0 ? "var(--accent)" : "var(--expense)"} hint={`inclui saldo inicial de ${formatCurrencyBRL(yearStart)}`} />
-      </div>
+      <YearStrip s={s} yearStart={yearStart} yearNet={yearNet} />
 
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="flex lg:col-span-2"><MonthlyChart months={s.months} year={year} currentYm={currentYm} /></div>
         <HealthCard income={s.income} expense={s.expense} investment={s.investment} />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <TopExpenses items={s.topExpenses} total={s.expense} />
-
-        {/* Alertas */}
-        <Card>
-          <div className="mb-4 flex items-center justify-between">
-            <p className="text-sm font-bold text-[var(--foreground)]">Contas a vencer</p>
-            {onNavigateAlerts && (
-              <button type="button" onClick={onNavigateAlerts} className="text-xs font-semibold text-[var(--accent)] hover:text-[var(--accent-dark)]">
-                Ver todos →
-              </button>
-            )}
-          </div>
-          {alerts.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 py-6 text-center">
-              <CheckCircle2 className="h-8 w-8 text-[var(--muted)]" aria-hidden strokeWidth={1.5} />
-              <p className="text-sm text-[var(--muted)]">Nenhuma conta a vencer</p>
-            </div>
-          ) : (
-            <ul className="grid gap-2">
-              {alerts.slice(0, 4).map((a) => {
-                const days = daysUntil(a.dueDate);
-                return (
-                  <li key={a.id} className="flex items-center gap-3 rounded-lg bg-[var(--surface-raised)] px-3 py-2.5">
-                    <AlertTriangle className={`h-4 w-4 shrink-0 ${days === 0 ? "text-rose-500" : "text-amber-500"}`} aria-hidden />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold text-[var(--foreground)]">{a.name}</p>
-                      <p className="text-xs text-[var(--muted)]">
-                        {formatDateBR(a.dueDate)} · {days === 0 ? "Hoje!" : `${days} dia${days !== 1 ? "s" : ""}`}
-                        {a.expectedValue != null && ` · ${formatCurrencyBRL(a.expectedValue)}`}
-                      </p>
-                    </div>
-                  </li>
-                );
-              })}
-              {alerts.length > 4 && <li className="py-1 text-center text-xs text-[var(--muted)]">+{alerts.length - 4} outras contas</li>}
-            </ul>
-          )}
-        </Card>
-
-        {/* Objetivos */}
-        <Card>
-          <p className="mb-4 text-sm font-bold text-[var(--foreground)]">Objetivos</p>
-          {objectives.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 py-6 text-center">
-              <Target className="h-8 w-8 text-[var(--muted)]" aria-hidden strokeWidth={1.5} />
-              <p className="text-sm text-[var(--muted)]">Nenhum objetivo cadastrado</p>
-            </div>
-          ) : (
-            <ul className="grid gap-3">
-              {objectives.slice(0, 4).map((o) => {
-                const pct = o.targetValue > 0 ? Math.min(100, (o.initialValue / o.targetValue) * 100) : 0;
-                const done = completionMonth(o, currentYm);
-                return (
-                  <li key={o.id}>
-                    <div className="mb-1 flex items-center justify-between">
-                      <p className="truncate text-xs font-semibold text-[var(--foreground)]">{o.name}</p>
-                      <span className="ml-2 shrink-0 text-xs text-[var(--muted)]">{pct.toFixed(0)}%</span>
-                    </div>
-                    <ProgressBar pct={pct} color={pct >= 100 ? "var(--income)" : "var(--investment)"} />
-                    <div className="mt-1 flex justify-between text-[10px] tabular-nums text-[var(--muted)]">
-                      <span>{formatCurrencyBRL(o.initialValue)} de {formatCurrencyBRL(o.targetValue)}</span>
-                      <span className="font-semibold">{done ? monthLabel(done.month) : "Não atinge"}</span>
-                    </div>
-                  </li>
-                );
-              })}
-              {objectives.length > 4 && <li className="text-center text-xs text-[var(--muted)]">+{objectives.length - 4} outros objetivos</li>}
-            </ul>
-          )}
-        </Card>
-      </div>
+      <TopExpenses items={s.topExpenses} total={s.expense} />
     </div>
   );
 }
