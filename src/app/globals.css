@@ -28,8 +28,8 @@
 /* ─── Design tokens ─────────────────────────────────────────────────── */
 
 :root {
-  /* Fonte de sistema */
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* Inter (carregada via next/font em layout.tsx), com fontes de sistema como fallback */
+  --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
   /* Brand */
   --accent: #0d6e60;
