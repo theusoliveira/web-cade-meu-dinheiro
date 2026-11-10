@@ -4,7 +4,8 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {
-  --font-sans: var(--font-sans);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-heading);
 }
 
 /*
@@ -28,8 +29,9 @@
 /* ─── Design tokens ─────────────────────────────────────────────────── */
 
 :root {
-  /* Inter (carregada via next/font em layout.tsx), com fontes de sistema como fallback */
-  --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* Figtree (texto) e Bricolage Grotesque (títulos/números grandes), via next/font em layout.tsx */
+  --font-body: var(--font-figtree), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-heading: var(--font-bricolage), var(--font-figtree), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
   /* Brand */
   --accent: #0d6e60;
@@ -103,12 +105,23 @@ html, body {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), sans-serif;
+  font-family: var(--font-body);
   min-height: 100dvh;
   min-height: -webkit-fill-available;
   overscroll-behavior-y: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Títulos e números grandes → Bricolage Grotesque */
+h1, h2, h3,
+.text-2xl, .text-3xl, .text-4xl, .text-5xl, .text-6xl {
+  font-family: var(--font-heading);
+}
+
+/* Campos e botões herdam a fonte do corpo (Figtree) */
+button, input, select, textarea {
+  font-family: inherit;
 }
 
 /* ─── Cursor pointer global ─────────────────────────────────────────── */

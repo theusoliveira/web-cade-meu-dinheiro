@@ -1,11 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Figtree, Bricolage_Grotesque } from "next/font/google";
 import "./globals.css";
 import { ServiceWorkerRegister } from "@/components/features/ServiceWorkerRegister";
 import { BusyProvider } from "@/components/features/BusyProvider";
 
-// Inter auto-hospedada pelo next/font (sem requisição ao Google em runtime; funciona offline no PWA).
-const inter = Inter({ subsets: ["latin"], display: "swap", variable: "--font-inter" });
+// Fontes auto-hospedadas pelo next/font (sem requisição ao Google em runtime; funciona offline no PWA).
+// Figtree: texto, campos, botões e listas. Bricolage Grotesque: títulos e números grandes.
+const figtree = Figtree({ subsets: ["latin", "latin-ext"], display: "swap", variable: "--font-figtree" });
+const bricolage = Bricolage_Grotesque({ subsets: ["latin", "latin-ext"], display: "swap", variable: "--font-bricolage" });
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -64,7 +66,7 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={inter.variable}
+      className={`${figtree.variable} ${bricolage.variable}`}
       suppressHydrationWarning
     >
       <body className="antialiased">
