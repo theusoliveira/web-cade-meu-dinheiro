@@ -225,8 +225,8 @@ export function AddEntryDialog({ open, kind: kindProp, onClose, initial, allowFi
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-3 sm:gap-4">
-              <div className="grid gap-1.5">
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-3 sm:gap-4">
+              <div className="grid min-w-0 gap-1.5">
                 <label htmlFor="entry-value" className={labelClass}>Valor (R$){req}</label>
                 <input
                   id="entry-value"
@@ -245,7 +245,7 @@ export function AddEntryDialog({ open, kind: kindProp, onClose, initial, allowFi
                 />
               </div>
 
-              <div className="grid gap-1.5">
+              <div className="grid min-w-0 gap-1.5">
                 <label htmlFor="entry-kind" className={labelClass}>Tipo</label>
                 <select
                   id="entry-kind"
@@ -264,12 +264,18 @@ export function AddEntryDialog({ open, kind: kindProp, onClose, initial, allowFi
                 </select>
               </div>
 
-              <div className="grid gap-1.5">
+              <div className="grid min-w-0 gap-1.5">
                 <label htmlFor="entry-date" className={labelClass}>Data{req}</label>
-                <input id="entry-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className={fieldClass} />
+                <input
+                  id="entry-date"
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className={`${fieldClass} date-field`}
+                />
               </div>
 
-              <div className="grid gap-1.5">
+              <div className="grid min-w-0 gap-1.5">
                 <label htmlFor="entry-category" className={labelClass}>Categoria</label>
                 <select
                   id="entry-category"

@@ -190,6 +190,25 @@ h1, h2, h3,
   font-weight: 400;
 }
 
+/*
+ * Campo de data nativo: no iOS Safari o <input type="date"> ignora a largura do contêiner
+ * (largura intrínseca) e invade o campo vizinho. Mantém o seletor nativo, mas obriga o campo
+ * a respeitar a coluna e alinha o valor à esquerda.
+ */
+input[type="date"].date-field {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+  text-align: left;
+}
+input[type="date"].date-field::-webkit-date-and-time-value {
+  text-align: left;
+  min-height: 1.2em;
+}
+
 /* Rolagem horizontal sem barra visível */
 .no-scrollbar { scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
