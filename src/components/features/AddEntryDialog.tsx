@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Button } from "@/components/ui/Button";
-import { TrendingUp, TrendingDown, LineChart, X, AlertCircle } from "lucide-react";
+import { Check, X, AlertCircle } from "lucide-react";
 import {
   categoriesFor,
   formatCurrencyBRL,
@@ -21,22 +21,15 @@ type Props = {
   initial?: FinanceEntry | null;
   allowFixed?: boolean;
   excludeCategories?: Category[];
+  /** Tipos disponíveis no seletor (padrão: todos) */
+  kinds?: EntryKind[];
   onSubmit: (entry: FinanceEntry) => void | Promise<void>;
 };
 
-const KIND_COLORS: Record<EntryKind, string> = {
-  income: "text-emerald-600 dark:text-emerald-400",
-  expense: "text-rose-600 dark:text-rose-400",
-  investment: "text-sky-600 dark:text-sky-400",
-};
+const KINDS: EntryKind[] = ["expense", "income", "investment"];
 
-const KIND_BG: Record<EntryKind, string> = {
-  income: "bg-emerald-50 dark:bg-emerald-950/20",
-  expense: "bg-rose-50 dark:bg-rose-950/20",
-  investment: "bg-sky-50 dark:bg-sky-950/20",
-};
-
-export function AddEntryDialog({ open, kind, onClose, initial, allowFixed = false, excludeCategories, onSubmit }: Props) {
+export function AddEntryDialog({ open, kind: kindProp, onClose, initial, allowFixed = false, excludeCategories, kinds = KINDS, onSubmit }: Props) {
+  const [kind, setKind] = React.useState<EntryKind>(initial?.kind ?? kindProp);
   const availableCategories = React.useCallback(
     (k: EntryKind) => {
       const all = categoriesFor(k) as Category[];
@@ -46,7 +39,7 @@ export function AddEntryDialog({ open, kind, onClose, initial, allowFixed = fals
     [excludeCategories],
   );
   const [date, setDate] = React.useState(() => todayAsDateInputValue());
-  const [category, setCategory] = React.useState<Category>(() => availableCategories(kind)[0]);
+  const [category, setCategory] = React.useState<Category>(() => availableCategories(kindProp)[0]);
   const [description, setDescription] = React.useState("");
   const [valueCents, setValueCents] = React.useState(0);
   const [valueText, setValueText] = React.useState("");
@@ -60,6 +53,7 @@ export function AddEntryDialog({ open, kind, onClose, initial, allowFixed = fals
     setSubmitting(false);
 
     if (initial) {
+      setKind(initial.kind);
       setDate(initial.date);
       setCategory(initial.category);
       setDescription(initial.description);
@@ -68,14 +62,15 @@ export function AddEntryDialog({ open, kind, onClose, initial, allowFixed = fals
       setValueText(formatCurrencyBRL(cents / 100));
       setIsFixedTemplate(Boolean(initial.isFixedTemplate));
     } else {
+      setKind(kindProp);
       setDate(todayAsDateInputValue());
-      setCategory(availableCategories(kind)[0]);
+      setCategory(availableCategories(kindProp)[0]);
       setDescription("");
       setValueCents(0);
       setValueText("");
       setIsFixedTemplate(false);
     }
-  }, [open, kind, initial]);
+  }, [open, kindProp, initial]);
 
   React.useEffect(() => {
     if (!open || !isFixedTemplate) return;
@@ -107,7 +102,7 @@ export function AddEntryDialog({ open, kind, onClose, initial, allowFixed = fals
 
     if (!date) return setError("Selecione uma data.");
     if (!category) return setError("Selecione uma categoria.");
-    if (!desc) return setError("Digite uma descrição.");
+    if (!desc) return setError("Digite um título.");
     if (!isFixedTemplate && valueCents < 0) return setError("Digite um valor válido.");
 
     const editingVirtualFixed = Boolean(initial?.isVirtualFixed && initial?.fixedEntryId);
@@ -150,65 +145,60 @@ export function AddEntryDialog({ open, kind, onClose, initial, allowFixed = fals
 
   if (!open) return null;
 
-  const inputClass =
-    "w-full h-10 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 text-sm " +
+  const fieldClass =
+    "w-full h-11 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3.5 text-sm " +
     "text-[var(--foreground)] placeholder:text-[var(--muted-light)] outline-none " +
-    "focus:ring-2 focus:ring-[var(--accent)] focus:border-[var(--accent)] transition-all";
+    " focus:border-[var(--accent)] transition-all disabled:opacity-60";
+  const labelClass = "text-[13px] font-semibold text-[var(--foreground)]";
+  const req = <span className="text-[var(--copper)]"> *</span>;
+  const title = initial ? "Editar lançamento" : "Novo lançamento";
 
   return (
     <div
       className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center p-0 sm:p-4"
       role="dialog"
       aria-modal
-      aria-label={`${initial ? "Editar" : "Adicionar"} ${kindLabel(kind).toLowerCase()}`}
+      aria-label={title}
     >
       {/* Backdrop */}
       <button
         type="button"
         aria-label="Fechar"
-        className="absolute inset-0 bg-black/50 cursor-pointer"
+        className="absolute inset-0 cursor-pointer bg-[#1f2a24]/40 backdrop-blur-sm"
         onClick={() => { if (!submitting) onClose(); }}
       />
 
       {/* Dialog */}
-      <div className="relative w-full max-w-lg rounded-t-3xl sm:rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-lg animate-slide-up sm:animate-scale-in">
+      <div className="relative max-h-[94dvh] w-full max-w-xl overflow-y-auto rounded-t-3xl border border-[var(--border)] bg-[var(--surface)] shadow-[0_24px_60px_-20px_rgba(31,42,36,0.35)] animate-slide-up sm:rounded-3xl sm:animate-scale-in">
         {/* Drag handle (mobile) */}
-        <div className="flex justify-center pt-3 pb-0 sm:hidden">
-          <div className="h-1 w-10 rounded-full bg-[var(--border)]" />
+        <div className="flex justify-center pt-3 sm:hidden">
+          <div className="h-1 w-10 rounded-full bg-[var(--border-strong)]" />
         </div>
 
-        {/* Header */}
-        <div className={`flex items-center justify-between gap-4 px-5 py-4 border-b border-[var(--border)] ${KIND_BG[kind]} rounded-t-3xl sm:rounded-t-2xl`}>
-          <div className="flex items-center gap-3">
-            <div className={`flex h-9 w-9 items-center justify-center rounded-xl bg-white/80 dark:bg-black/30 ${KIND_COLORS[kind]}`}>
-              {kind === "income" && <TrendingUp className="h-5 w-5" />}
-              {kind === "expense" && <TrendingDown className="h-5 w-5" />}
-              {kind === "investment" && <LineChart className="h-5 w-5" />}
-            </div>
+        <form onSubmit={submit} className="p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:p-7">
+          {/* Header */}
+          <div className="mb-6 flex items-start justify-between gap-4">
             <div>
-              <h2 className={`text-base font-bold ${KIND_COLORS[kind]}`}>
-                {initial ? "Editar" : "Adicionar"} {kindLabel(kind).toLowerCase()}
-              </h2>
-              <p className="text-xs text-[var(--muted)]">
-                {initial ? "Atualize os dados do lançamento" : "Preencha os dados abaixo"}
+              <p className="eyebrow !text-[var(--copper)]">Seu próximo passo</p>
+              <h2 className="mt-1.5 text-2xl font-semibold tracking-tight text-[var(--foreground)]">{title}</h2>
+              <p className="mt-1 text-sm text-[var(--muted)]">
+                {initial ? "Atualize os dados do lançamento." : "Um plano simples começa com o próximo passo."}
               </p>
             </div>
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={submitting}
+              className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full text-[var(--muted)] transition-colors hover:bg-[var(--surface-raised)] hover:text-[var(--foreground)]"
+              aria-label="Fechar"
+            >
+              <X className="h-5 w-5" aria-hidden />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={submitting}
-            className="cursor-pointer h-8 w-8 flex items-center justify-center rounded-xl text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-raised)] transition-colors"
-            aria-label="Fechar"
-          >
-            <X className="h-4 w-4" aria-hidden />
-          </button>
-        </div>
 
-        <form onSubmit={submit} className="p-5">
           <fieldset disabled={submitting} className="grid gap-4">
             {allowFixed && !initial && (
-              <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface-raised)] p-3 text-sm hover:bg-[var(--border)]/50 transition-colors">
+              <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface-raised)] p-3 text-sm transition-colors hover:bg-[var(--border)]/50">
                 <input
                   type="checkbox"
                   checked={isFixedTemplate}
@@ -225,65 +215,89 @@ export function AddEntryDialog({ open, kind, onClose, initial, allowFixed = fals
             )}
 
             <div className="grid gap-1.5">
-              <label className="text-sm font-semibold text-[var(--foreground)]">Data</label>
-              <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className={inputClass} />
-            </div>
-
-            <div className="grid gap-1.5">
-              <label className="text-sm font-semibold text-[var(--foreground)]">Categoria</label>
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value as Category)}
-                className={`${inputClass} cursor-pointer`}
-              >
-                {categoryOptions.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="grid gap-1.5">
-              <label className="text-sm font-semibold text-[var(--foreground)]">Descrição</label>
+              <label htmlFor="entry-title" className={labelClass}>Título{req}</label>
               <input
+                id="entry-title"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Ex.: almoço, gasolina, aporte..."
-                className={inputClass}
+                className={fieldClass}
               />
             </div>
 
-            <div className="grid gap-1.5">
-              <label className="text-sm font-semibold text-[var(--foreground)]">Valor</label>
-              <input
-                type="text"
-                inputMode="numeric"
-                value={valueText}
-                onChange={(e) => {
-                  const digits = e.target.value.replace(/\D/g, "");
-                  const cents = digits ? parseInt(digits, 10) : 0;
-                  setValueCents(cents);
-                  setValueText(cents === 0 ? "" : formatCurrencyBRL(cents / 100));
-                }}
-                disabled={isFixedTemplate}
-                placeholder="R$ 0,00"
-                className={`${inputClass} `}
-              />
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
+              <div className="grid gap-1.5">
+                <label htmlFor="entry-value" className={labelClass}>Valor (R$){req}</label>
+                <input
+                  id="entry-value"
+                  type="text"
+                  inputMode="numeric"
+                  value={valueText}
+                  onChange={(e) => {
+                    const digits = e.target.value.replace(/\D/g, "");
+                    const cents = digits ? parseInt(digits, 10) : 0;
+                    setValueCents(cents);
+                    setValueText(cents === 0 ? "" : formatCurrencyBRL(cents / 100));
+                  }}
+                  disabled={isFixedTemplate}
+                  placeholder="R$ 0,00"
+                  className={fieldClass}
+                />
+              </div>
+
+              <div className="grid gap-1.5">
+                <label htmlFor="entry-kind" className={labelClass}>Tipo</label>
+                <select
+                  id="entry-kind"
+                  value={kind}
+                  disabled={Boolean(initial)}
+                  onChange={(e) => {
+                    const next = e.target.value as EntryKind;
+                    setKind(next);
+                    setCategory(availableCategories(next)[0]);
+                  }}
+                  className={`${fieldClass} cursor-pointer`}
+                >
+                  {kinds.map((k) => (
+                    <option key={k} value={k}>{kindLabel(k)}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid gap-1.5">
+                <label htmlFor="entry-date" className={labelClass}>Data{req}</label>
+                <input id="entry-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className={fieldClass} />
+              </div>
+
+              <div className="grid gap-1.5">
+                <label htmlFor="entry-category" className={labelClass}>Categoria</label>
+                <select
+                  id="entry-category"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value as Category)}
+                  className={`${fieldClass} cursor-pointer`}
+                >
+                  {categoryOptions.map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
             </div>
           </fieldset>
 
           {error && (
-            <div className="mt-4 flex items-center gap-2 rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50 dark:bg-rose-950/30 px-3 py-2.5">
-              <AlertCircle className="h-4 w-4 text-rose-500 shrink-0" />
+            <div className="mt-4 flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2.5 dark:border-rose-900/50 dark:bg-rose-950/30">
+              <AlertCircle className="h-4 w-4 shrink-0 text-rose-500" />
               <p className="text-sm text-rose-700 dark:text-rose-300">{error}</p>
             </div>
           )}
 
-          <div className="mt-5 flex items-center justify-end gap-2">
-            <Button type="button" variant="secondary" onClick={onClose} disabled={submitting}>
+          <div className="mt-6 flex items-center justify-end gap-2 border-t border-[var(--border)] pt-5">
+            <Button type="button" variant="ghost" size="lg" onClick={onClose} disabled={submitting}>
               Cancelar
             </Button>
-            <Button type="submit" loading={submitting}>
-              {initial ? "Salvar alterações" : "Salvar"}
+            <Button type="submit" size="lg" loading={submitting} leftIcon={<Check className="h-4 w-4" aria-hidden />}>
+              {initial ? "Salvar alterações" : "Salvar registro"}
             </Button>
           </div>
         </form>

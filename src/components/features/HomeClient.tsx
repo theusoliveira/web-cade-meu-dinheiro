@@ -186,7 +186,7 @@ export function HomeClient({ displayName }: { displayName: string }) {
 
         <div className="flex min-w-0 flex-1 flex-col">
           {/* Header */}
-          <header className="sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--surface)]">
+          <header className="sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--surface)]/90 backdrop-blur">
             <div
               className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8"
               style={{ paddingTop: "calc(env(safe-area-inset-top) + 14px)", paddingBottom: "14px" }}
@@ -204,7 +204,7 @@ export function HomeClient({ displayName }: { displayName: string }) {
                 </button>
 
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-bold text-[var(--foreground)] leading-tight">
+                  <p className="truncate text-base font-bold text-[var(--foreground)] leading-tight" style={{ fontFamily: "var(--font-heading)" }}>
                     {TAB_TITLES[activeTab]}
                   </p>
                   <p className="truncate text-xs text-[var(--muted)] leading-tight mt-0.5">
@@ -289,6 +289,7 @@ export function HomeClient({ displayName }: { displayName: string }) {
                   kind={kind}
                   allowFixed={isMonthlyTab}
                   excludeCategories={isMonthlyTab ? ["Saldo"] : undefined}
+                  kinds={activeTab === "controle" ? ["expense", "income"] : undefined}
                   onClose={() => { setDialogOpen(false); setEditing(null); }}
                   initial={editing}
                   onSubmit={onSubmit}

@@ -13,7 +13,7 @@ import { fetchObjectives, type ObjectiveRecord } from "@/actions/objectives";
 import { completionMonth, monthLabel } from "@/lib/finance/objectives";
 import { fetchCardMonthTotals } from "@/actions/cardEntries";
 import { fetchRebalanceClasses } from "@/actions/rebalance";
-import { buildEntriesWithVirtuals, formatCurrencyBRL, isSaldoEntry, todayAsDateInputValue, type FinanceEntry } from "@/lib/finance";
+import { buildEntriesWithVirtuals, formatCurrencyBRL, isSaldoEntry, signedEntryValue, todayAsDateInputValue, type FinanceEntry } from "@/lib/finance";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -62,7 +62,7 @@ function CardHeader({ title, subtitle, action }: { title: string; subtitle?: str
   return (
     <div className="mb-4 flex items-start justify-between gap-3">
       <div className="min-w-0">
-        <p className="text-sm font-bold text-[var(--foreground)]">{title}</p>
+        <p className="text-base font-semibold text-[var(--foreground)]" style={{ fontFamily: "var(--font-heading)" }}>{title}</p>
         {subtitle && <p className="text-xs text-[var(--muted)]">{subtitle}</p>}
       </div>
       {action}
@@ -104,7 +104,12 @@ type Summary = {
   topExpenses: { category: string; value: number }[];
 };
 
-function summarize(entries: FinanceEntry[]): Summary {
+/**
+ * `opening` = saldo que abriu o ano; `lastMonthIdx` = último mês (0–11) que já tem saldo a mostrar.
+ * O saldo trazido do mês anterior entra em `months` (usado só no gráfico): positivo conta como receita
+ * e negativo como despesa, igual à aba Lançamentos. Os totais do ano não mudam.
+ */
+function summarize(entries: FinanceEntry[], opening = 0, lastMonthIdx = -1): Summary {
   const months: Month[] = Array.from({ length: 12 }, () => ({ income: 0, expense: 0, investment: 0 }));
   const byCategory = new Map<string, number>();
   let income = 0, expense = 0, investment = 0;
@@ -120,6 +125,18 @@ function summarize(entries: FinanceEntry[]): Summary {
       expense += e.value;
       byCategory.set(e.category, (byCategory.get(e.category) ?? 0) + e.value);
     } else investment += e.value;
+  }
+
+  let balance = opening;
+  for (let i = 0; i <= Math.min(lastMonthIdx, 11); i++) {
+    const mm = String(i + 1).padStart(2, "0");
+    const monthEntries = entries.filter((e) => e.date.slice(5, 7) === mm);
+    const saldos = monthEntries.filter(isSaldoEntry);
+    // Um lançamento "Saldo" manual substitui o saldo trazido do mês anterior.
+    const carry = saldos.length > 0 ? saldos.reduce((t, e) => t + signedEntryValue(e), 0) : balance;
+    if (carry > 0.005) months[i].income += carry;
+    else if (carry < -0.005) months[i].expense += -carry;
+    balance = carry + monthEntries.filter((e) => !isSaldoEntry(e)).reduce((t, e) => t + signedEntryValue(e), 0);
   }
 
   const topExpenses = [...byCategory.entries()]
@@ -158,6 +175,13 @@ function yearStartBalance(year: string, entries: FinanceEntry[], janOpening: num
   const janSaldo = entries.filter((e) => e.date.startsWith(`${year}-01`) && isSaldoEntry(e));
   if (janSaldo.length === 0) return janOpening;
   return janSaldo.reduce((t, e) => t + (e.kind === "income" ? e.value : -e.value), 0);
+}
+
+function lastMonthIdx(year: string, currentYm: string): number {
+  const curYear = currentYm.slice(0, 4);
+  if (year < curYear) return 11;
+  if (year > curYear) return -1;
+  return Number(currentYm.slice(5, 7)) - 1;
 }
 
 function prevYm(ym: string): string {
@@ -214,16 +238,16 @@ function Hero({ now, wealth, displayName }: { now: MonthNow; wealth: Wealth; dis
   ];
 
   return (
-    <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-600 via-brand-700 to-brand-900 p-6 text-white shadow-sm sm:p-7">
+    <section className="relative overflow-hidden rounded-2xl bg-brand-600 p-6 text-white sm:p-8">
       <div className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-white/5" aria-hidden />
       <div className="pointer-events-none absolute -bottom-28 right-28 h-56 w-56 rounded-full bg-white/5" aria-hidden />
 
       <div className="relative grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
         <div className="min-w-0">
-          <p className="text-sm text-white/70">
+          <p className="serif-accent text-lg text-white/80">
             {greeting()}{displayName ? `, ${displayName.split(" ")[0]}` : ""}
           </p>
-          <p className="mt-4 text-xs font-semibold uppercase tracking-wider text-white/60">Saldo disponível</p>
+          <p className="eyebrow mt-4 !text-white/60">Saldo disponível</p>
           <p className={`mt-1 text-4xl font-bold tabular-nums tracking-tight sm:text-5xl ${now.available < 0 ? "text-rose-200" : ""}`}>
             {formatCurrencyBRL(now.available)}
           </p>
@@ -249,7 +273,7 @@ function Hero({ now, wealth, displayName }: { now: MonthNow; wealth: Wealth; dis
         </div>
 
         {accounts.length > 1 && (
-          <div className="rounded-xl bg-white/10 p-4 lg:min-w-64">
+          <div className="rounded-2xl bg-white/10 p-4 lg:min-w-64">
             <p className="text-[11px] uppercase tracking-wider text-white/60">Patrimônio total</p>
             <p className="text-xl font-bold tabular-nums">{formatCurrencyBRL(total)}</p>
             <ul className="mt-3 grid gap-2 border-t border-white/10 pt-3">
@@ -449,11 +473,11 @@ function MonthlyChart({ months, year, currentYm }: { months: Month[]; year: stri
     <Card className="flex w-full flex-col">
       <CardHeader
         title="Fluxo mensal"
-        subtitle={`Receitas × despesas em ${year}`}
+        subtitle={`Receitas (com saldo anterior) × despesas em ${year}`}
         action={
           <div className="flex shrink-0 items-center gap-3 text-[11px] text-[var(--muted)]">
             <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-[var(--accent)]" />Receitas</span>
-            <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-[var(--border-strong)]" />Despesas</span>
+            <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-[var(--expense)]" />Despesas</span>
           </div>
         }
       />
@@ -476,7 +500,7 @@ function MonthlyChart({ months, year, currentYm }: { months: Month[]; year: stri
             >
               <div className={`flex h-full w-full items-end justify-center gap-0.5 pt-2 transition-opacity ${active ? "opacity-100" : "opacity-70"}`}>
                 <div className="w-1/2 max-w-3.5 rounded-t-sm bg-[var(--accent)]" style={{ height: `${(m.income / max) * 100}%` }} />
-                <div className="w-1/2 max-w-3.5 rounded-t-sm bg-[var(--border-strong)]" style={{ height: `${(m.expense / max) * 100}%` }} />
+                <div className="w-1/2 max-w-3.5 rounded-t-sm bg-[var(--expense)]" style={{ height: `${(m.expense / max) * 100}%` }} />
               </div>
               <span className={`text-[10px] ${active ? "font-bold text-[var(--foreground)]" : "text-[var(--muted)]"}`}>{MONTHS[i]}</span>
             </button>
@@ -645,7 +669,7 @@ export function DashboardClient({
         const hasPj = pjEntries !== null && pjOpening !== null && (pjEntries.length > 0 || pjOpening !== 0);
         setError(false);
         setData({
-          summary: summarize(entries),
+          summary: summarize(entries, janOpening, lastMonthIdx(year, currentYm)),
           yearStart: yearStartBalance(year, entries, janOpening),
           now,
           alerts,
@@ -676,7 +700,7 @@ export function DashboardClient({
       <div className="grid gap-4">
         <div className="skeleton h-56 rounded-2xl" />
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {Array.from({ length: 3 }).map((_, i) => <div key={i} className="skeleton h-52 rounded-xl" />)}
+          {Array.from({ length: 3 }).map((_, i) => <div key={i} className="skeleton h-52 rounded-2xl" />)}
         </div>
         <div className="skeleton h-24 rounded-xl" />
         <div className="skeleton h-64 rounded-xl" />

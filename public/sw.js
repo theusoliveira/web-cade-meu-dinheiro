@@ -3,7 +3,7 @@
    - Navegação autenticada: network-first sem salvar página em cache
    - Offline fallback para quando a rede falhar
 */
-const CACHE_VERSION = "cmd-v2";
+const CACHE_VERSION = "cmd-v3";
 const STATIC_CACHE = `static-${CACHE_VERSION}`;
 const OFFLINE_URL = "/offline.html";
 

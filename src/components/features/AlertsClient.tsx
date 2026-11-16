@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Edit2, Trash2, Bell, AlertTriangle, Repeat } from "lucide-react";
+import { Edit2, Trash2, Bell, AlertTriangle, Repeat, Plus } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card, StatCard } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
@@ -15,6 +15,7 @@ import {
 } from "@/actions/alerts";
 import { formatCurrencyBRL, formatBRLFromCents, formatDateBR } from "@/lib/finance";
 import { newId } from "@/lib/finance/id";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 // ─── Ícones — lucide-react, mesmo conjunto do design system ──────────────────
 
@@ -169,7 +170,7 @@ function AlertDialog({ open, initial, onClose, onSubmit }: AlertDialogProps) {
   }
 
   const inputClass =
-    "h-10 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm text-[var(--foreground)] outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-[var(--accent)] transition-all";
+    "h-10 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm text-[var(--foreground)] outline-none focus:border-[var(--accent)] transition-all";
 
   return (
     <div
@@ -447,35 +448,33 @@ export function AlertsClient() {
 
   return (
     <>
-      <div className="grid gap-6 animate-fade-in">
-        <Card>
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <h1 className="text-xl font-bold text-[var(--foreground)]">Alertas de Contas</h1>
-              <p className="mt-1 text-sm text-[var(--muted)]">
-                Cadastre contas a vencer e seja lembrado na data certa.
-              </p>
-            </div>
+      <div className="grid min-w-0 grid-cols-1 gap-5 animate-fade-in sm:gap-6">
+        <PageHeader
+          eyebrow="Lembretes"
+          title="Alertas de contas"
+          description="Cadastre contas a vencer e seja lembrado na data certa."
+          actions={
             <Button
               type="button"
-              size="sm"
-              className="hidden sm:inline-flex"
+              size="lg"
+              leftIcon={<Plus className="h-4 w-4" aria-hidden />}
               onClick={() => { setEditing(null); setDialogOpen(true); }}
             >
-              + Novo alerta
+              Novo alerta
             </Button>
-          </div>
+          }
+        />
 
-          <div className="mt-5 grid gap-3 sm:grid-cols-3">
-            <StatCard label="Total" value={String(alerts.length)} color="neutral" />
-            <StatCard label="Ativos" value={String(activeAlerts.length)} color="income" />
-            <StatCard
-              label="A vencer em breve"
-              value={String(dueCount)}
-              color={dueCount > 0 ? "warning" : "neutral"}
-            />
-          </div>
-        </Card>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <StatCard label="Total" value={String(alerts.length)} color="neutral" />
+          <StatCard label="Ativos" value={String(activeAlerts.length)} color="income" />
+          <StatCard
+            label="A vencer em breve"
+            value={String(dueCount)}
+            color={dueCount > 0 ? "warning" : "neutral"}
+            className="col-span-2 sm:col-span-1"
+          />
+        </div>
 
         {alerts.length === 0 ? (
           <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface-raised)] py-16 text-center">

@@ -91,7 +91,7 @@ export function HistoryTable({
   return (
     <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
       {/* Mobile: cards */}
-      <div className="divide-y divide-[var(--border)] sm:hidden">
+      <div className="divide-y divide-[var(--border)] lg:hidden">
         {entries.map((e) => {
           const readOnly = Boolean(e.isAutoCarryover);
           const isSelected = selectedIds.has(e.id);
@@ -124,7 +124,7 @@ export function HistoryTable({
                         <p className="text-sm font-medium break-words">{e.description}</p>
                       )}
                     </div>
-                    <p className={`whitespace-nowrap text-sm font-medium shrink-0 ${e.kind === "income" ? "text-emerald-600 dark:text-emerald-400" : e.kind === "expense" ? "text-rose-600 dark:text-rose-400" : "text-sky-600 dark:text-sky-400"}`}>
+                    <p className={`whitespace-nowrap text-sm font-medium shrink-0 text-[var(--foreground)]`}>
                       {kindPrefix(e.kind)} {formatCurrencyBRL(e.value)}
                     </p>
                   </div>
@@ -158,7 +158,7 @@ export function HistoryTable({
       </div>
 
       {/* Desktop: table */}
-      <div className="hidden sm:block overflow-x-auto">
+      <div className="hidden lg:block overflow-x-auto">
         <table className="w-full table-fixed text-left text-sm">
           <colgroup>
             {selectable && <col className="w-[44px]" />}
@@ -186,12 +186,12 @@ export function HistoryTable({
                   />
                 </th>
               )}
-              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">Data</th>
-              {!hideKind && <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">Tipo</th>}
-              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">Categoria</th>
-              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">Descrição</th>
-              <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">Valor</th>
-              <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">Ações</th>
+              <th className="px-4 py-3 eyebrow">Data</th>
+              {!hideKind && <th className="px-4 py-3 eyebrow">Tipo</th>}
+              <th className="px-4 py-3 eyebrow">Categoria</th>
+              <th className="px-4 py-3 eyebrow">Descrição</th>
+              <th className="px-4 py-3 text-right eyebrow">Valor</th>
+              <th className="px-4 py-3 text-right eyebrow">Ações</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--border)]">
@@ -226,7 +226,7 @@ export function HistoryTable({
                   )}
                   <td className="px-4 py-3 text-[var(--foreground)] truncate">{e.category}</td>
                   <td className="px-4 py-3 text-[var(--foreground)] truncate">{e.description}</td>
-                  <td className={`whitespace-nowrap px-4 py-3 text-right ${e.kind === "income" ? "text-emerald-600 dark:text-emerald-400" : e.kind === "expense" ? "text-rose-600 dark:text-rose-400" : "text-sky-600 dark:text-sky-400"}`}>
+                  <td className={`whitespace-nowrap px-4 py-3 text-right text-[var(--foreground)]`}>
                     {kindPrefix(e.kind)} {formatCurrencyBRL(e.value)}
                   </td>
                   <td className="whitespace-nowrap px-4 py-3 text-right">

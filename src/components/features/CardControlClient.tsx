@@ -5,7 +5,10 @@ import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/Button";
 import { StatCard } from "@/components/ui/Card";
 import { HistoryTable } from "@/components/features/HistoryTable";
+import { EntryFiltersBar, useEntryFilters, type KindSegment } from "@/components/features/EntryFilters";
 import { formatCurrencyBRL, groupByCategory, type EntryKind, type FinanceEntry } from "@/lib/finance";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Plus } from "lucide-react";
 
 const BudgetDonutCard = dynamic(
   () => import("@/components/features/DonutChartCard").then((m) => m.BudgetDonutCard),
@@ -23,6 +26,12 @@ type Props = {
 
 export function CardControlClient({ entries, openDialog, onEdit, onDelete, onDeleteAll, onDeleteSelected }: Props) {
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
+  const filters = useEntryFilters(entries);
+  const segments: KindSegment[] = [
+    { key: "all", label: "Todos" },
+    { key: "expense", label: "Despesas" },
+    { key: "income", label: "Receitas" },
+  ];
 
   const totals = React.useMemo(() => {
     let income = 0;
@@ -65,46 +74,33 @@ export function CardControlClient({ entries, openDialog, onEdit, onDelete, onDel
   }
 
   return (
-    <div className="grid gap-6 animate-fade-in">
-      {/* Header */}
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h1 className="text-xl font-bold text-[var(--foreground)]">Controle de gastos</h1>
-            <p className="mt-1 text-sm text-[var(--muted)]">
-              Todos os lançamentos · {entries.length} registro{entries.length === 1 ? "" : "s"}
-            </p>
-          </div>
+    <div className="grid min-w-0 grid-cols-1 gap-5 animate-fade-in sm:gap-6">
+      <PageHeader
+        eyebrow="Cartão de crédito"
+        title="Controle de gastos"
+        actionsDesktopOnly
+        description={`Todos os lançamentos · ${entries.length} registro${entries.length === 1 ? "" : "s"}`}
+        actions={
+          <Button
+            type="button"
+            size="lg"
+            onClick={() => openDialog("expense")}
+            leftIcon={<Plus className="h-4 w-4" aria-hidden />}
+          >
+            Novo lançamento
+          </Button>
+        }
+      />
 
-          <div className="hidden gap-2 sm:flex">
-            <Button
-              type="button"
-              // variant="success"
-              size="sm"
-              onClick={() => openDialog("income")}
-            >
-              + Receita
-            </Button>
-            <Button
-              type="button"
-              variant="danger"
-              size="sm"
-              onClick={() => openDialog("expense")}
-            >
-              − Despesa
-            </Button>
-          </div>
-        </div>
-
-        <div className="mt-5 grid gap-3 grid-cols-1 sm:grid-cols-3">
-          <StatCard label="Receitas" value={formatCurrencyBRL(totals.income)} color="income" />
-          <StatCard label="Despesas" value={formatCurrencyBRL(totals.expense)} color="expense" />
-          <StatCard
-            label="Saldo"
-            value={formatCurrencyBRL(totals.balance)}
-            color="balance"
-          />
-        </div>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <StatCard label="Receitas" value={formatCurrencyBRL(totals.income)} color="income" />
+        <StatCard label="Despesas" value={formatCurrencyBRL(totals.expense)} color="expense" />
+        <StatCard
+          label="Saldo"
+          value={formatCurrencyBRL(totals.balance)}
+          color="balance"
+          className="col-span-2 sm:col-span-1"
+        />
       </div>
 
       {/* Charts */}
@@ -151,14 +147,25 @@ export function CardControlClient({ entries, openDialog, onEdit, onDelete, onDel
             </Button>
           </div>
         </div>
-        <HistoryTable
-          entries={entries}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          selectable
-          selectedIds={selectedIds}
-          onSelectionChange={setSelectedIds}
-        />
+        <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 sm:p-5">
+          <EntryFiltersBar filters={filters} segments={segments} />
+          <div className="mt-4">
+            <HistoryTable
+              entries={filters.filtered}
+              hideKind
+              emptyMessage={
+                entries.length === 0
+                  ? "Nenhum lançamento ainda. Use os botões acima para adicionar."
+                  : "Nenhum lançamento encontrado com esses filtros."
+              }
+              onEdit={onEdit}
+              onDelete={onDelete}
+              selectable
+              selectedIds={selectedIds}
+              onSelectionChange={setSelectedIds}
+            />
+          </div>
+        </section>
       </div>
     </div>
   );

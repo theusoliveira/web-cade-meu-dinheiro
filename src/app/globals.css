@@ -14,16 +14,77 @@
  * para ações primárias, estados ativos e foco.
  */
 @theme {
-  --color-brand-50: #eefaf7;
-  --color-brand-100: #d3f0e8;
-  --color-brand-200: #a8e0d1;
-  --color-brand-300: #75c9b5;
-  --color-brand-400: #47ab97;
-  --color-brand-500: #268c78;
-  --color-brand-600: #0d6e60;
-  --color-brand-700: #0a584d;
-  --color-brand-800: #08453c;
-  --color-brand-900: #06342d;
+  --color-brand-50: #eff4ef;
+  --color-brand-100: #dde8dd;
+  --color-brand-200: #bcd1c1;
+  --color-brand-300: #8fb09a;
+  --color-brand-400: #5f8a73;
+  --color-brand-500: #3f6b57;
+  --color-brand-600: #2a5444;
+  --color-brand-700: #224536;
+  --color-brand-800: #1a352a;
+  --color-brand-900: #12261e;
+
+  /* Todo "emerald" do Tailwind aponta para o verde da marca (uma única fonte de verdade) */
+  --color-emerald-50: var(--color-brand-50);
+  --color-emerald-100: var(--color-brand-100);
+  --color-emerald-200: var(--color-brand-200);
+  --color-emerald-300: var(--color-brand-300);
+  --color-emerald-400: var(--color-brand-400);
+  --color-emerald-500: var(--color-brand-500);
+  --color-emerald-600: var(--color-brand-600);
+  --color-emerald-700: var(--color-brand-700);
+  --color-emerald-800: var(--color-brand-800);
+  --color-emerald-900: var(--color-brand-900);
+  --color-emerald-950: #0b1a14;
+
+  /* Vermelho do sistema: rgb(181, 101, 91). "rose" e "red" do Tailwind usam esta escala */
+  --color-rose-50: #fbf3f1;
+  --color-rose-100: #f5e6e3;
+  --color-rose-200: #ecd0cc;
+  --color-rose-300: #e0b2ab;
+  --color-rose-400: #d19289;
+  --color-rose-500: #c07a70;
+  --color-rose-600: #b5655b;
+  --color-rose-700: #96504a;
+  --color-rose-800: #7a413c;
+  --color-rose-900: #5e3330;
+  --color-rose-950: #3d2220;
+  --color-red-50: #fbf3f1;
+  --color-red-100: #f5e6e3;
+  --color-red-200: #ecd0cc;
+  --color-red-300: #e0b2ab;
+  --color-red-400: #d19289;
+  --color-red-500: #c07a70;
+  --color-red-600: #b5655b;
+  --color-red-700: #96504a;
+  --color-red-800: #7a413c;
+  --color-red-900: #5e3330;
+  --color-red-950: #3d2220;
+
+  /* Azul do sistema: tom acinzentado que conversa com o verde-floresta. "sky" e "blue" usam esta escala */
+  --color-sky-50: #f1f5f7;
+  --color-sky-100: #e1eaee;
+  --color-sky-200: #c6d6de;
+  --color-sky-300: #a1bac7;
+  --color-sky-400: #7a9bad;
+  --color-sky-500: #5f8296;
+  --color-sky-600: #4b6a7d;
+  --color-sky-700: #3d5767;
+  --color-sky-800: #324755;
+  --color-sky-900: #283a45;
+  --color-sky-950: #18232a;
+  --color-blue-50: #f1f5f7;
+  --color-blue-100: #e1eaee;
+  --color-blue-200: #c6d6de;
+  --color-blue-300: #a1bac7;
+  --color-blue-400: #7a9bad;
+  --color-blue-500: #5f8296;
+  --color-blue-600: #4b6a7d;
+  --color-blue-700: #3d5767;
+  --color-blue-800: #324755;
+  --color-blue-900: #283a45;
+  --color-blue-950: #18232a;
 }
 
 /* ─── Design tokens ─────────────────────────────────────────────────── */
@@ -32,68 +93,71 @@
   /* Figtree (texto) e Bricolage Grotesque (títulos/números grandes), via next/font em layout.tsx */
   --font-body: var(--font-figtree), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-heading: var(--font-bricolage), var(--font-figtree), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-serif: Georgia, "Times New Roman", serif;
 
-  /* Brand */
-  --accent: #0d6e60;
-  --accent-light: #d3f0e8;
-  --accent-dark: #0a584d;
+  /* Brand — verde-floresta */
+  --accent: #2a5444;
+  --accent-light: #e5eadc;
+  --accent-dark: #1a352a;
+  --copper: #b5703f;
 
-  /* Surfaces */
-  --background: #f8fafc;
-  --surface: #ffffff;
-  --surface-raised: #f1f5f9;
-  --border: #e2e8f0;
-  --border-strong: #cbd5e1;
+  /* Surfaces — sálvia + creme */
+  --background: #f3f4ef;
+  --surface: #fffefb;
+  --surface-raised: #f6f7f1;
+  --border: #e5e7df;
+  --border-strong: #d3d7cb;
 
   /* Text */
-  --foreground: #0f172a;
-  --muted: #64748b;
-  --muted-light: #94a3b8;
+  --foreground: #1f2a24;
+  --muted: #66716a;
+  --muted-light: #98a29b;
 
-  /* Sidebar — clara, no mesmo tom neutro do resto do app, com destaque teal */
-  --sidebar-bg: #ffffff;
-  --sidebar-border: #e2e8f0;
-  --sidebar-text: #475569;
-  --sidebar-text-muted: #94a3b8;
-  --sidebar-active-bg: #eefaf7;
-  --sidebar-active-text: #0a584d;
-  --sidebar-active-icon: #0d6e60;
-  --sidebar-hover-bg: #f1f5f9;
-  --sidebar-logo-bg: #0d6e60;
+  /* Sidebar */
+  --sidebar-bg: #fffefb;
+  --sidebar-border: #e5e7df;
+  --sidebar-text: #3d4a43;
+  --sidebar-text-muted: #7d887f;
+  --sidebar-active-bg: #e5eadc;
+  --sidebar-active-text: #1f3a2e;
+  --sidebar-active-icon: #2a5444;
+  --sidebar-hover-bg: #f1f3ea;
+  --sidebar-logo-bg: #2a5444;
 
   /* Status colors */
-  --income: #0a7a5f;
-  --expense: #be123c;
-  --investment: #0369a1;
+  --income: #2a5444;
+  --expense: #b5655b;
+  --investment: #4b6a7d;
 }
 
 .dark {
-  --background: #0b0f16;
-  --surface: #12161f;
-  --surface-raised: #171c27;
-  --border: #232838;
-  --border-strong: #2e3548;
-  --foreground: #f1f5f9;
-  --muted: #8b93a3;
-  --muted-light: #4a5568;
+  --background: #0f1512;
+  --surface: #151d19;
+  --surface-raised: #1a241f;
+  --border: #25312b;
+  --border-strong: #33423a;
+  --foreground: #eef2ec;
+  --muted: #94a199;
+  --muted-light: #5c6a62;
 
-  --accent: #47ab97;
-  --accent-light: #0a584d;
-  --accent-dark: #75c9b5;
+  --accent: #7fb59a;
+  --accent-light: #1f3a2e;
+  --accent-dark: #a9d0bb;
+  --copper: #d49a6a;
 
-  --sidebar-bg: #12161f;
-  --sidebar-border: #232838;
-  --sidebar-text: #b6bec9;
-  --sidebar-text-muted: #656e80;
-  --sidebar-active-bg: #0a2e28;
-  --sidebar-active-text: #eefaf7;
-  --sidebar-active-icon: #47ab97;
-  --sidebar-hover-bg: #1e2436;
-  --sidebar-logo-bg: #268c78;
+  --sidebar-bg: #121a16;
+  --sidebar-border: #25312b;
+  --sidebar-text: #b9c4bc;
+  --sidebar-text-muted: #6d7b72;
+  --sidebar-active-bg: #1f3a2e;
+  --sidebar-active-text: #eef2ec;
+  --sidebar-active-icon: #7fb59a;
+  --sidebar-hover-bg: #1a241f;
+  --sidebar-logo-bg: #2a5444;
 
-  --income: #34d399;
-  --expense: #fb7185;
-  --investment: #38bdf8;
+  --income: #7fb59a;
+  --expense: #d9958b;
+  --investment: #a1bac7;
 }
 
 /* ─── Base ─────────────────────────────────────────────────────────── */
@@ -117,6 +181,26 @@ body {
 h1, h2, h3,
 .text-2xl, .text-3xl, .text-4xl, .text-5xl, .text-6xl {
   font-family: var(--font-heading);
+}
+
+/* Detalhe editorial: texto em itálico serifado (ex.: "Uma boa direção.") */
+.serif-accent {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* Rolagem horizontal sem barra visível */
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* Eyebrow: rótulo pequeno em caixa-alta espaçada */
+.eyebrow {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
 }
 
 /* Campos e botões herdam a fonte do corpo (Figtree) */
