@@ -23,7 +23,7 @@ export function Button({
   ...props
 }: ButtonProps) {
   const base =
-    "inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg font-semibold " +
+    "inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-full font-semibold " +
     "transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 " +
     "focus-visible:ring-[var(--accent)] select-none " +
     "disabled:cursor-not-allowed disabled:opacity-50 disabled:pointer-events-none " +
@@ -37,9 +37,9 @@ export function Button({
   } as const;
 
   const variants = {
-    primary: "bg-brand-600 text-white hover:bg-brand-700",
+    primary: "bg-brand-600 text-white hover:bg-brand-800",
     secondary:
-      "bg-[var(--surface-raised)] text-[var(--foreground)] hover:bg-[var(--border)] border border-[var(--border)]",
+      "bg-transparent text-[var(--foreground)] hover:bg-[var(--surface-raised)] border border-[var(--foreground)]",
     ghost:
       "bg-transparent text-[var(--muted)] hover:bg-[var(--surface-raised)] hover:text-[var(--foreground)]",
     danger: "bg-red-700 text-white hover:bg-red-700",

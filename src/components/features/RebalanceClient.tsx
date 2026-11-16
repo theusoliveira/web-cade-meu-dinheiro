@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Trash2 } from "lucide-react";
+import { Trash2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useBusy } from "@/components/features/BusyProvider";
 import { formatBRLFromCents, newId, parseBRLCents } from "@/lib/finance";
@@ -11,6 +11,7 @@ import {
   upsertRebalanceClass,
   type RebalanceClassRecord,
 } from "@/actions/rebalance";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 function IconTrash() {
   return <Trash2 className="h-3.5 w-3.5" aria-hidden />;
@@ -88,29 +89,28 @@ export function RebalanceClient() {
   }
 
   return (
-    <div className="grid gap-6 animate-fade-in">
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h1 className="text-xl font-bold text-[var(--foreground)]">Rebalanceador</h1>
-            <p className="mt-1 text-sm text-[var(--muted)]">
-              Cadastre classes de ativos, defina a % ideal e acompanhe onde comprar para rebalancear a carteira.
-            </p>
-          </div>
-          <Button onClick={addClass} size="sm">+ Adicionar classe</Button>
-        </div>
+    <div className="grid min-w-0 grid-cols-1 gap-5 animate-fade-in sm:gap-6">
+      <PageHeader
+        eyebrow="Carteira"
+        title="Rebalanceador"
+        description="Cadastre classes de ativos, defina a % ideal e acompanhe onde comprar para rebalancear a carteira."
+        actions={
+          <Button onClick={addClass} size="lg" leftIcon={<Plus className="h-4 w-4" aria-hidden />}>
+            Adicionar classe
+          </Button>
+        }
+      />
 
-        <div className="mt-5 grid gap-3 sm:grid-cols-2">
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-raised)] p-4">
-            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">Total investido</p>
-            <p className="mt-1 text-lg font-bold text-[var(--foreground)]">{formatBRLFromCents(Math.round(totalCurrent * 100))}</p>
-          </div>
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-raised)] p-4">
-            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">Soma % ideal</p>
-            <p className={`mt-1 text-lg font-bold ${Math.round(totalTargetPercent) !== 100 ? "text-amber-500" : "text-[var(--foreground)]"}`}>
-              {totalTargetPercent.toFixed(1)}%
-            </p>
-          </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="min-w-0 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-3 sm:p-4">
+          <p className="eyebrow">Total investido</p>
+          <p className="mt-1 truncate text-base font-bold text-[var(--foreground)] sm:text-lg">{formatBRLFromCents(Math.round(totalCurrent * 100))}</p>
+        </div>
+        <div className="min-w-0 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-3 sm:p-4">
+          <p className="eyebrow">Soma % ideal</p>
+          <p className={`mt-1 text-base font-bold sm:text-lg ${Math.round(totalTargetPercent) !== 100 ? "text-amber-500" : "text-[var(--foreground)]"}`}>
+            {totalTargetPercent.toFixed(1)}%
+          </p>
         </div>
       </div>
 
@@ -141,7 +141,7 @@ function RebalanceTable({
   const inputClass =
     "w-full h-9 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2.5 text-sm " +
     "text-[var(--foreground)] placeholder:text-[var(--muted-light)] outline-none " +
-    "focus:ring-1 focus:ring-[var(--accent)] focus:border-[var(--accent)] transition-all";
+    " focus:border-[var(--accent)] transition-all";
 
   if (!classes.length) {
     return (

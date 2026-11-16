@@ -36,10 +36,10 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             id={inputId}
             className={twMerge(
-              "w-full h-10 rounded-lg border bg-[var(--surface)] text-sm text-[var(--foreground)] " +
+              "w-full h-10 rounded-xl border bg-[var(--surface)] text-sm text-[var(--foreground)] " +
               "placeholder:text-[var(--muted-light)] " +
               "outline-none transition-all duration-150 " +
-              "focus:ring-2 focus:ring-[var(--accent)] focus:ring-offset-0 focus:border-[var(--accent)] " +
+              " focus:border-[var(--accent)] " +
               (error ? "border-rose-500" : "border-[var(--border)]") + " " +
               (leftIcon ? "pl-10" : "pl-3") + " " +
               (rightIcon ? "pr-10" : "pr-3"),
@@ -88,9 +88,9 @@ export function Select({ label, error, className, id, children, ...props }: Sele
       <select
         id={inputId}
         className={twMerge(
-          "w-full h-10 rounded-lg border bg-[var(--surface)] pl-3 pr-8 text-sm text-[var(--foreground)] " +
+          "w-full h-10 rounded-xl border bg-[var(--surface)] pl-3 pr-8 text-sm text-[var(--foreground)] " +
           "outline-none transition-all duration-150 cursor-pointer " +
-          "focus:ring-2 focus:ring-[var(--accent)] focus:border-[var(--accent)] " +
+          " focus:border-[var(--accent)] " +
           (error ? "border-rose-500" : "border-[var(--border)]"),
           className
         )}

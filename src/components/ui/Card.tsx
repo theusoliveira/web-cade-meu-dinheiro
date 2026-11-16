@@ -9,14 +9,14 @@ type CardProps = React.HTMLAttributes<HTMLDivElement> & {
 export function Card({ variant = "default", className, children, ...props }: CardProps) {
   const variants = {
     default: "bg-[var(--surface)] border border-[var(--border)]",
-    raised: "bg-[var(--surface)] border border-[var(--border)] shadow-sm",
+    raised: "bg-[var(--surface)] border border-[var(--border)] shadow-[0_1px_2px_rgba(31,42,36,0.04),0_8px_24px_-12px_rgba(31,42,36,0.08)]",
     outlined: "bg-transparent border-2 border-dashed border-[var(--border)]",
   };
 
   return (
     <div
       className={twMerge(
-        "rounded-xl p-5",
+        "rounded-2xl p-5",
         variants[variant],
         className
       )}
@@ -41,7 +41,9 @@ export function StatCard({
   value,
   color = "neutral",
   icon,
+  className = "",
 }: {
+  className?: string;
   label: string;
   value: string;
   color?: "income" | "expense" | "investment" | "balance" | "warning" | "neutral";
@@ -57,13 +59,13 @@ export function StatCard({
   };
 
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 flex items-center gap-3">
-      <div className={`shrink-0 rounded-lg p-2.5 ${iconStyles[color]}`}>
+    <div className={`rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-3 sm:p-4 flex min-w-0 items-center gap-3 ${className}`}>
+      <div className={`hidden shrink-0 rounded-lg p-2.5 sm:block ${iconStyles[color]}`}>
         {icon ?? STAT_ICONS[color]}
       </div>
       <div className="min-w-0">
-        <p className="text-xs font-medium text-[var(--muted)]">{label}</p>
-        <p className="mt-0.5 text-lg font-bold text-[var(--foreground)] truncate">{value}</p>
+        <p className="eyebrow">{label}</p>
+        <p className="mt-0.5 text-base sm:text-lg font-bold text-[var(--foreground)] truncate">{value}</p>
       </div>
     </div>
   );

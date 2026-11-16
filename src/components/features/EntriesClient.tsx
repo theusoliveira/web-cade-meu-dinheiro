@@ -1,22 +1,13 @@
 "use client";
 
 import * as React from "react";
-import dynamic from "next/dynamic";
+import { Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { TrendingUp, TrendingDown, LineChart } from "lucide-react";
-import { Card, StatCard } from "@/components/ui/Card";
+import { StatCard } from "@/components/ui/Card";
 import { HistoryTable } from "@/components/features/HistoryTable";
-import type { DonutSlice } from "@/components/features/DonutChartCard";
-import { formatCurrencyBRL, groupByCategory, monthLabel, type EntryKind, type FinanceEntry } from "@/lib/finance";
-
-const DonutChartCard = dynamic(
-  () => import("./DonutChartCard").then((m) => m.DonutChartCard),
-  { loading: () => <div className="skeleton h-48 rounded-2xl" /> },
-);
-
-function pluralRegistros(n: number) {
-  return `${n} registro${n === 1 ? "" : "s"}`;
-}
+import { EntryFiltersBar, useEntryFilters, type KindSegment } from "@/components/features/EntryFilters";
+import { formatCurrencyBRL, monthLabel, type EntryKind, type FinanceEntry } from "@/lib/finance";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 type Props = {
   month: string;
@@ -28,10 +19,17 @@ type Props = {
   isPJ?: boolean;
   title?: string;
   description?: string;
-  incomeChartTitle?: string;
-  expenseChartTitle?: string;
-  investmentChartTitle?: string;
 };
+
+function shiftMonth(ym: string, delta: number): string {
+  const [y, m] = ym.split("-").map(Number);
+  const d = new Date(y, m - 1 + delta, 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function capitalize(s: string) {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
 
 export function EntriesClient({
   month,
@@ -43,23 +41,11 @@ export function EntriesClient({
   isPJ = false,
   title = "Lançamentos",
   description = "Registre receitas, despesas e investimentos do mês.",
-  incomeChartTitle = "De onde vem meu dinheiro",
-  expenseChartTitle = "Onde estou gastando mais",
-  investmentChartTitle = "Onde estou investindo",
 }: Props) {
   const incomeLabel = isPJ ? "Entradas" : "Receitas";
   const expenseLabel = isPJ ? "Saídas" : "Despesas";
 
-  const effectiveIncomeChartTitle = isPJ ? "Entradas da conta PJ" : incomeChartTitle;
-  const effectiveExpenseChartTitle = isPJ ? "Saídas da conta PJ" : expenseChartTitle;
-
-  const incomeByCategory = React.useMemo<DonutSlice[]>(() => groupByCategory(entries, "income"), [entries]);
-  const expenseByCategory = React.useMemo<DonutSlice[]>(() => groupByCategory(entries, "expense"), [entries]);
-  const investmentByCategory = React.useMemo<DonutSlice[]>(() => groupByCategory(entries, "investment"), [entries]);
-
-  const incomeEntries = React.useMemo(() => entries.filter((e) => e.kind === "income"), [entries]);
-  const expenseEntries = React.useMemo(() => entries.filter((e) => e.kind === "expense"), [entries]);
-  const investmentEntries = React.useMemo(() => entries.filter((e) => e.kind === "investment"), [entries]);
+  const filters = useEntryFilters(entries);
 
   const totals = React.useMemo(() => {
     let income = 0; let expense = 0; let investment = 0;
@@ -71,127 +57,86 @@ export function EntriesClient({
     return { income, expense, investment, balance: income - expense - investment };
   }, [entries]);
 
+  const segments: KindSegment[] = [
+    { key: "all", label: "Todos" },
+    { key: "expense", label: expenseLabel },
+    { key: "income", label: incomeLabel },
+    { key: "investment", label: "Investimentos" },
+  ];
+
   return (
-    <div className="grid gap-6 animate-fade-in">
-      {/* Header card */}
-      <Card>
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h1 className="text-xl font-bold text-[var(--foreground)]">{title}</h1>
-            <p className="mt-1 text-sm text-[var(--muted)]">{description}</p>
-          </div>
+    <div className="grid min-w-0 grid-cols-1 gap-5 animate-fade-in sm:gap-6">
+      <PageHeader
+        eyebrow={isPJ ? "Conta PJ" : "Seu dinheiro"}
+        title={title}
+        actionsDesktopOnly
+        description={description}
+        actions={
+          <Button
+            type="button"
+            size="lg"
+            onClick={() => openDialog("expense")}
+            leftIcon={<Plus className="h-4 w-4" aria-hidden />}
+          >
+            Novo lançamento
+          </Button>
+        }
+      />
 
-          {/* Desktop action buttons */}
-          <div className="hidden flex-wrap gap-2 sm:flex sm:items-center sm:justify-end">
-            <Button
-              type="button"
-              // variant="success"
-              size="sm"
-              onClick={() => openDialog("income")}
-              className="gap-1.5"
-              leftIcon={<TrendingUp className="h-4 w-4" />}
-            >
-              {isPJ ? "Entrada" : "Receita"}
-            </Button>
-            <Button
-              type="button"
-              variant="danger"
-              size="sm"
-              onClick={() => openDialog("expense")}
-              className="gap-1.5"
-              leftIcon={<TrendingDown className="h-4 w-4" />}
-            >
-              {isPJ ? "Saída" : "Despesa"}
-            </Button>
-            <Button
-              type="button"
-              variant="info"
-              size="sm"
-              onClick={() => openDialog("investment")}
-              className="gap-1.5"
-              leftIcon={<LineChart className="h-4 w-4" />}
-            >
-              Investimento
-            </Button>
-          </div>
-        </div>
-
-        {/* Stat cards */}
-        <div className="mt-5 grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard label={incomeLabel} value={formatCurrencyBRL(totals.income)} color="income" />
-          <StatCard label={expenseLabel} value={formatCurrencyBRL(totals.expense)} color="expense" />
-          <StatCard label="Investimentos" value={formatCurrencyBRL(totals.investment)} color="investment" />
-          <StatCard
-            label="Saldo"
-            value={formatCurrencyBRL(totals.balance)}
-            color="balance"
-          />
-        </div>
-      </Card>
-
-      {/* Month selector + charts */}
-      <div>
-        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 className="text-base font-bold text-[var(--foreground)]">Visão do mês</h2>
-            <p className="mt-0.5 text-xs text-[var(--muted)]">
-              {monthLabel(month)} · {pluralRegistros(entries.length)}
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <label htmlFor="month-select" className="text-xs font-semibold text-[var(--muted)] tracking-wide">
-              Mês
-            </label>
-            <input
-              id="month-select"
-              type="month"
-              value={month}
-              onChange={(e) => setMonth(e.target.value)}
-              className="h-9 cursor-pointer rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm text-[var(--foreground)] outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-[var(--accent)] transition-all"
-            />
-          </div>
-        </div>
-
-        {/* Charts */}
-        {/* <div className="grid gap-3 md:grid-cols-3">
-          <DonutChartCard
-            title={effectiveIncomeChartTitle}
-            data={incomeByCategory}
-            colors={["#0d6e60", "#268c78", "#47ab97", "#75c9b5", "#a8e0d1"]}
-            centerLabel={incomeLabel}
-          />
-          <DonutChartCard
-            title={effectiveExpenseChartTitle}
-            data={expenseByCategory}
-            colors={["#be123c", "#e11d48", "#f43f5e", "#fb7185", "#fda4af"]}
-            centerLabel={expenseLabel}
-          />
-          <DonutChartCard
-            title={investmentChartTitle}
-            data={investmentByCategory}
-            colors={["#0369a1", "#0284c7", "#0ea5e9", "#38bdf8", "#7dd3fc"]}
-            centerLabel="Investimentos"
-          />
-        </div> */}
+      {/* Resumo */}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <StatCard label={incomeLabel} value={formatCurrencyBRL(totals.income)} color="income" />
+        <StatCard label={expenseLabel} value={formatCurrencyBRL(totals.expense)} color="expense" />
+        <StatCard label="Investimentos" value={formatCurrencyBRL(totals.investment)} color="investment" />
+        <StatCard label="Saldo" value={formatCurrencyBRL(totals.balance)} color="balance" />
       </div>
 
-      {/* Entry lists */}
-      <div className="grid gap-5">
-        {([
-          { label: incomeLabel, list: incomeEntries, color: "text-[var(--foreground)]" },
-          { label: expenseLabel, list: expenseEntries, color: "text-[var(--foreground)]" },
-          { label: "Investimentos", list: investmentEntries, color: "text-[var(--foreground)]" },
-        ] as const).map(({ label, list, color }) => (
-          <div key={label}>
-            <div className="mb-3 flex items-center justify-between">
-              <h3 className={`text-sm font-bold ${color}`}>{label}</h3>
-              <span className="text-xs text-[var(--muted)]">{pluralRegistros(list.length)}</span>
-            </div>
-            <HistoryTable entries={list} onEdit={onEdit} onDelete={onDelete} />
-          </div>
-        ))}
+      {/* Mês */}
+      <div className="flex items-center justify-between gap-3 border-b border-[var(--border)] pb-3">
+        <p className="text-sm text-[var(--muted)]">
+          {entries.length} registro{entries.length === 1 ? "" : "s"}
+        </p>
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => setMonth(shiftMonth(month, -1))}
+            aria-label="Mês anterior"
+            className="flex h-9 w-9 items-center justify-center rounded-full text-[var(--muted)] transition-colors hover:bg-[var(--surface-raised)] hover:text-[var(--foreground)]"
+          >
+            <ChevronLeft className="h-4 w-4" aria-hidden />
+          </button>
+          <span className="min-w-36 text-center text-sm font-semibold text-[var(--foreground)]">
+            {capitalize(monthLabel(month))}
+          </span>
+          <button
+            type="button"
+            onClick={() => setMonth(shiftMonth(month, 1))}
+            aria-label="Próximo mês"
+            className="flex h-9 w-9 items-center justify-center rounded-full text-[var(--muted)] transition-colors hover:bg-[var(--surface-raised)] hover:text-[var(--foreground)]"
+          >
+            <ChevronRight className="h-4 w-4" aria-hidden />
+          </button>
+        </div>
       </div>
+
+      {/* Lista com filtros */}
+      <section className="min-w-0 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 sm:p-5">
+        <EntryFiltersBar filters={filters} segments={segments} />
+
+        <div className="mt-4">
+          <HistoryTable
+            entries={filters.filtered}
+            hideKind
+            onEdit={onEdit}
+            onDelete={onDelete}
+            emptyMessage={
+              entries.length === 0
+                ? "Nenhum lançamento neste mês. Use “Novo lançamento” para começar."
+                : "Nenhum lançamento encontrado com esses filtros."
+            }
+          />
+        </div>
+      </section>
     </div>
   );
 }

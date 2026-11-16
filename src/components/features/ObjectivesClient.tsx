@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { AlertCircle, CalendarCheck, Pencil, Trash2, TrendingUp, X } from "lucide-react";
+import { AlertCircle, CalendarCheck, Pencil, Trash2, TrendingUp, X, Plus } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useBusy } from "@/components/features/BusyProvider";
 import { formatBRLFromCents, formatCurrencyBRL, newId, parseBRLCents, todayAsDateInputValue } from "@/lib/finance";
@@ -12,6 +12,7 @@ import {
   upsertObjective,
   type ObjectiveRecord,
 } from "@/actions/objectives";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 export function ObjectivesClient() {
   const [objectives, setObjectives] = React.useState<ObjectiveRecord[]>([]);
@@ -57,18 +58,17 @@ export function ObjectivesClient() {
 
   return (
     <>
-      <div className="grid gap-6 animate-fade-in">
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <h1 className="text-xl font-bold text-[var(--foreground)]">Objetivos</h1>
-              <p className="mt-1 text-sm text-[var(--muted)]">
-                Cadastre objetivos com aporte mensal e taxa e veja quando cada um será concluído.
-              </p>
-            </div>
-            <Button onClick={openNew} size="sm">+ Novo objetivo</Button>
-          </div>
-        </div>
+      <div className="grid min-w-0 grid-cols-1 gap-5 animate-fade-in sm:gap-6">
+        <PageHeader
+          eyebrow="Seu futuro"
+          title="Objetivos"
+          description="Cadastre objetivos com aporte mensal e taxa e veja quando cada um será concluído."
+          actions={
+            <Button onClick={openNew} size="lg" leftIcon={<Plus className="h-4 w-4" aria-hidden />}>
+              Novo objetivo
+            </Button>
+          }
+        />
 
         {!objectives.length ? (
           <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface-raised)]/50 p-10 text-center">
@@ -248,7 +248,7 @@ function ObjectiveDialog({
   const inputClass =
     "w-full h-10 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 text-sm " +
     "text-[var(--foreground)] placeholder:text-[var(--muted-light)] outline-none " +
-    "focus:ring-2 focus:ring-[var(--accent)] focus:border-[var(--accent)] transition-all";
+    " focus:border-[var(--accent)] transition-all";
 
   const moneyField = (label: string, value: string, set: (v: string) => void) => (
     <div className="grid gap-1.5">

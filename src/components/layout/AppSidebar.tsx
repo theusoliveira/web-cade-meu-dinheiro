@@ -105,7 +105,7 @@ function LogoMark({ collapsed }: { collapsed: boolean }) {
   return (
     <div className={`flex items-center gap-2.5 ${collapsed ? "justify-center" : ""}`}>
       <div
-        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg shadow-sm"
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl shadow-sm"
         style={{ backgroundColor: "var(--sidebar-logo-bg)" }}
       >
         <svg viewBox="0 0 24 24" fill="none" className="h-4.5 w-4.5" aria-hidden>
@@ -114,8 +114,8 @@ function LogoMark({ collapsed }: { collapsed: boolean }) {
       </div>
       {!collapsed && (
         <div className="leading-tight">
-          <p className="text-sm font-bold" style={{ color: "var(--sidebar-active-text)" }}>Cadê Meu</p>
-          <p className="text-xs font-semibold" style={{ color: "var(--sidebar-logo-bg)" }}>Dinheiro?</p>
+          <p className="text-lg font-bold tracking-tight" style={{ color: "var(--sidebar-active-text)", fontFamily: "var(--font-heading)" }}>Cadê Meu</p>
+          <p className="serif-accent text-sm" style={{ color: "var(--copper)" }}>Dinheiro?</p>
         </div>
       )}
     </div>
@@ -218,7 +218,7 @@ export function AppSidebar({
                     aria-label={item.label}
                     aria-current={isActive ? "page" : undefined}
                     className={[
-                      "w-full flex items-center rounded-lg transition-all duration-150 cursor-pointer",
+                      "w-full flex items-center rounded-xl transition-all duration-150 cursor-pointer",
                       collapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2.5",
                     ].join(" ")}
                     style={

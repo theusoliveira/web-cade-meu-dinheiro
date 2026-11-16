@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Controle inteligente de finanças pessoais e PJ",
     start_url: "/",
     display: "standalone",
-    background_color: "#080f1a",
-    theme_color: "#0d6e60",
+    background_color: "#f3f4ef",
+    theme_color: "#2a5444",
     orientation: "portrait-primary",
     icons: [
       { src: "/icons/icon-72x72.png", sizes: "72x72", type: "image/png" },

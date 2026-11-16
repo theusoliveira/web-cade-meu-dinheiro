@@ -5,6 +5,7 @@ import { Trash2, Plus, X, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useSalaryDistribution } from "@/hooks/useSalaryDistribution";
 import { formatCurrencyBRL, formatBRLFromCents } from "@/lib/finance/format";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 // ─── Currency input helpers ───────────────────────────────────────────────────
 
@@ -467,12 +468,7 @@ export function SalaryDistributionClient() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-lg font-semibold">Distribuição de Salário PJ</h1>
-        <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
-          Planeje como distribuir o seu faturamento.
-        </p>
-      </div>
+      <PageHeader eyebrow="Conta PJ" title="Distribuição de salário PJ" description="Planeje como distribuir o seu faturamento." />
 
       {loading && (
         <p className="text-xs text-slate-400 dark:text-slate-500">Carregando…</p>
